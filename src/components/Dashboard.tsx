@@ -4,15 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Instagram, LogOut, Settings, MessageCircle } from "lucide-react";
+import { Sparkles, Instagram, LogOut, Settings, MessageCircle, RefreshCw, Zap, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AutomationTester from "./AutomationTester";
+import { useAutomationStats } from "@/hooks/useAutomationStats";
+import { StatCard } from "./StatCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { stats, loading: statsLoading, refetch } = useAutomationStats();
 
   useEffect(() => {
     // Check initial session
@@ -45,6 +48,14 @@ const Dashboard = () => {
       description: "You've been successfully signed out.",
     });
     navigate("/auth");
+  };
+
+  const handleRefresh = async () => {
+    await refetch();
+    toast({
+      title: "Refreshed",
+      description: "Stats updated successfully.",
+    });
   };
 
   if (loading) {
@@ -80,7 +91,7 @@ const Dashboard = () => {
               <span className="text-sm text-muted-foreground hidden sm:inline">
                 {user?.email}
               </span>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}>
                 <Settings className="w-5 h-5" />
               </Button>
               <Button variant="ghost" size="icon" onClick={handleSignOut}>
@@ -93,6 +104,66 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
+        {/* Stats Overview */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold">Dashboard Overview</h2>
+              <p className="text-sm text-muted-foreground">
+                Last updated: {stats.lastUpdated.toLocaleTimeString()}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={statsLoading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${statsLoading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
+            <StatCard
+              icon={Zap}
+              label="Active Rules"
+              value={stats.activeRules}
+              loading={statsLoading}
+            />
+            <StatCard
+              icon={MessageCircle}
+              label="Comments Processed"
+              value={stats.commentsProcessed}
+              loading={statsLoading}
+            />
+            <StatCard
+              icon={Activity}
+              label="DMs Sent"
+              value={stats.dmsSent}
+              loading={statsLoading}
+            />
+          </div>
+
+          {/* Quick Actions */}
+          {!statsLoading && stats.activeRules === 0 && (
+            <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-2">
+                  <Sparkles className="w-12 h-12 text-primary mx-auto mb-2" />
+                  <h3 className="text-lg font-semibold">Get Started</h3>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    Connect your Instagram account and create your first automation rule to start engaging with your audience automatically.
+                  </p>
+                  <div className="flex gap-2 justify-center pt-2">
+                    <Button className="bg-gradient-to-r from-primary via-secondary to-accent">
+                      Create First Rule
+                    </Button>
+                    <Button variant="outline">
+                      View Tutorial
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
         {/* Connection Status Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <Card className="border-2 hover:shadow-lg transition-shadow">
@@ -117,23 +188,23 @@ const Dashboard = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-secondary" />
-                <CardTitle>Automation Status</CardTitle>
+                <CardTitle>Quick Actions</CardTitle>
               </div>
-              <CardDescription>Your automation performance</CardDescription>
+              <CardDescription>Common tasks and shortcuts</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Active Rules:</span>
-                <span className="font-bold">0</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Comments Processed:</span>
-                <span className="font-bold">0</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">DMs Sent:</span>
-                <span className="font-bold">0</span>
-              </div>
+              <Button variant="outline" className="w-full justify-start" disabled>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Create New Rule
+              </Button>
+              <Button variant="outline" className="w-full justify-start" disabled>
+                <Activity className="w-4 h-4 mr-2" />
+                View Activity Logs
+              </Button>
+              <Button variant="outline" className="w-full justify-start" disabled>
+                <Instagram className="w-4 h-4 mr-2" />
+                Manage Posts
+              </Button>
             </CardContent>
           </Card>
         </div>
