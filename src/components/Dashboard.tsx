@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Instagram, LogOut, Settings, MessageCircle, RefreshCw, Zap, Activity } from "lucide-react";
+import { Sparkles, Instagram, LogOut, Settings, MessageCircle, RefreshCw, Zap, Activity, Youtube } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AutomationTester from "./AutomationTester";
 import { useAutomationStats } from "@/hooks/useAutomationStats";
@@ -204,6 +204,10 @@ const Dashboard = () => {
               <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/posts")}>
                 <Instagram className="w-4 h-4 mr-2" />
                 Manage Posts
+              </Button>
+              <Button variant="outline" className="w-full justify-start bg-gradient-to-r from-red-500/5 to-red-500/10" onClick={() => navigate("/youtube-manager")}>
+                <Youtube className="w-4 h-4 mr-2 text-red-500" />
+                YouTube Manager
               </Button>
               <Button variant="outline" className="w-full justify-start" disabled>
                 <Activity className="w-4 h-4 mr-2" />

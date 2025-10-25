@@ -9,3 +9,9 @@ verify_jwt = false
 
 [functions.generate-caption]
 verify_jwt = false
+
+[functions.generate-video-metadata]
+verify_jwt = false
+
+[functions.youtube-upload]
+verify_jwt = false
