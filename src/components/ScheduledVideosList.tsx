@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Clock, CheckCircle, AlertCircle, Upload, Copy, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 interface ScheduledVideo {
   id: string;
@@ -154,7 +155,7 @@ const ScheduledVideosList = () => {
               <div className="flex flex-wrap gap-2">
                 <Badge variant="outline">
                   <Clock className="h-3 w-3 mr-1" />
-                  {format(new Date(video.scheduled_for), 'MMM dd, yyyy hh:mm a')}
+                  {formatInTimeZone(new Date(video.scheduled_for), Intl.DateTimeFormat().resolvedOptions().timeZone, 'MMM dd, yyyy hh:mm a')}
                 </Badge>
                 <Badge variant={video.status === 'uploaded' ? 'default' : 'secondary'}>
                   {video.status}
