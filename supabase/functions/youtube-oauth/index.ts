@@ -22,16 +22,28 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const authHeader = req.headers.get('Authorization')!;
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-
-    if (userError || !user) {
-      throw new Error('Unauthorized');
-    }
-
     const url = new URL(req.url);
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+
+    // For OAuth callback, authenticate using state parameter
+    // For auth-url, require Authorization header
+    let user;
+    if (req.method === 'POST' && body.code) {
+      // OAuth callback - user ID will come from state parameter
+      user = { id: body.state || body.userId };
+    } else {
+      // Auth URL generation - require authentication
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        throw new Error('Unauthorized');
+      }
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user: authUser }, error: userError } = await supabase.auth.getUser(token);
+      if (userError || !authUser) {
+        throw new Error('Unauthorized');
+      }
+      user = authUser;
+    }
 
     // Generate OAuth URL
     if (url.pathname.endsWith('/auth-url')) {

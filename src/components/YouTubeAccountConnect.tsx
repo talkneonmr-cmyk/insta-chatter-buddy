@@ -18,21 +18,22 @@ const YouTubeAccountConnect = () => {
     // Check for OAuth callback code in URL
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-    console.log('[YouTube OAuth] URL code param:', code);
+    const state = urlParams.get('state');
+    console.log('[YouTube OAuth] URL params - code:', code, 'state:', state);
     
-    if (code) {
-      handleOAuthCallback(code);
+    if (code && state) {
+      handleOAuthCallback(code, state);
     }
   }, []);
 
-  const handleOAuthCallback = async (code: string) => {
+  const handleOAuthCallback = async (code: string, state: string) => {
     try {
       setLoading(true);
       console.log('[YouTube OAuth] Exchanging code for tokens...');
       
       // Exchange code for tokens
       const { data, error } = await supabase.functions.invoke('youtube-oauth', {
-        body: { code },
+        body: { code, state },
       });
 
       if (error) throw error as any;
