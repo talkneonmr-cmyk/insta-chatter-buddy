@@ -6,3 +6,6 @@ site_url = "http://localhost:54323"
 
 [functions.process-comment]
 verify_jwt = false
+
+[functions.generate-caption]
+verify_jwt = false

@@ -61,6 +61,45 @@ export type Database = {
           },
         ]
       }
+      caption_templates: {
+        Row: {
+          category: string
+          created_at: string | null
+          example_caption: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          suggested_hashtags: string[] | null
+          template_structure: string
+          usage_count: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          example_caption?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          suggested_hashtags?: string[] | null
+          template_structure: string
+          usage_count?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          example_caption?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          suggested_hashtags?: string[] | null
+          template_structure?: string
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       comments_log: {
         Row: {
           action_taken: string | null
@@ -142,6 +181,77 @@ export type Database = {
             columns: ["comment_log_id"]
             isOneToOne: false
             referencedRelation: "comments_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generated_captions: {
+        Row: {
+          ai_model_used: string | null
+          brand_voice: string | null
+          call_to_action: string | null
+          caption: string
+          content_type: string | null
+          created_at: string | null
+          description: string | null
+          emoji_suggestions: string[] | null
+          generation_time_ms: number | null
+          hashtags: string[] | null
+          hook_line: string | null
+          id: string
+          is_saved: boolean | null
+          reel_idea: string
+          saved_to_post_id: string | null
+          target_audience: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          brand_voice?: string | null
+          call_to_action?: string | null
+          caption: string
+          content_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          emoji_suggestions?: string[] | null
+          generation_time_ms?: number | null
+          hashtags?: string[] | null
+          hook_line?: string | null
+          id?: string
+          is_saved?: boolean | null
+          reel_idea: string
+          saved_to_post_id?: string | null
+          target_audience?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          brand_voice?: string | null
+          call_to_action?: string | null
+          caption?: string
+          content_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          emoji_suggestions?: string[] | null
+          generation_time_ms?: number | null
+          hashtags?: string[] | null
+          hook_line?: string | null
+          id?: string
+          is_saved?: boolean | null
+          reel_idea?: string
+          saved_to_post_id?: string | null
+          target_audience?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_captions_saved_to_post_id_fkey"
+            columns: ["saved_to_post_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_posts"
             referencedColumns: ["id"]
           },
         ]
