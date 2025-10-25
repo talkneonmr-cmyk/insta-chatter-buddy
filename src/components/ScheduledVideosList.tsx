@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Clock, CheckCircle, AlertCircle, Upload, Copy, ExternalLink } from "lucide-react";
+import { Trash2, Clock, CheckCircle, AlertCircle, Upload, Copy, ExternalLink, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 
@@ -22,6 +22,7 @@ interface ScheduledVideo {
 const ScheduledVideosList = () => {
   const [videos, setVideos] = useState<ScheduledVideo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -78,6 +79,7 @@ const ScheduledVideosList = () => {
   };
 
   const handleUploadNow = async (id: string) => {
+    setUploadingId(id);
     try {
       const { data, error } = await supabase.functions.invoke('youtube-upload', {
         body: { scheduledVideoId: id }
@@ -105,6 +107,8 @@ const ScheduledVideosList = () => {
         description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setUploadingId(null);
     }
   };
 
@@ -203,9 +207,19 @@ const ScheduledVideosList = () => {
                   size="sm"
                   variant="outline"
                   onClick={() => handleUploadNow(video.id)}
+                  disabled={uploadingId === video.id}
                 >
-                  <Upload className="h-4 w-4 mr-1" />
-                  Upload Now
+                  {uploadingId === video.id ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-1" />
+                      Upload Now
+                    </>
+                  )}
                 </Button>
               )}
               <Button
