@@ -51,11 +51,68 @@ serve(async (req) => {
 
     console.log('Found video:', video.title);
 
+    // Fetch YouTube account access token
+    const { data: ytAccount, error: ytError } = await supabase
+      .from('youtube_accounts')
+      .select('access_token, refresh_token, token_expires_at')
+      .eq('id', video.youtube_account_id)
+      .single();
+
+    if (ytError || !ytAccount) {
+      throw new Error('YouTube account not found');
+    }
+
+    // Check if token needs refresh
+    let accessToken = ytAccount.access_token;
+    if (new Date(ytAccount.token_expires_at) <= new Date()) {
+      console.log('Access token expired, refreshing...');
+      
+      const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: Deno.env.get('YOUTUBE_CLIENT_ID')!,
+          client_secret: Deno.env.get('YOUTUBE_CLIENT_SECRET')!,
+          refresh_token: ytAccount.refresh_token,
+          grant_type: 'refresh_token',
+        }),
+      });
+
+      if (!refreshResponse.ok) {
+        throw new Error('Failed to refresh access token');
+      }
+
+      const tokens = await refreshResponse.json();
+      accessToken = tokens.access_token;
+
+      // Update token in database
+      await supabase
+        .from('youtube_accounts')
+        .update({
+          access_token: tokens.access_token,
+          token_expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+        })
+        .eq('id', video.youtube_account_id);
+    }
+
     // Update status to processing
     await supabase
       .from('scheduled_videos')
       .update({ status: 'processing' })
       .eq('id', scheduledVideoId);
+
+    // Download video file from storage
+    console.log('Downloading video from storage:', video.video_file_path);
+    const { data: videoFile, error: downloadError } = await supabase
+      .storage
+      .from('videos')
+      .download(video.video_file_path.replace('videos/', ''));
+
+    if (downloadError || !videoFile) {
+      throw new Error(`Failed to download video: ${downloadError?.message || 'File not found'}`);
+    }
+
+    console.log('Video downloaded, size:', videoFile.size);
 
     // Prepare video metadata
     const metadata = {
@@ -70,21 +127,59 @@ serve(async (req) => {
       }
     };
 
-    // Note: Actual video upload requires multipart/form-data with video file
-    // This is a simplified version - in production, you'd need to handle file streaming
-    console.log('Would upload video with metadata:', metadata);
-    console.log('Video file path:', video.video_file_path);
+    // Step 1: Initialize resumable upload
+    console.log('Initializing YouTube upload...');
+    const initResponse = await fetch(
+      'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'X-Upload-Content-Length': videoFile.size.toString(),
+          'X-Upload-Content-Type': 'video/*',
+        },
+        body: JSON.stringify(metadata),
+      }
+    );
 
-    // For now, we'll simulate a successful upload
-    // In production, implement actual YouTube Data API v3 resumable upload
-    const mockYoutubeVideoId = `yt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    if (!initResponse.ok) {
+      const errorText = await initResponse.text();
+      throw new Error(`Failed to initialize upload: ${errorText}`);
+    }
+
+    const uploadUrl = initResponse.headers.get('location');
+    if (!uploadUrl) {
+      throw new Error('No upload URL received from YouTube');
+    }
+
+    console.log('Upload initialized, uploading video...');
+
+    // Step 2: Upload video file
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'video/*',
+      },
+      body: videoFile,
+    });
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      throw new Error(`Failed to upload video: ${errorText}`);
+    }
+
+    const uploadResult = await uploadResponse.json();
+    const youtubeVideoId = uploadResult.id;
+
+    console.log('Video uploaded successfully! YouTube ID:', youtubeVideoId);
 
     // Update scheduled video with YouTube video ID
     await supabase
       .from('scheduled_videos')
       .update({
         status: 'uploaded',
-        youtube_video_id: mockYoutubeVideoId
+        youtube_video_id: youtubeVideoId
       })
       .eq('id', scheduledVideoId);
 
@@ -96,15 +191,16 @@ serve(async (req) => {
         youtube_account_id: video.youtube_account_id,
         scheduled_video_id: scheduledVideoId,
         title: video.title,
-        youtube_video_id: mockYoutubeVideoId,
+        youtube_video_id: youtubeVideoId,
         status: 'uploaded'
       });
 
     return new Response(
       JSON.stringify({
         success: true,
-        youtube_video_id: mockYoutubeVideoId,
-        message: 'Video uploaded successfully'
+        youtube_video_id: youtubeVideoId,
+        youtube_url: `https://www.youtube.com/watch?v=${youtubeVideoId}`,
+        message: 'Video uploaded successfully to YouTube!'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
