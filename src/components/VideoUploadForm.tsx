@@ -116,9 +116,36 @@ const VideoUploadForm = () => {
         return;
       }
 
-      // In production, upload video file to storage here
-      const videoFilePath = `videos/${user.id}/${Date.now()}_${videoFile.name}`;
-      const thumbnailPath = thumbnailFile ? `thumbnails/${user.id}/${Date.now()}_${thumbnailFile.name}` : null;
+      // Upload video file to storage
+      const videoFileName = `${user.id}/${Date.now()}_${videoFile.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('videos')
+        .upload(videoFileName, videoFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        throw new Error(`Failed to upload video: ${uploadError.message}`);
+      }
+
+      const videoFilePath = `videos/${videoFileName}`;
+
+      // Upload thumbnail if provided
+      let thumbnailPath = null;
+      if (thumbnailFile) {
+        const thumbnailFileName = `${user.id}/${Date.now()}_${thumbnailFile.name}`;
+        const { error: thumbError } = await supabase.storage
+          .from('videos')
+          .upload(thumbnailFileName, thumbnailFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+        
+        if (!thumbError) {
+          thumbnailPath = `videos/${thumbnailFileName}`;
+        }
+      }
 
       // Parse tags
       const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];

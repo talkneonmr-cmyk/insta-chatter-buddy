@@ -78,23 +78,30 @@ const ScheduledVideosList = () => {
 
   const handleUploadNow = async (id: string) => {
     try {
-      const { error } = await supabase.functions.invoke('youtube-upload', {
+      const { data, error } = await supabase.functions.invoke('youtube-upload', {
         body: { scheduledVideoId: id }
       });
 
       if (error) throw error;
 
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
       toast({
         title: "Success",
-        description: "Video upload initiated!",
+        description: data?.youtube_url 
+          ? "Video uploaded to YouTube!"
+          : "Video upload initiated!",
       });
       
       fetchVideos();
     } catch (error) {
       console.error('Error uploading video:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload video.";
       toast({
         title: "Error",
-        description: "Failed to upload video.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
