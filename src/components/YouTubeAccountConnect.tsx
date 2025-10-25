@@ -92,11 +92,31 @@ const YouTubeAccountConnect = () => {
       
       if (authError) throw authError;
 
-      // Use top-window redirect to bypass iframe restrictions
-      if (window.top) {
-        (window.top as Window).location.href = authData.authUrl;
-      } else {
-        window.location.href = authData.authUrl;
+      // Try top-level redirect; fallback to new tab; final fallback copies link
+      try {
+        if (window.top && window.top !== window) {
+          (window.top as Window).location.href = authData.authUrl;
+          return;
+        }
+        window.location.assign(authData.authUrl);
+      } catch (navErr) {
+        const popup = window.open(authData.authUrl, '_blank', 'noopener,noreferrer');
+        if (!popup) {
+          try {
+            await navigator.clipboard.writeText(authData.authUrl);
+            toast({
+              title: 'Open YouTube authorization',
+              description: 'Popup blocked. Auth link copied to clipboard—paste it in a new tab.',
+            });
+          } catch {
+            toast({
+              title: 'Open YouTube authorization',
+              description: 'Popup blocked. Please allow popups or open the link manually from your browser address bar.',
+            });
+          }
+        }
+      } finally {
+        setLoading(false);
       }
 
     } catch (error) {
