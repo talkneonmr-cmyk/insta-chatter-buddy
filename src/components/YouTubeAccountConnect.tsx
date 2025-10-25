@@ -18,6 +18,7 @@ const YouTubeAccountConnect = () => {
     // Check for OAuth callback code in URL
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    console.log('[YouTube OAuth] URL code param:', code);
     
     if (code) {
       handleOAuthCallback(code);
@@ -27,14 +28,16 @@ const YouTubeAccountConnect = () => {
   const handleOAuthCallback = async (code: string) => {
     try {
       setLoading(true);
+      console.log('[YouTube OAuth] Exchanging code for tokens...');
       
       // Exchange code for tokens
       const { data, error } = await supabase.functions.invoke('youtube-oauth', {
         body: { code },
       });
 
-      if (error) throw error;
+      if (error) throw error as any;
 
+      console.log('[YouTube OAuth] Exchange success:', data);
       toast({
         title: "Success",
         description: `Connected to YouTube channel: ${data.channelTitle}`,
@@ -45,7 +48,7 @@ const YouTubeAccountConnect = () => {
       
       await checkConnection();
     } catch (error) {
-      console.error('Token exchange error:', error);
+      console.error('[YouTube OAuth] Token exchange error:', error);
       toast({
         title: "Error",
         description: "Failed to complete YouTube connection.",
