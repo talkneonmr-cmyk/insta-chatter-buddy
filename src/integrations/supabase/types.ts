@@ -357,6 +357,141 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_videos: {
+        Row: {
+          ai_generated_metadata: boolean | null
+          category_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          privacy_status: string | null
+          scheduled_for: string
+          status: string | null
+          tags: string[] | null
+          thumbnail_path: string | null
+          title: string
+          updated_at: string | null
+          upload_error: string | null
+          user_id: string
+          video_file_path: string
+          youtube_account_id: string
+          youtube_video_id: string | null
+        }
+        Insert: {
+          ai_generated_metadata?: boolean | null
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          privacy_status?: string | null
+          scheduled_for: string
+          status?: string | null
+          tags?: string[] | null
+          thumbnail_path?: string | null
+          title: string
+          updated_at?: string | null
+          upload_error?: string | null
+          user_id: string
+          video_file_path: string
+          youtube_account_id: string
+          youtube_video_id?: string | null
+        }
+        Update: {
+          ai_generated_metadata?: boolean | null
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          privacy_status?: string | null
+          scheduled_for?: string
+          status?: string | null
+          tags?: string[] | null
+          thumbnail_path?: string | null
+          title?: string
+          updated_at?: string | null
+          upload_error?: string | null
+          user_id?: string
+          video_file_path?: string
+          youtube_account_id?: string
+          youtube_video_id?: string | null
+        }
+        Relationships: []
+      }
+      video_uploads_history: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          scheduled_video_id: string | null
+          status: string
+          title: string
+          upload_date: string | null
+          user_id: string
+          youtube_account_id: string
+          youtube_video_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          scheduled_video_id?: string | null
+          status: string
+          title: string
+          upload_date?: string | null
+          user_id: string
+          youtube_account_id: string
+          youtube_video_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          scheduled_video_id?: string | null
+          status?: string
+          title?: string
+          upload_date?: string | null
+          user_id?: string
+          youtube_account_id?: string
+          youtube_video_id?: string | null
+        }
+        Relationships: []
+      }
+      youtube_accounts: {
+        Row: {
+          access_token: string
+          channel_id: string
+          channel_title: string
+          created_at: string | null
+          id: string
+          refresh_token: string
+          token_expires_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          channel_id: string
+          channel_title: string
+          created_at?: string | null
+          id?: string
+          refresh_token: string
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          channel_id?: string
+          channel_title?: string
+          created_at?: string | null
+          id?: string
+          refresh_token?: string
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
