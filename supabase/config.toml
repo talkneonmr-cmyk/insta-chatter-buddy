@@ -1,1 +1,8 @@
 project_id = "swuryncvasdwlxtwagnb"
+
+[auth]
+enabled = true
+site_url = "http://localhost:54323"
+
+[functions.process-comment]
+verify_jwt = false

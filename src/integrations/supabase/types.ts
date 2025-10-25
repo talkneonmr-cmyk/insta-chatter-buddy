@@ -14,7 +14,239 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      automation_rules: {
+        Row: {
+          created_at: string | null
+          goal: string | null
+          id: string
+          is_active: boolean | null
+          monitored_post_id: string
+          name: string
+          tone: string | null
+          trigger_keywords: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          goal?: string | null
+          id?: string
+          is_active?: boolean | null
+          monitored_post_id: string
+          name: string
+          tone?: string | null
+          trigger_keywords: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          goal?: string | null
+          id?: string
+          is_active?: boolean | null
+          monitored_post_id?: string
+          name?: string
+          tone?: string | null
+          trigger_keywords?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_rules_monitored_post_id_fkey"
+            columns: ["monitored_post_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comments_log: {
+        Row: {
+          action_taken: string | null
+          comment_id: string
+          comment_text: string
+          commenter_name: string | null
+          commenter_username: string
+          created_at: string | null
+          id: string
+          monitored_post_id: string
+          trigger_matched: boolean | null
+          user_id: string
+        }
+        Insert: {
+          action_taken?: string | null
+          comment_id: string
+          comment_text: string
+          commenter_name?: string | null
+          commenter_username: string
+          created_at?: string | null
+          id?: string
+          monitored_post_id: string
+          trigger_matched?: boolean | null
+          user_id: string
+        }
+        Update: {
+          action_taken?: string | null
+          comment_id?: string
+          comment_text?: string
+          commenter_name?: string | null
+          commenter_username?: string
+          created_at?: string | null
+          id?: string
+          monitored_post_id?: string
+          trigger_matched?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_log_monitored_post_id_fkey"
+            columns: ["monitored_post_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dms_sent: {
+        Row: {
+          comment_log_id: string
+          id: string
+          message_text: string
+          recipient_username: string
+          sent_at: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          comment_log_id: string
+          id?: string
+          message_text: string
+          recipient_username: string
+          sent_at?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          comment_log_id?: string
+          id?: string
+          message_text?: string
+          recipient_username?: string
+          sent_at?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dms_sent_comment_log_id_fkey"
+            columns: ["comment_log_id"]
+            isOneToOne: false
+            referencedRelation: "comments_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instagram_accounts: {
+        Row: {
+          access_token: string
+          created_at: string | null
+          id: string
+          instagram_user_id: string
+          token_expires_at: string | null
+          updated_at: string | null
+          user_id: string
+          username: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string | null
+          id?: string
+          instagram_user_id: string
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id: string
+          username: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string | null
+          id?: string
+          instagram_user_id?: string
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      monitored_posts: {
+        Row: {
+          created_at: string | null
+          id: string
+          instagram_account_id: string
+          is_active: boolean | null
+          post_id: string
+          post_title: string | null
+          post_url: string
+          thumbnail_url: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          instagram_account_id: string
+          is_active?: boolean | null
+          post_id: string
+          post_title?: string | null
+          post_url: string
+          thumbnail_url?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          instagram_account_id?: string
+          is_active?: boolean | null
+          post_id?: string
+          post_title?: string | null
+          post_url?: string
+          thumbnail_url?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitored_posts_instagram_account_id_fkey"
+            columns: ["instagram_account_id"]
+            isOneToOne: false
+            referencedRelation: "instagram_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

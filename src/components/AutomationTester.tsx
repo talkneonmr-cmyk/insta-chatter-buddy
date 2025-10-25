@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Shield, MessageCircle, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AutomationResult {
   trigger_match: "YES" | "NO";
@@ -65,55 +66,49 @@ const AutomationTester = () => {
     return `${greeting}! Thanks for your comment on "${postTitle}". ${cta}`;
   };
 
-  const processComment = () => {
+  const processComment = async () => {
     setIsProcessing(true);
     
-    setTimeout(() => {
-      const keywords = ruleKeywords.split(",").map(k => k.trim());
-      const matches = fuzzyMatch(commentText, keywords);
+    try {
+      console.log("Calling process-comment edge function...");
       
-      const optOutWords = ["stop", "unsubscribe", "no thanks", "nahi chahiye", "stop dm"];
-      const isOptOut = optOutWords.some(word => commentText.toLowerCase().includes(word));
-      
-      const hasSensitiveRequest = commentText.toLowerCase().match(/password|bank|ssn|credit card|payment info/);
-      
-      let action: "SEND" | "BLOCK" | "DO_NOT_CONTACT" = "SEND";
-      let safetyCheck = "CLEAN";
-      let message = "";
-      
-      if (isOptOut) {
-        action = "DO_NOT_CONTACT";
-        safetyCheck = "User opted out";
-      } else if (hasSensitiveRequest) {
-        action = "BLOCK";
-        safetyCheck = "BLOCK_REASON: Sensitive data request detected";
-      } else if (matches) {
-        message = generateDM();
-      } else {
-        action = "SEND";
-        message = "";
+      const { data, error } = await supabase.functions.invoke("process-comment", {
+        body: {
+          comment_text: commentText,
+          first_name: firstName,
+          username: username,
+          post_title: postTitle,
+          post_url: postUrl,
+          creator_name: creatorName,
+          tone: tone,
+          goal: goal,
+          rule_keywords: ruleKeywords,
+        },
+      });
+
+      if (error) {
+        console.error("Edge function error:", error);
+        throw error;
       }
+
+      console.log("Edge function response:", data);
       
-      const automationResult: AutomationResult = {
-        trigger_match: matches && !isOptOut ? "YES" : "NO",
-        trigger_reason: matches ? `Comment contains keywords: ${keywords.filter(k => commentText.toLowerCase().includes(k.toLowerCase())).join(", ")}` : "No keyword match found",
-        action,
-        message_text: action === "SEND" ? message : "",
-        delay_seconds: matches ? 2 : 0,
-        retry_on_failure: true,
-        tags: matches ? ["auto_generated", goal.replace(" ", "_"), "followup"] : [],
-        safety_check: safetyCheck,
-        notes: `Processed at ${new Date().toISOString()}`
-      };
-      
-      setResult(automationResult);
+      setResult(data as AutomationResult);
       setIsProcessing(false);
       
       toast({
-        title: matches ? "✅ Rule Triggered!" : "ℹ️ No Match",
-        description: automationResult.trigger_reason,
+        title: data.trigger_match === "YES" ? "✅ Rule Triggered!" : "ℹ️ No Match",
+        description: data.trigger_reason,
       });
-    }, 800);
+    } catch (error: any) {
+      console.error("Error processing comment:", error);
+      setIsProcessing(false);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to process comment",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -125,11 +120,15 @@ const AutomationTester = () => {
             <Sparkles className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-            Lovable Me Assistant
+            AI-Powered Automation Tester
           </h1>
           <p className="text-muted-foreground text-lg">
-            Instagram Comment → DM Automation Tester
+            Instagram Comment → DM Automation with Lovable AI
           </p>
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20">
+            <Sparkles className="w-4 h-4 text-accent" />
+            <span className="text-sm font-medium text-accent">Powered by Google Gemini 2.5 Flash</span>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 mb-6">

@@ -1,7 +1,7 @@
-import AutomationTester from "@/components/AutomationTester";
+import Dashboard from "@/components/Dashboard";
 
 const Index = () => {
-  return <AutomationTester />;
+  return <Dashboard />;
 };
 
 export default Index;
