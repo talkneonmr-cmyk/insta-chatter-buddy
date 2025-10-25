@@ -14,7 +14,47 @@ const YouTubeAccountConnect = () => {
 
   useEffect(() => {
     checkConnection();
+    
+    // Check for OAuth callback code in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    
+    if (code) {
+      handleOAuthCallback(code);
+    }
   }, []);
+
+  const handleOAuthCallback = async (code: string) => {
+    try {
+      setLoading(true);
+      
+      // Exchange code for tokens
+      const { data, error } = await supabase.functions.invoke('youtube-oauth', {
+        body: { code },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Connected to YouTube channel: ${data.channelTitle}`,
+      });
+
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      await checkConnection();
+    } catch (error) {
+      console.error('Token exchange error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to complete YouTube connection.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const checkConnection = async () => {
     try {
@@ -49,59 +89,8 @@ const YouTubeAccountConnect = () => {
       
       if (authError) throw authError;
 
-      // Open OAuth in popup
-      const width = 600;
-      const height = 700;
-      const left = window.screen.width / 2 - width / 2;
-      const top = window.screen.height / 2 - height / 2;
-      
-      const popup = window.open(
-        authData.authUrl,
-        'YouTube OAuth',
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
-
-      // Listen for OAuth callback
-      const handleMessage = async (event: MessageEvent) => {
-        if (event.data.type === 'youtube-oauth-code') {
-          const code = event.data.code;
-          
-          try {
-            // Exchange code for tokens
-            const { data, error } = await supabase.functions.invoke('youtube-oauth', {
-              body: { code },
-            });
-
-            if (error) throw error;
-
-            toast({
-              title: "Success",
-              description: `Connected to YouTube channel: ${data.channelTitle}`,
-            });
-
-            await checkConnection();
-            popup?.close();
-          } catch (err) {
-            console.error('Token exchange error:', err);
-            toast({
-              title: "Error",
-              description: "Failed to complete YouTube connection.",
-              variant: "destructive",
-            });
-          }
-        }
-      };
-
-      window.addEventListener('message', handleMessage);
-
-      // Cleanup listener
-      const checkClosed = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(checkClosed);
-          window.removeEventListener('message', handleMessage);
-          setLoading(false);
-        }
-      }, 500);
+      // Use full page redirect instead of popup to avoid blockers
+      window.location.href = authData.authUrl;
 
     } catch (error) {
       console.error('OAuth initiation error:', error);
