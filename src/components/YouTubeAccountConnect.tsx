@@ -40,11 +40,78 @@ const YouTubeAccountConnect = () => {
     }
   };
 
-  const handleConnect = () => {
-    toast({
-      title: "YouTube OAuth Setup Required",
-      description: "Please configure YouTube OAuth credentials in your project settings to enable account connection.",
-    });
+  const handleConnect = async () => {
+    try {
+      setLoading(true);
+      
+      // Get OAuth URL
+      const { data: authData, error: authError } = await supabase.functions.invoke('youtube-oauth/auth-url');
+      
+      if (authError) throw authError;
+
+      // Open OAuth in popup
+      const width = 600;
+      const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      
+      const popup = window.open(
+        authData.authUrl,
+        'YouTube OAuth',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+
+      // Listen for OAuth callback
+      const handleMessage = async (event: MessageEvent) => {
+        if (event.data.type === 'youtube-oauth-code') {
+          const code = event.data.code;
+          
+          try {
+            // Exchange code for tokens
+            const { data, error } = await supabase.functions.invoke('youtube-oauth', {
+              body: { code },
+            });
+
+            if (error) throw error;
+
+            toast({
+              title: "Success",
+              description: `Connected to YouTube channel: ${data.channelTitle}`,
+            });
+
+            await checkConnection();
+            popup?.close();
+          } catch (err) {
+            console.error('Token exchange error:', err);
+            toast({
+              title: "Error",
+              description: "Failed to complete YouTube connection.",
+              variant: "destructive",
+            });
+          }
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      // Cleanup listener
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          window.removeEventListener('message', handleMessage);
+          setLoading(false);
+        }
+      }, 500);
+
+    } catch (error) {
+      console.error('OAuth initiation error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start YouTube connection.",
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
   };
 
   const handleDisconnect = async () => {

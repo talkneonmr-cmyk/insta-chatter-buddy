@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YouTube OAuth Callback</title>
+</head>
+<body>
+  <script>
+    // Extract code from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    
+    if (code && window.opener) {
+      // Send code to parent window
+      window.opener.postMessage({
+        type: 'youtube-oauth-code',
+        code: code
+      }, '*');
+    }
+  </script>
+  <p>Completing authentication... You can close this window.</p>
+</body>
+</html>
