@@ -151,11 +151,11 @@ const Dashboard = () => {
                     Connect your Instagram account and create your first automation rule to start engaging with your audience automatically.
                   </p>
                   <div className="flex gap-2 justify-center pt-2">
-                    <Button className="bg-gradient-to-r from-primary via-secondary to-accent">
+                    <Button className="bg-gradient-to-r from-primary via-secondary to-accent" onClick={() => navigate("/rules")}>
                       Create First Rule
                     </Button>
-                    <Button variant="outline">
-                      View Tutorial
+                    <Button variant="outline" onClick={() => navigate("/posts")}>
+                      Add Posts
                     </Button>
                   </div>
                 </div>
@@ -193,17 +193,17 @@ const Dashboard = () => {
               <CardDescription>Common tasks and shortcuts</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start" disabled>
+              <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/rules")}>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Create New Rule
+                Manage Rules
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/posts")}>
+                <Instagram className="w-4 h-4 mr-2" />
+                Manage Posts
               </Button>
               <Button variant="outline" className="w-full justify-start" disabled>
                 <Activity className="w-4 h-4 mr-2" />
                 View Activity Logs
-              </Button>
-              <Button variant="outline" className="w-full justify-start" disabled>
-                <Instagram className="w-4 h-4 mr-2" />
-                Manage Posts
               </Button>
             </CardContent>
           </Card>
