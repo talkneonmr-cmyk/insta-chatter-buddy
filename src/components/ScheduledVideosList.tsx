@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Clock, CheckCircle, AlertCircle, Upload } from "lucide-react";
+import { Trash2, Clock, CheckCircle, AlertCircle, Upload, Copy, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 
 interface ScheduledVideo {
@@ -163,14 +163,36 @@ const ScheduledVideosList = () => {
               </div>
 
               {video.youtube_video_id && (
-                <a
-                  href={`https://youtube.com/watch?v=${video.youtube_video_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  View on YouTube
-                </a>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`https://www.youtube.com/watch?v=${video.youtube_video_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                    onClick={(e) => {
+                      // In preview, opening new tabs may be blocked
+                      const opened = window.open(`https://www.youtube.com/watch?v=${video.youtube_video_id}`, "_blank");
+                      if (!opened) {
+                        e.preventDefault();
+                        navigator.clipboard.writeText(`https://www.youtube.com/watch?v=${video.youtube_video_id}`);
+                        toast({ title: "Link copied", description: "YouTube link copied to clipboard." });
+                      }
+                    }}
+                  >
+                    View on YouTube <ExternalLink className="h-3 w-3" />
+                  </a>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://www.youtube.com/watch?v=${video.youtube_video_id}`);
+                      toast({ title: "Link copied", description: "YouTube link copied to clipboard." });
+                    }}
+                    aria-label="Copy YouTube link"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
               )}
             </div>
 
