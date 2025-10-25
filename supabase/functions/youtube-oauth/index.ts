@@ -31,9 +31,10 @@ serve(async (req) => {
     }
 
     const url = new URL(req.url);
+    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
 
     // Generate OAuth URL
-    if (req.method === 'GET' && url.pathname.endsWith('/auth-url')) {
+    if (url.pathname.endsWith('/auth-url')) {
       const clientId = Deno.env.get('YOUTUBE_CLIENT_ID');
       const redirectUri = `${url.origin}/youtube-manager`;
       
@@ -53,8 +54,8 @@ serve(async (req) => {
     }
 
     // Handle OAuth callback
-    if (req.method === 'POST') {
-      const { code } = await req.json() as OAuthCallbackRequest;
+    if (req.method === 'POST' && body.code) {
+      const { code } = body as OAuthCallbackRequest;
 
       const clientId = Deno.env.get('YOUTUBE_CLIENT_ID');
       const clientSecret = Deno.env.get('YOUTUBE_CLIENT_SECRET');
