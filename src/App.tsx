@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
 import Rules from "./pages/Rules";
 import Posts from "./pages/Posts";
+import CaptionGenerator from "./pages/CaptionGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           <Route path="/rules" element={<Rules />} />
           <Route path="/posts" element={<Posts />} />
+          <Route path="/caption-generator" element={<CaptionGenerator />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

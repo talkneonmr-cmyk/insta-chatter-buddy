@@ -193,8 +193,12 @@ const Dashboard = () => {
               <CardDescription>Common tasks and shortcuts</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/rules")}>
+              <Button variant="outline" className="w-full justify-start bg-gradient-to-r from-primary/5 to-secondary/5" onClick={() => navigate("/caption-generator")}>
                 <Sparkles className="w-4 h-4 mr-2" />
+                AI Caption Generator
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/rules")}>
+                <Zap className="w-4 h-4 mr-2" />
                 Manage Rules
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/posts")}>
