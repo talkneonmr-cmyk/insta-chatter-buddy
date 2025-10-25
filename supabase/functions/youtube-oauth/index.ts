@@ -36,7 +36,10 @@ serve(async (req) => {
     // Generate OAuth URL
     if (url.pathname.endsWith('/auth-url')) {
       const clientId = Deno.env.get('YOUTUBE_CLIENT_ID');
-      const redirectUri = `${url.origin}/youtube-manager`;
+      // Use the referer header to get the actual app URL
+      const referer = req.headers.get('referer') || req.headers.get('origin') || '';
+      const appUrl = new URL(referer);
+      const redirectUri = `${appUrl.origin}/youtube-manager`;
       
       const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
       authUrl.searchParams.set('client_id', clientId!);
@@ -46,6 +49,8 @@ serve(async (req) => {
       authUrl.searchParams.set('access_type', 'offline');
       authUrl.searchParams.set('prompt', 'consent');
       authUrl.searchParams.set('state', user.id);
+
+      console.log('OAuth redirect URI:', redirectUri);
 
       return new Response(
         JSON.stringify({ authUrl: authUrl.toString() }),
@@ -59,7 +64,10 @@ serve(async (req) => {
 
       const clientId = Deno.env.get('YOUTUBE_CLIENT_ID');
       const clientSecret = Deno.env.get('YOUTUBE_CLIENT_SECRET');
-      const redirectUri = `${url.origin}/youtube-manager`;
+      // Use the referer to get the redirect URI
+      const referer = req.headers.get('referer') || req.headers.get('origin') || '';
+      const appUrl = new URL(referer);
+      const redirectUri = `${appUrl.origin}/youtube-manager`;
 
       // Exchange code for tokens
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
