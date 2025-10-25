@@ -15,12 +15,15 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { scheduledVideoId }: UploadRequest = await req.json();
+  let scheduledVideoId: string | undefined;
+
+  try {
+    const body: UploadRequest = await req.json();
+    scheduledVideoId = body.scheduledVideoId;
 
     if (!scheduledVideoId) {
       return new Response(
@@ -30,15 +33,23 @@ serve(async (req) => {
     }
 
     // Fetch scheduled video details
+    console.log('Fetching video with ID:', scheduledVideoId);
     const { data: video, error: videoError } = await supabase
       .from('scheduled_videos')
-      .select('*, youtube_accounts(*)')
+      .select('*')
       .eq('id', scheduledVideoId)
       .single();
 
-    if (videoError || !video) {
+    if (videoError) {
+      console.error('Video fetch error:', videoError);
+      throw new Error(`Scheduled video not found: ${videoError.message}`);
+    }
+
+    if (!video) {
       throw new Error('Scheduled video not found');
     }
+
+    console.log('Found video:', video.title);
 
     // Update status to processing
     await supabase
@@ -102,21 +113,18 @@ serve(async (req) => {
     console.error('Error in youtube-upload function:', error);
     
     // Try to update video status to failed
-    try {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      
-      const { scheduledVideoId } = await req.json();
-      await supabase
-        .from('scheduled_videos')
-        .update({
-          status: 'failed',
-          upload_error: error instanceof Error ? error.message : 'Unknown error'
-        })
-        .eq('id', scheduledVideoId);
-    } catch (updateError) {
-      console.error('Failed to update error status:', updateError);
+    if (scheduledVideoId) {
+      try {
+        await supabase
+          .from('scheduled_videos')
+          .update({
+            status: 'failed',
+            upload_error: error instanceof Error ? error.message : 'Unknown error'
+          })
+          .eq('id', scheduledVideoId);
+      } catch (updateError) {
+        console.error('Failed to update error status:', updateError);
+      }
     }
 
     return new Response(
