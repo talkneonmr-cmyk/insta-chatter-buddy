@@ -92,8 +92,12 @@ const YouTubeAccountConnect = () => {
       
       if (authError) throw authError;
 
-      // Use full page redirect instead of popup to avoid blockers
-      window.location.href = authData.authUrl;
+      // Use top-window redirect to bypass iframe restrictions
+      if (window.top) {
+        (window.top as Window).location.href = authData.authUrl;
+      } else {
+        window.location.href = authData.authUrl;
+      }
 
     } catch (error) {
       console.error('OAuth initiation error:', error);
