@@ -127,6 +127,14 @@ serve(async (req) => {
       }
     };
 
+    console.log('Uploading with metadata:', JSON.stringify({
+      title: metadata.snippet.title,
+      description: metadata.snippet.description?.substring(0, 50) + '...',
+      tags: metadata.snippet.tags,
+      categoryId: metadata.snippet.categoryId,
+      privacy: metadata.status.privacyStatus
+    }, null, 2));
+
     // Step 1: Initialize resumable upload
     console.log('Initializing YouTube upload...');
     const initResponse = await fetch(

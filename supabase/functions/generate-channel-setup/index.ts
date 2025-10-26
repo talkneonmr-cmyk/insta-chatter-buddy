@@ -116,7 +116,7 @@ Make it highly specific to the ${niche} niche and designed for maximum viral pot
   } catch (error) {
     console.error('Error in generate-channel-setup function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
