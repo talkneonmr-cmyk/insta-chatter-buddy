@@ -110,12 +110,22 @@ export function InstagramAccountConnect() {
           <Instagram className="w-5 h-5 text-primary" />
           <CardTitle>Connect Instagram</CardTitle>
         </div>
-        <CardDescription>Connect your Instagram account to enable automation</CardDescription>
+        <CardDescription>
+          Connect your Instagram Business account via Facebook
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <div className="text-sm text-muted-foreground space-y-2">
+          <p className="font-medium">Requirements:</p>
+          <ul className="list-disc list-inside space-y-1 text-xs">
+            <li>Instagram Business or Creator account</li>
+            <li>Facebook Page connected to your Instagram</li>
+            <li>Facebook App with Instagram permissions</li>
+          </ul>
+        </div>
         <Button onClick={handleConnect} disabled={isConnecting}>
           <Instagram className="w-4 h-4 mr-2" />
-          {isConnecting ? "Connecting..." : "Connect Instagram"}
+          {isConnecting ? "Connecting..." : "Connect via Facebook"}
         </Button>
       </CardContent>
     </Card>
