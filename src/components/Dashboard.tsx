@@ -4,19 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Instagram, LogOut, Settings, MessageCircle, RefreshCw, Zap, Activity, Youtube } from "lucide-react";
+import { Sparkles, LogOut, Settings, Youtube } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import AutomationTester from "./AutomationTester";
-import { useAutomationStats } from "@/hooks/useAutomationStats";
-import { StatCard } from "./StatCard";
-import { InstagramAccountConnect } from "./InstagramAccountConnect";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { stats, loading: statsLoading, refetch } = useAutomationStats();
 
   useEffect(() => {
     // Check initial session
@@ -51,14 +46,6 @@ const Dashboard = () => {
     navigate("/auth");
   };
 
-  const handleRefresh = async () => {
-    await refetch();
-    toast({
-      title: "Refreshed",
-      description: "Stats updated successfully.",
-    });
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -84,7 +71,7 @@ const Dashboard = () => {
                 <h1 className="font-bold text-xl bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
                   Lovable Me Assistant
                 </h1>
-                <p className="text-xs text-muted-foreground">Instagram Automation</p>
+                <p className="text-xs text-muted-foreground">YouTube Manager</p>
               </div>
             </div>
             
@@ -105,153 +92,69 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        {/* Stats Overview */}
+        {/* Welcome Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-2xl font-bold">Dashboard Overview</h2>
-              <p className="text-sm text-muted-foreground">
-                Last updated: {stats.lastUpdated.toLocaleTimeString()}
-              </p>
-            </div>
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={statsLoading}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${statsLoading ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-4 mb-6">
-            <StatCard
-              icon={Zap}
-              label="Active Rules"
-              value={stats.activeRules}
-              loading={statsLoading}
-            />
-            <StatCard
-              icon={MessageCircle}
-              label="Comments Processed"
-              value={stats.commentsProcessed}
-              loading={statsLoading}
-            />
-            <StatCard
-              icon={Activity}
-              label="DMs Sent"
-              value={stats.dmsSent}
-              loading={statsLoading}
-            />
-          </div>
-
-          {/* Quick Actions */}
-          {!statsLoading && stats.activeRules === 0 && (
-            <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-2">
-                  <Sparkles className="w-12 h-12 text-primary mx-auto mb-2" />
-                  <h3 className="text-lg font-semibold">Get Started</h3>
-                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    Connect your Instagram account and create your first automation rule to start engaging with your audience automatically.
-                  </p>
-                  <div className="flex gap-2 justify-center pt-2">
-                    <Button className="bg-gradient-to-r from-primary via-secondary to-accent" onClick={() => navigate("/rules")}>
-                      Create First Rule
-                    </Button>
-                    <Button variant="outline" onClick={() => navigate("/posts")}>
-                      Add Posts
-                    </Button>
-                  </div>
+          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-2">
+                <Sparkles className="w-12 h-12 text-primary mx-auto mb-2" />
+                <h2 className="text-2xl font-bold">YouTube Content Manager</h2>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Manage your YouTube channel, schedule uploads, and create AI-powered content.
+                </p>
+                <div className="flex gap-2 justify-center pt-4">
+                  <Button className="bg-gradient-to-r from-red-500 to-red-600" onClick={() => navigate("/youtube-manager")}>
+                    <Youtube className="w-4 h-4 mr-2" />
+                    Open YouTube Manager
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate("/channel-creator")}>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    AI Channel Creator
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Connection Status Cards */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <InstagramAccountConnect />
+        {/* Quick Actions */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="border-2 hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Youtube className="w-5 h-5 text-red-500" />
+                <CardTitle>YouTube Manager</CardTitle>
+              </div>
+              <CardDescription>Upload and schedule your videos</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="outline" className="w-full justify-start bg-gradient-to-r from-red-500/5 to-red-500/10" onClick={() => navigate("/youtube-manager")}>
+                <Youtube className="w-4 h-4 mr-2 text-red-500" />
+                Manage YouTube Channel
+              </Button>
+            </CardContent>
+          </Card>
 
           <Card className="border-2 hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-secondary" />
-                <CardTitle>Quick Actions</CardTitle>
+                <Sparkles className="w-5 h-5 text-primary" />
+                <CardTitle>AI Tools</CardTitle>
               </div>
-              <CardDescription>Common tasks and shortcuts</CardDescription>
+              <CardDescription>AI-powered content creation</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <Button variant="outline" className="w-full justify-start bg-gradient-to-r from-primary/5 to-secondary/5" onClick={() => navigate("/caption-generator")}>
                 <Sparkles className="w-4 h-4 mr-2" />
                 AI Caption Generator
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/rules")}>
-                <Zap className="w-4 h-4 mr-2" />
-                Manage Rules
-              </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/posts")}>
-                <Instagram className="w-4 h-4 mr-2" />
-                Manage Posts
-              </Button>
-              <Button variant="outline" className="w-full justify-start bg-gradient-to-r from-red-500/5 to-red-500/10" onClick={() => navigate("/youtube-manager")}>
-                <Youtube className="w-4 h-4 mr-2 text-red-500" />
-                YouTube Manager
-              </Button>
-              <Button variant="outline" className="w-full justify-start" disabled>
-                <Activity className="w-4 h-4 mr-2" />
-                View Activity Logs
+              <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/channel-creator")}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                AI Channel Creator
               </Button>
             </CardContent>
           </Card>
         </div>
-
-        {/* Testing Component */}
-        <div className="mb-8">
-          <AutomationTester />
-        </div>
-
-        {/* Instructions */}
-        <Card className="border-2 border-accent/20">
-          <CardHeader>
-            <CardTitle>Getting Started</CardTitle>
-            <CardDescription>How to set up Instagram automation</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h4 className="font-semibold mb-2">1. Create a Meta Developer App</h4>
-              <p className="text-sm text-muted-foreground">
-                Visit{" "}
-                <a
-                  href="https://developers.facebook.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Meta for Developers
-                </a>{" "}
-                and create a new app with Instagram Basic Display or Instagram Graph API permissions.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-2">2. Configure Instagram Permissions</h4>
-              <p className="text-sm text-muted-foreground">
-                Request these permissions: instagram_basic, instagram_manage_comments, instagram_manage_messages
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-2">3. Set Up Webhooks</h4>
-              <p className="text-sm text-muted-foreground">
-                Configure webhooks to receive comment notifications in real-time
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-2">4. Test Your Automation</h4>
-              <p className="text-sm text-muted-foreground">
-                Use the testing tool above to verify your rules work correctly before going live
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

@@ -6,8 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
-import Rules from "./pages/Rules";
-import Posts from "./pages/Posts";
 import CaptionGenerator from "./pages/CaptionGenerator";
 import YouTubeManager from "./pages/YouTubeManager";
 import ChannelCreator from "./pages/ChannelCreator";
@@ -25,8 +23,6 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/rules" element={<Rules />} />
-          <Route path="/posts" element={<Posts />} />
           <Route path="/caption-generator" element={<CaptionGenerator />} />
           <Route path="/youtube-manager" element={<YouTubeManager />} />
           <Route path="/channel-creator" element={<ChannelCreator />} />
