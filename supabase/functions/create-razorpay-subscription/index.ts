@@ -79,42 +79,53 @@ Deno.serve(async (req) => {
         .eq('user_id', user.id);
     }
 
-    // Create subscription plan (₹1900/month = ₹19 * 100)
-    const subscriptionResponse = await fetch('https://api.razorpay.com/v1/subscriptions', {
+    // Create payment link for Pro plan (₹1900)
+    const paymentLinkResponse = await fetch('https://api.razorpay.com/v1/payment_links', {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        plan_id: 'plan_pro', // You need to create this plan in Razorpay dashboard
-        customer_id: customerId,
-        total_count: 12, // 12 months
-        quantity: 1,
+        amount: 190000, // ₹1900 in paise
+        currency: 'INR',
+        description: 'YouTube Manager Pro Plan - Monthly Subscription',
+        customer: {
+          name: profile?.email || 'User',
+          email: profile?.email,
+        },
+        notify: {
+          email: true,
+        },
+        reminder_enable: true,
         notes: {
           user_id: user.id,
+          plan: 'pro',
         },
+        callback_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/razorpay-webhook`,
+        callback_method: 'get',
       }),
     });
 
-    if (!subscriptionResponse.ok) {
-      const error = await subscriptionResponse.json();
-      throw new Error(error.error?.description || 'Failed to create subscription');
+    if (!paymentLinkResponse.ok) {
+      const error = await paymentLinkResponse.json();
+      console.error('Razorpay error:', error);
+      throw new Error(error.error?.description || 'Failed to create payment link');
     }
 
-    const razorpaySubscription = await subscriptionResponse.json();
+    const paymentLink = await paymentLinkResponse.json();
 
     return new Response(
       JSON.stringify({ 
-        subscriptionId: razorpaySubscription.id,
-        shortUrl: razorpaySubscription.short_url 
+        paymentLinkId: paymentLink.id,
+        shortUrl: paymentLink.short_url 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Error creating Razorpay subscription:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

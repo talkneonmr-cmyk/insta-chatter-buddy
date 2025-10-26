@@ -40,6 +40,34 @@ Deno.serve(async (req) => {
     );
 
     switch (event.event) {
+      case 'payment.captured': {
+        const payment = event.payload.payment.entity;
+        const userId = payment.notes?.user_id;
+        const plan = payment.notes?.plan;
+
+        if (!userId || plan !== 'pro') {
+          console.log('Payment received but no user_id or not pro plan');
+          break;
+        }
+
+        // Upgrade user to Pro plan
+        const currentDate = new Date();
+        const nextMonthDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+
+        await supabase
+          .from('user_subscriptions')
+          .update({
+            plan: 'pro',
+            status: 'active',
+            current_period_start: new Date().toISOString(),
+            current_period_end: nextMonthDate.toISOString(),
+          })
+          .eq('user_id', userId);
+
+        console.log('User upgraded to Pro:', userId);
+        break;
+      }
+
       case 'subscription.activated':
       case 'subscription.charged': {
         const subscription = event.payload.subscription.entity;
@@ -101,7 +129,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error processing webhook:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
