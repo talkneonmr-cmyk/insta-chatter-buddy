@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import AutomationTester from "./AutomationTester";
 import { useAutomationStats } from "@/hooks/useAutomationStats";
 import { StatCard } from "./StatCard";
+import { InstagramAccountConnect } from "./InstagramAccountConnect";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -166,23 +167,7 @@ const Dashboard = () => {
 
         {/* Connection Status Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <Card className="border-2 hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Instagram className="w-5 h-5 text-primary" />
-                <CardTitle>Instagram Connection</CardTitle>
-              </div>
-              <CardDescription>Connect your Instagram account to start automation</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90">
-                Connect Instagram Account
-              </Button>
-              <p className="text-xs text-muted-foreground mt-4">
-                You'll need an Instagram Business or Creator account and a Meta Developer App
-              </p>
-            </CardContent>
-          </Card>
+          <InstagramAccountConnect />
 
           <Card className="border-2 hover:shadow-lg transition-shadow">
             <CardHeader>
