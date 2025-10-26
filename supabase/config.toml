@@ -24,3 +24,15 @@ verify_jwt = false
 
 [functions.generate-channel-setup]
 verify_jwt = false
+
+[functions.check-usage-limit]
+verify_jwt = false
+
+[functions.increment-usage]
+verify_jwt = false
+
+[functions.create-razorpay-subscription]
+verify_jwt = false
+
+[functions.razorpay-webhook]
+verify_jwt = false

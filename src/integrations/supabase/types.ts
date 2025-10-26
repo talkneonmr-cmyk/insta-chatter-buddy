@@ -417,6 +417,78 @@ export type Database = {
         }
         Relationships: []
       }
+      usage_tracking: {
+        Row: {
+          ai_captions_count: number
+          created_at: string
+          id: string
+          reset_at: string
+          updated_at: string
+          user_id: string
+          video_uploads_count: number
+          youtube_channels_count: number
+        }
+        Insert: {
+          ai_captions_count?: number
+          created_at?: string
+          id?: string
+          reset_at?: string
+          updated_at?: string
+          user_id: string
+          video_uploads_count?: number
+          youtube_channels_count?: number
+        }
+        Update: {
+          ai_captions_count?: number
+          created_at?: string
+          id?: string
+          reset_at?: string
+          updated_at?: string
+          user_id?: string
+          video_uploads_count?: number
+          youtube_channels_count?: number
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          razorpay_customer_id: string | null
+          razorpay_subscription_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       video_uploads_history: {
         Row: {
           created_at: string | null
@@ -500,7 +572,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      subscription_plan: "free" | "pro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -627,6 +699,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_plan: ["free", "pro"],
+    },
   },
 } as const

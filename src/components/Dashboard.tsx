@@ -79,6 +79,9 @@ const Dashboard = () => {
               <span className="text-sm text-muted-foreground hidden sm:inline">
                 {user?.email}
               </span>
+              <Button variant="outline" size="sm" onClick={() => navigate("/pricing")}>
+                Upgrade
+              </Button>
               <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}>
                 <Settings className="w-5 h-5" />
               </Button>
