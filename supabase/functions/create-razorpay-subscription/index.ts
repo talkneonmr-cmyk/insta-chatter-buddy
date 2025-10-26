@@ -35,49 +35,14 @@ Deno.serve(async (req) => {
 
     const auth = btoa(`${razorpayKeyId}:${razorpayKeySecret}`);
 
-    // Create or get customer
+    // Fetch profile (fallback to auth email)
     const { data: profile } = await supabase
       .from('profiles')
       .select('email')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
-    let customerId: string;
-    const { data: subscription } = await supabase
-      .from('user_subscriptions')
-      .select('razorpay_customer_id')
-      .eq('user_id', user.id)
-      .single();
-
-    if (subscription?.razorpay_customer_id) {
-      customerId = subscription.razorpay_customer_id;
-    } else {
-      // Create new customer
-      const customerResponse = await fetch('https://api.razorpay.com/v1/customers', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${auth}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: profile?.email || 'User',
-          email: profile?.email,
-        }),
-      });
-
-      if (!customerResponse.ok) {
-        throw new Error('Failed to create Razorpay customer');
-      }
-
-      const customer = await customerResponse.json();
-      customerId = customer.id;
-
-      // Update subscription with customer ID
-      await supabase
-        .from('user_subscriptions')
-        .update({ razorpay_customer_id: customerId })
-        .eq('user_id', user.id);
-    }
+    const email = profile?.email || user.email || 'user@example.com';
 
     // Create payment link for Pro plan (₹1900)
     const paymentLinkResponse = await fetch('https://api.razorpay.com/v1/payment_links', {
@@ -91,8 +56,8 @@ Deno.serve(async (req) => {
         currency: 'INR',
         description: 'YouTube Manager Pro Plan - Monthly Subscription',
         customer: {
-          name: profile?.email || 'User',
-          email: profile?.email,
+          name: email,
+          email,
         },
         notify: {
           email: true,
