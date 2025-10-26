@@ -50,9 +50,12 @@ export function InstagramAccountConnect() {
 
   const handleConnect = async () => {
     setIsConnecting(true);
+    // Pre-open a blank tab synchronously to avoid popup blockers
+    const popup = window.open('', '_blank', 'noopener,noreferrer');
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
+        popup?.close();
         toast.error("Please sign in first");
         return;
       }
@@ -65,16 +68,21 @@ export function InstagramAccountConnect() {
 
       if (error) throw error;
 
-    if (data?.authUrl) {
-      const popup = window.open(data.authUrl, "_blank", "noopener,noreferrer");
-      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        toast.error("Please allow popups to connect Instagram");
-      } else {
-        toast.info("Complete Instagram authorization in the new tab");
+      if (data?.authUrl) {
+        if (popup) {
+          popup.location.href = data.authUrl;
+          toast.info("Complete Instagram authorization in the new tab");
+        } else {
+          const newTab = window.open(data.authUrl, "_blank", "noopener,noreferrer");
+          if (!newTab) {
+            try { (window.top || window).location.href = data.authUrl; } catch {}
+            toast.error("Popup blocked. Opening here instead...");
+          }
+        }
       }
-    }
     } catch (error) {
       console.error("Error connecting Instagram:", error);
+      popup?.close();
       toast.error("Failed to connect Instagram account");
     } finally {
       setIsConnecting(false);
