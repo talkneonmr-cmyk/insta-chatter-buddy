@@ -115,19 +115,22 @@ Make it ${brandVoice}, targeted at ${targetAudience}, and optimized for maximum 
       
       if (aiResponse.status === 429) {
         return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }),
+          JSON.stringify({ error: 'Too many requests. Please try again later.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
       if (aiResponse.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'Payment required. Please add credits to your Lovable AI workspace.' }),
+          JSON.stringify({ error: 'Service temporarily unavailable. Please try again later.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
-      throw new Error(`AI API error: ${aiResponse.status} - ${errorText}`);
+      return new Response(
+        JSON.stringify({ error: 'Failed to generate caption. Please try again.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const aiData = await aiResponse.json();
@@ -179,7 +182,7 @@ Make it ${brandVoice}, targeted at ${targetAudience}, and optimized for maximum 
     console.error('Error in generate-caption:', error);
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Failed to generate caption',
+        error: 'Failed to generate caption. Please try again later.',
         success: false 
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -139,7 +139,7 @@ Output ONLY valid JSON in this exact format:
   } catch (error: any) {
     console.error("Error in process-comment function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Failed to process comment. Please try again later.' }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

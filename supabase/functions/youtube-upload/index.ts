@@ -223,7 +223,7 @@ serve(async (req) => {
           .from('scheduled_videos')
           .update({
             status: 'failed',
-            upload_error: error instanceof Error ? error.message : 'Unknown error'
+            upload_error: 'Upload failed. Please try again.'
           })
           .eq('id', scheduledVideoId);
       } catch (updateError) {
@@ -232,7 +232,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'Failed to upload video. Please try again later.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
