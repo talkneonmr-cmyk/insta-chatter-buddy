@@ -12,6 +12,13 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Only accept POST webhooks; for GET (e.g., user redirect), return a friendly page
+    if (req.method !== 'POST') {
+      return new Response('<!doctype html><html><body style="font-family:system-ui;padding:24px">Payment processed. You can return to the app now.</body></html>', {
+        headers: { ...corsHeaders, 'Content-Type': 'text/html' },
+      });
+    }
+
     const webhookSecret = Deno.env.get('RAZORPAY_WEBHOOK_SECRET');
     const signature = req.headers.get('x-razorpay-signature');
     const body = await req.text();

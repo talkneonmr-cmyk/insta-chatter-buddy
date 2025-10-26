@@ -67,8 +67,6 @@ Deno.serve(async (req) => {
           user_id: user.id,
           plan: 'pro',
         },
-        callback_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/razorpay-webhook`,
-        callback_method: 'get',
       }),
     });
 
