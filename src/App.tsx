@@ -10,6 +10,7 @@ import Rules from "./pages/Rules";
 import Posts from "./pages/Posts";
 import CaptionGenerator from "./pages/CaptionGenerator";
 import YouTubeManager from "./pages/YouTubeManager";
+import ChannelCreator from "./pages/ChannelCreator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/posts" element={<Posts />} />
           <Route path="/caption-generator" element={<CaptionGenerator />} />
           <Route path="/youtube-manager" element={<YouTubeManager />} />
+          <Route path="/channel-creator" element={<ChannelCreator />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
