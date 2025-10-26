@@ -163,7 +163,7 @@ const VideoUploadForm = () => {
           privacy_status: data.privacyStatus,
           video_file_path: videoFilePath,
           thumbnail_path: thumbnailPath,
-          scheduled_for: data.scheduledFor,
+          scheduled_for: new Date(data.scheduledFor).toISOString(),
           ai_generated_metadata: data.useAI,
         });
 
