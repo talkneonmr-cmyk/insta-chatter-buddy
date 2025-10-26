@@ -51,7 +51,7 @@ export function InstagramAccountConnect() {
   const handleConnect = async () => {
     setIsConnecting(true);
     // Pre-open a blank tab synchronously to avoid popup blockers
-    const popup = window.open('', '_blank', 'noopener,noreferrer');
+    const popup = window.open('about:blank', '_blank');
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
