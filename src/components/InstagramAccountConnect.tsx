@@ -65,9 +65,14 @@ export function InstagramAccountConnect() {
 
       if (error) throw error;
 
-      if (data?.authUrl) {
-        window.location.href = data.authUrl;
+    if (data?.authUrl) {
+      const popup = window.open(data.authUrl, "_blank", "noopener,noreferrer");
+      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        toast.error("Please allow popups to connect Instagram");
+      } else {
+        toast.info("Complete Instagram authorization in the new tab");
       }
+    }
     } catch (error) {
       console.error("Error connecting Instagram:", error);
       toast.error("Failed to connect Instagram account");
