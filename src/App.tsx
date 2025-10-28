@@ -10,6 +10,7 @@ import CaptionGenerator from "./pages/CaptionGenerator";
 import YouTubeManager from "./pages/YouTubeManager";
 import ChannelCreator from "./pages/ChannelCreator";
 import Pricing from "./pages/Pricing";
+import MusicGenerator from "./pages/MusicGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/caption-generator" element={<CaptionGenerator />} />
           <Route path="/youtube-manager" element={<YouTubeManager />} />
           <Route path="/channel-creator" element={<ChannelCreator />} />
+          <Route path="/music-generator" element={<MusicGenerator />} />
           <Route path="/pricing" element={<Pricing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

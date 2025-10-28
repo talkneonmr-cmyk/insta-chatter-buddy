@@ -155,6 +155,10 @@ const Dashboard = () => {
                 <Sparkles className="w-4 h-4 mr-2" />
                 AI Channel Creator
               </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/music-generator")}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                AI Music Generator
+              </Button>
             </CardContent>
           </Card>
         </div>
