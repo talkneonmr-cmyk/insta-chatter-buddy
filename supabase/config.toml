@@ -36,3 +36,6 @@ verify_jwt = false
 
 [functions.razorpay-webhook]
 verify_jwt = false
+
+[functions.generate-audio]
+verify_jwt = false
