@@ -48,7 +48,7 @@ All colors MUST be HSL.
     /* Modern 3D Shadows */
     --shadow-3d: 0 10px 30px -10px hsl(291 64% 42% / 0.3), 0 4px 8px -2px hsl(340 82% 52% / 0.2);
     --shadow-card: 0 4px 20px -4px hsl(222.2 84% 4.9% / 0.1), 0 2px 8px -2px hsl(222.2 84% 4.9% / 0.05);
-    --shadow-glow: 0 0 60px hsl(291 64% 42% / 0.8), 0 0 40px hsl(340 82% 52% / 0.6), 0 0 20px hsl(24 95% 53% / 0.5), 0 0 80px hsl(291 64% 42% / 0.4);
+    --shadow-glow: 0 0 30px hsl(291 64% 42% / 0.4), 0 0 20px hsl(340 82% 52% / 0.3), 0 0 40px hsl(291 64% 42% / 0.2);
     
     /* Smooth Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -102,7 +102,7 @@ All colors MUST be HSL.
     /* Modern 3D Shadows - Dark Mode */
     --shadow-3d: 0 10px 30px -10px hsl(291 64% 52% / 0.4), 0 4px 8px -2px hsl(340 82% 62% / 0.3);
     --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3), 0 2px 8px -2px hsl(0 0% 0% / 0.2);
-    --shadow-glow: 0 0 70px hsl(291 64% 52% / 0.9), 0 0 50px hsl(340 82% 62% / 0.7), 0 0 30px hsl(24 95% 63% / 0.6), 0 0 90px hsl(291 64% 52% / 0.5);
+    --shadow-glow: 0 0 35px hsl(291 64% 52% / 0.5), 0 0 25px hsl(340 82% 62% / 0.35), 0 0 45px hsl(291 64% 52% / 0.25);
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
