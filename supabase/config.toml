@@ -39,3 +39,6 @@ verify_jwt = false
 
 [functions.generate-audio]
 verify_jwt = false
+
+[functions.check-audio-status]
+verify_jwt = false

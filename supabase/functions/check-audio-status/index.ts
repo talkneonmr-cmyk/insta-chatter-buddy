@@ -12,19 +12,10 @@ serve(async (req) => {
   }
 
   try {
-    const { 
-      prompt, 
-      tags, 
-      lyrics, 
-      instrumental = false,
-      num_songs = 1,
-      output_format = 'mp3',
-      bpm = null
-    } = await req.json();
+    const { task_id } = await req.json();
 
-    // At least one of prompt, tags, or lyrics must be provided
-    if (!prompt && !tags && !lyrics) {
-      throw new Error('At least one of prompt, tags, or lyrics is required');
+    if (!task_id) {
+      throw new Error('task_id is required');
     }
 
     const SONAUTO_API_KEY = Deno.env.get('SONAUTO_API_KEY');
@@ -32,24 +23,14 @@ serve(async (req) => {
       throw new Error('SONAUTO_API_KEY is not configured');
     }
 
-    console.log('Generating audio with Sonauto API');
+    console.log('Checking audio generation status for task:', task_id);
 
-    // Call Sonauto API to start generation
-    const response = await fetch('https://api.sonauto.ai/v1/generations', {
-      method: 'POST',
+    // Check the status of the generation task
+    const response = await fetch(`https://api.sonauto.ai/v1/generations/${task_id}`, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${SONAUTO_API_KEY}`,
-        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        prompt,
-        tags,
-        lyrics,
-        instrumental,
-        num_songs,
-        output_format,
-        bpm,
-      }),
     });
 
     if (!response.ok) {
@@ -59,14 +40,13 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log('Audio generation task created:', data.task_id);
+    console.log('Audio generation status:', data.status);
 
-    // Return the task_id so client can poll for status
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error in generate-audio function:', error);
+    console.error('Error in check-audio-status function:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {
