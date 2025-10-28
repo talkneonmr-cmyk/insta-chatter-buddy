@@ -112,10 +112,10 @@ export const MusicGeneratorForm = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="slide-in">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Music className="h-5 w-5" />
+            <Music className="h-5 w-5 float-animation" />
             AI Music Generator
           </CardTitle>
           <CardDescription>
@@ -200,6 +200,7 @@ export const MusicGeneratorForm = () => {
           <Button
             onClick={handleGenerate}
             disabled={isGenerating}
+            variant="gradient"
             className="w-full"
             size="lg"
           >

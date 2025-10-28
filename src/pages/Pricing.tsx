@@ -59,10 +59,10 @@ export default function Pricing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
       <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
+        <div className="text-center mb-12 slide-in">
+          <h1 className="text-4xl font-bold mb-4 gradient-text">Choose Your Plan</h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Start free and upgrade when you need more power
           </p>
@@ -70,10 +70,10 @@ export default function Pricing() {
 
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* Free Plan */}
-          <Card className="relative">
+          <Card className="relative scale-in">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
+                <Sparkles className="h-5 w-5 float-animation" />
                 Free Plan
               </CardTitle>
               <CardDescription>Perfect for getting started</CardDescription>
@@ -104,7 +104,7 @@ export default function Pricing() {
           </Card>
 
           {/* Pro Plan */}
-          <Card className="relative border-primary shadow-lg">
+          <Card className="relative border-primary shadow-lg scale-in glow-effect">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2">
               <span className="bg-primary text-primary-foreground text-sm font-medium px-3 py-1 rounded-full">
                 Most Popular
@@ -112,7 +112,7 @@ export default function Pricing() {
             </div>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-primary" />
+                <Zap className="h-5 w-5 text-primary float-animation" />
                 Pro Plan
               </CardTitle>
               <CardDescription>For serious content creators</CardDescription>
@@ -133,6 +133,7 @@ export default function Pricing() {
             </CardContent>
             <CardFooter>
               <Button
+                variant="gradient"
                 className="w-full"
                 onClick={handleSubscribe}
                 disabled={loading}

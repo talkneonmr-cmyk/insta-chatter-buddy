@@ -36,18 +36,18 @@ const MusicGenerator = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
       <div className="container mx-auto py-8 px-4 max-w-4xl">
-        <div className="mb-6">
+        <div className="mb-6 slide-in">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
-            className="mb-4"
+            className="mb-4 btn-3d"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Button>
-          <h1 className="text-4xl font-bold mb-2">AI Music Generator</h1>
+          <h1 className="text-4xl font-bold mb-2 gradient-text">AI Music Generator</h1>
           <p className="text-muted-foreground">
             Create amazing music with AI using Sonauto
           </p>

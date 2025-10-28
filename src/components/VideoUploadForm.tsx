@@ -191,9 +191,9 @@ const VideoUploadForm = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 slide-in">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Upload New Video</h3>
+        <h3 className="text-lg font-semibold mb-2 gradient-text">Upload New Video</h3>
         <p className="text-sm text-muted-foreground">Schedule videos for automatic upload to YouTube</p>
       </div>
 
@@ -349,7 +349,7 @@ const VideoUploadForm = () => {
           />
 
           {/* Submit Button */}
-          <Button type="submit" disabled={uploading} className="w-full">
+          <Button type="submit" disabled={uploading} variant="gradient" className="w-full">
             <Calendar className="h-4 w-4 mr-2" />
             {uploading ? "Scheduling..." : "Schedule Video"}
           </Button>

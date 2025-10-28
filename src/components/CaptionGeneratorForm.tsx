@@ -109,10 +109,10 @@ const CaptionGeneratorForm = ({ onCaptionGenerated }: CaptionGeneratorFormProps)
   const charCount = form.watch("reelIdea")?.length || 0;
 
   return (
-    <Card className="border-2 shadow-lg">
+    <Card className="border-2 shadow-lg slide-in">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
+          <Sparkles className="w-5 h-5 text-primary float-animation" />
           Generate Caption
         </CardTitle>
         <CardDescription>
@@ -286,7 +286,8 @@ const CaptionGeneratorForm = ({ onCaptionGenerated }: CaptionGeneratorFormProps)
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-primary via-secondary to-accent"
+              variant="gradient"
+              className="w-full"
               size="lg"
               disabled={isGenerating}
             >

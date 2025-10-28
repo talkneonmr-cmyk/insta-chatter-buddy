@@ -79,12 +79,12 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background p-4">
-      <Card className="w-full max-w-md border-2 shadow-xl">
+      <Card className="w-full max-w-md border-2 shadow-xl scale-in">
         <CardHeader className="text-center">
-          <div className="inline-block p-3 rounded-2xl bg-gradient-to-r from-primary via-secondary to-accent mb-4 mx-auto">
+          <div className="inline-block p-3 rounded-2xl bg-gradient-to-r from-primary via-secondary to-accent mb-4 mx-auto float-animation">
             <Sparkles className="w-8 h-8 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+          <CardTitle className="text-3xl gradient-text">
             Lovable Me Assistant
           </CardTitle>
           <CardDescription>
@@ -124,7 +124,8 @@ const Auth = () => {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90"
+                  variant="gradient"
+                  className="w-full"
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign In"}
@@ -162,7 +163,8 @@ const Auth = () => {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90"
+                  variant="gradient"
+                  className="w-full"
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating account..." : "Sign Up"}

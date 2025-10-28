@@ -77,11 +77,11 @@ const Settings = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+              <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="btn-3d">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div>
-                <h1 className="font-bold text-xl">Settings</h1>
+                <h1 className="font-bold text-xl gradient-text">Settings</h1>
                 <p className="text-xs text-muted-foreground">Manage your preferences</p>
               </div>
             </div>
@@ -93,7 +93,7 @@ const Settings = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="space-y-6">
           {/* User Profile */}
-          <Card className="border-2">
+          <Card className="border-2 slide-in">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <UserIcon className="w-5 h-5 text-primary" />

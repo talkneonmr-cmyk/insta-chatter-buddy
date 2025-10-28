@@ -86,23 +86,24 @@ const ChannelCreator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 slide-in">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate("/youtube-manager")}
+            className="btn-3d"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-500/10 rounded-lg">
+            <div className="p-2 bg-red-500/10 rounded-lg float-animation">
               <Youtube className="h-6 w-6 text-red-500" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">AI Channel Creator</h1>
+              <h1 className="text-3xl font-bold gradient-text">AI Channel Creator</h1>
               <p className="text-muted-foreground">Generate viral-optimized channel setup with AI</p>
             </div>
           </div>
@@ -147,6 +148,7 @@ const ChannelCreator = () => {
             <Button
               onClick={handleGenerate}
               disabled={generating}
+              variant="gradient"
               className="w-full"
               size="lg"
             >
