@@ -99,12 +99,19 @@ export const MusicGeneratorForm = () => {
         // Start polling for status
         setTimeout(() => checkStatus(data.task_id), 3000);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating music:", error);
       setIsGenerating(false);
+      
+      // Extract error message from the error object
+      let errorMessage = "Failed to start music generation";
+      if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to start music generation",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -142,6 +149,16 @@ export const MusicGeneratorForm = () => {
               value={tags}
               onChange={(e) => setTags(e.target.value)}
             />
+            <p className="text-xs text-muted-foreground">
+              <a 
+                href="https://sonauto.ai/tag-explorer" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline hover:text-primary"
+              >
+                View valid tags
+              </a>
+            </p>
           </div>
 
           {!instrumental && (

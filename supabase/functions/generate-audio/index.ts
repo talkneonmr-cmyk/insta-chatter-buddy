@@ -55,7 +55,20 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Sonauto API error:', response.status, errorText);
-      throw new Error(`Sonauto API error: ${response.status} - ${errorText}`);
+      
+      // Parse error message for better user feedback
+      let errorMessage = `API error (${response.status})`;
+      try {
+        const errorData = JSON.parse(errorText);
+        if (errorData.detail && Array.isArray(errorData.detail)) {
+          const details = errorData.detail.map((d: any) => d.msg).join(', ');
+          errorMessage = details;
+        }
+      } catch {
+        errorMessage = errorText;
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
