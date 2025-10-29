@@ -14,9 +14,9 @@ import MusicPresets from "./MusicPresets";
 import EnhancedAudioPlayer from "./EnhancedAudioPlayer";
 
 const PRESET_TAGS = [
-  "pop", "rock", "jazz", "classical", "electronic", "hiphop", "rap", "country", 
+  "pop", "rock", "jazz", "classical", "electronic", "rap", "country", 
   "blues", "reggae", "metal", "punk", "folk", "indie", "soul", "funk", "disco", "edm",
-  "lofi", "chill", "upbeat", "energetic", "relaxing", "ambient", "cinematic"
+  "chill", "upbeat", "energetic", "relaxing", "ambient", "cinematic", "beats", "guitar"
 ];
 
 const DRAFT_KEY = "music-generator-draft";
