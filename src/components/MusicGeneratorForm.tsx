@@ -66,6 +66,12 @@ export default function MusicGeneratorForm() {
       setAudioUrls([]);
       setGenerationStartTime(Date.now());
 
+      console.log('Starting music generation with:', {
+        title: formData.title,
+        tags: formData.tags,
+        bpm: formData.bpm,
+      });
+
       const { data, error } = await supabase.functions.invoke("generate-audio", {
         body: {
           title: formData.title,
@@ -79,12 +85,21 @@ export default function MusicGeneratorForm() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Generation error:', error);
+        throw error;
+      }
 
-      if (data.task_id) {
+      console.log('Generation started, task_id:', data?.task_id);
+
+      if (data?.task_id) {
+        toast({ title: "Generation Started", description: "Creating your music... This may take 1-2 minutes." });
         checkStatus(data.task_id);
+      } else {
+        throw new Error('No task_id returned from API');
       }
     } catch (error: any) {
+      console.error('Error in handleGenerate:', error);
       setIsGenerating(false);
       toast({ title: "Error", description: error.message || "Failed to generate music", variant: "destructive" });
     }
@@ -92,9 +107,15 @@ export default function MusicGeneratorForm() {
 
   const checkStatus = async (id: string) => {
     try {
+      console.log('Checking status for task:', id);
       const { data, error } = await supabase.functions.invoke("check-audio-status", { body: { task_id: id } });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Status check error:', error);
+        throw error;
+      }
+
+      console.log('Status response:', data);
 
       if (data.status === "complete" && data.audio_url) {
         const urls = [data.audio_url];
@@ -122,14 +143,24 @@ export default function MusicGeneratorForm() {
         return;
       }
 
-      if (data.status === "failed") {
+      if (data.status === "failed" || data.status === "FAILURE") {
+        console.error('Generation failed:', data);
         setIsGenerating(false);
-        toast({ title: "Failed", description: "Music generation failed", variant: "destructive" });
-      } else {
-        setTimeout(() => checkStatus(id), 3000);
+        toast({ title: "Failed", description: data.error || "Music generation failed", variant: "destructive" });
+        return;
       }
-    } catch (error) {
+
+      // Still processing - check again
+      console.log('Still processing, checking again in 3s...');
+      setTimeout(() => checkStatus(id), 3000);
+    } catch (error: any) {
+      console.error('Error in checkStatus:', error);
       setIsGenerating(false);
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to check generation status", 
+        variant: "destructive" 
+      });
     }
   };
 
