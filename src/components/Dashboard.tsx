@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Sparkles, LogOut, Settings, Youtube, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { plan, isLoading: subscriptionLoading } = useSubscription();
+  const { isAdmin } = useIsAdmin();
 
   useEffect(() => {
     // Check initial session
@@ -81,6 +83,17 @@ const Dashboard = () => {
               <span className="text-sm text-muted-foreground hidden sm:inline">
                 {user?.email}
               </span>
+              {isAdmin && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate("/admin")} 
+                  className="btn-3d gap-2"
+                >
+                  <Crown className="w-4 h-4 text-yellow-500" />
+                  Admin Panel
+                </Button>
+              )}
               {plan === "pro" ? (
                 <Button variant="outline" size="sm" className="btn-3d gap-2" disabled>
                   <Crown className="w-4 h-4 text-yellow-500" />
