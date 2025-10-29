@@ -38,11 +38,14 @@ export default function MusicStats() {
           schema: 'public',
           table: 'music_generations'
         },
-        () => {
+        (payload) => {
+          console.log('Stats: Real-time update received', payload);
           fetchStats();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Stats: Subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);

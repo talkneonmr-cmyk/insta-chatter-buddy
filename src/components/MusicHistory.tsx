@@ -45,11 +45,14 @@ export default function MusicHistory() {
           schema: 'public',
           table: 'music_generations'
         },
-        () => {
+        (payload) => {
+          console.log('Library: Real-time update received', payload);
           fetchGenerations();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Library: Subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
