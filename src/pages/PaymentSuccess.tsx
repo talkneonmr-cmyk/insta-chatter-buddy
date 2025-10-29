@@ -11,23 +11,55 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
   const { plan, status, isLoading } = useSubscription();
   const [checking, setChecking] = useState(true);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkPayment = async () => {
-      // Wait a bit for webhook to process
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Check if user is authenticated
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/auth');
-        return;
-      }
+    const verifyPayment = async () => {
+      try {
+        // Check if user is authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          navigate('/auth');
+          return;
+        }
 
-      setChecking(false);
+        // Get payment link ID from localStorage (saved during payment creation)
+        const paymentLinkId = localStorage.getItem('razorpay_payment_link_id');
+        
+        if (!paymentLinkId) {
+          console.log('No payment link ID found, checking subscription status...');
+          setChecking(false);
+          return;
+        }
+
+        console.log('Verifying payment for link:', paymentLinkId);
+
+        // Call verification function
+        const { data, error } = await supabase.functions.invoke('verify-razorpay-payment', {
+          body: { paymentLinkId }
+        });
+
+        if (error) {
+          console.error('Verification error:', error);
+          setVerificationError(error.message);
+        } else if (data?.success) {
+          console.log('Payment verified successfully!');
+          // Clear the stored payment link ID
+          localStorage.removeItem('razorpay_payment_link_id');
+        } else {
+          console.log('Payment not yet completed:', data?.paymentStatus);
+        }
+      } catch (error) {
+        console.error('Error during verification:', error);
+        setVerificationError(error instanceof Error ? error.message : 'Unknown error');
+      } finally {
+        setChecking(false);
+      }
     };
 
-    checkPayment();
+    // Wait 2 seconds before verifying to allow Razorpay processing
+    const timer = setTimeout(verifyPayment, 2000);
+    return () => clearTimeout(timer);
   }, [navigate]);
 
   if (checking || isLoading) {

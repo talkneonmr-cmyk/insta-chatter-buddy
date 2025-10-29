@@ -25,7 +25,9 @@ export default function Pricing() {
 
       if (error) throw error;
 
-      if (data.shortUrl) {
+      if (data.shortUrl && data.paymentLinkId) {
+        // Store payment link ID for verification after redirect
+        localStorage.setItem('razorpay_payment_link_id', data.paymentLinkId);
         window.location.href = data.shortUrl;
       }
     } catch (error: any) {
