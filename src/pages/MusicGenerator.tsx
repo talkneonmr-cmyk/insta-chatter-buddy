@@ -1,75 +1,70 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { MusicGeneratorForm } from "@/components/MusicGeneratorForm";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Music } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Music, History, BarChart3 } from "lucide-react";
+import MusicGeneratorForm from "@/components/MusicGeneratorForm";
+import MusicHistory from "@/components/MusicHistory";
+import MusicStats from "@/components/MusicStats";
 
-const MusicGenerator = () => {
+export default function MusicGenerator() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
-      } else {
-        setIsAuthenticated(true);
+        return;
       }
-    });
+      setIsAuthenticated(true);
+    };
+    checkAuth();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setIsAuthenticated(true);
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) navigate("/auth");
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background relative overflow-hidden">
-      {/* Animated background elements */}
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-background via-background/95 to-primary/5">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-pink-500/20 via-purple-500/10 to-transparent rounded-full blur-3xl animate-pulse" />
       </div>
-      
-      <div className="container mx-auto py-8 px-4 max-w-5xl relative z-10">
-        <div className="mb-8 animate-fade-in">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className="mb-6 hover:bg-primary/10 transition-all duration-300 hover:translate-x-[-4px]"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
-          <div className="text-center space-y-4 mb-8">
-            <div className="inline-flex items-center gap-3 bg-primary/10 backdrop-blur-sm px-6 py-3 rounded-full border border-primary/20">
-              <Music className="h-6 w-6 text-primary animate-pulse" />
-              <span className="text-sm font-medium text-primary">Powered by Sonauto AI</span>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-fade-in">
-              AI Music Generator
+
+      <div className="relative z-10 container mx-auto px-4 py-8">
+        <Button variant="outline" onClick={() => navigate("/")} className="mb-6 gap-2">
+          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+        </Button>
+
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12 space-y-4">
+            <h1 className="text-6xl md:text-7xl font-black bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              AI Music Studio
             </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Create professional-quality music in seconds with cutting-edge AI technology
-            </p>
+            <p className="text-xl text-muted-foreground">Create, manage, and analyze your AI-generated music</p>
           </div>
+
+          <Tabs defaultValue="generator" className="space-y-8">
+            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 h-14">
+              <TabsTrigger value="generator" className="gap-2"><Music className="h-5 w-5" /> Generator</TabsTrigger>
+              <TabsTrigger value="library" className="gap-2"><History className="h-5 w-5" /> Library</TabsTrigger>
+              <TabsTrigger value="stats" className="gap-2"><BarChart3 className="h-5 w-5" /> Stats</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="generator"><MusicGeneratorForm /></TabsContent>
+            <TabsContent value="library"><MusicHistory /></TabsContent>
+            <TabsContent value="stats"><MusicStats /></TabsContent>
+          </Tabs>
         </div>
-        <MusicGeneratorForm />
       </div>
     </div>
   );
-};
-
-export default MusicGenerator;
+}

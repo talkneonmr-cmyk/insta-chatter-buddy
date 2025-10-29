@@ -336,6 +336,105 @@ export type Database = {
           },
         ]
       }
+      music_generations: {
+        Row: {
+          audio_urls: string[] | null
+          bpm: number | null
+          created_at: string | null
+          generation_time_ms: number | null
+          id: string
+          instrumental: boolean | null
+          is_favorite: boolean | null
+          lyrics: string | null
+          output_format: string | null
+          prompt: string | null
+          tags: string[] | null
+          task_id: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          audio_urls?: string[] | null
+          bpm?: number | null
+          created_at?: string | null
+          generation_time_ms?: number | null
+          id?: string
+          instrumental?: boolean | null
+          is_favorite?: boolean | null
+          lyrics?: string | null
+          output_format?: string | null
+          prompt?: string | null
+          tags?: string[] | null
+          task_id?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          audio_urls?: string[] | null
+          bpm?: number | null
+          created_at?: string | null
+          generation_time_ms?: number | null
+          id?: string
+          instrumental?: boolean | null
+          is_favorite?: boolean | null
+          lyrics?: string | null
+          output_format?: string | null
+          prompt?: string | null
+          tags?: string[] | null
+          task_id?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      music_presets: {
+        Row: {
+          bpm: number | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          instrumental: boolean | null
+          is_system_preset: boolean | null
+          name: string
+          prompt_template: string | null
+          tags: string[] | null
+          usage_count: number | null
+          user_id: string | null
+        }
+        Insert: {
+          bpm?: number | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          instrumental?: boolean | null
+          is_system_preset?: boolean | null
+          name: string
+          prompt_template?: string | null
+          tags?: string[] | null
+          usage_count?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          bpm?: number | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          instrumental?: boolean | null
+          is_system_preset?: boolean | null
+          name?: string
+          prompt_template?: string | null
+          tags?: string[] | null
+          usage_count?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
