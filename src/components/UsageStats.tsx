@@ -36,6 +36,26 @@ export default function UsageStats() {
 
   useEffect(() => {
     fetchUsage();
+
+    // Set up real-time subscription for usage updates
+    const channel = supabase
+      .channel('usage-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'usage_tracking',
+        },
+        () => {
+          fetchUsage();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchUsage = async () => {
@@ -47,10 +67,28 @@ export default function UsageStats() {
         .from("usage_tracking")
         .select("video_uploads_count, ai_captions_count, youtube_channels_count")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching usage:", error);
+        return;
+      }
+
+      if (!data) {
+        // Create usage tracking if it doesn't exist
+        const { error: insertError } = await supabase
+          .from("usage_tracking")
+          .insert({ user_id: user.id });
+        
+        if (insertError) {
+          console.error("Error creating usage tracking:", insertError);
+        }
+        
+        setUsage({
+          video_uploads_count: 0,
+          ai_captions_count: 0,
+          youtube_channels_count: 0,
+        });
         return;
       }
 

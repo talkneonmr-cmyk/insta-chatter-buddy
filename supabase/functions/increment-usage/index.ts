@@ -29,25 +29,43 @@ Deno.serve(async (req) => {
     const { usageType } = await req.json();
 
     // Get current usage
-    const { data: usage } = await supabase
+    let { data: usage } = await supabase
       .from('usage_tracking')
       .select('*')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (!usage) {
-      throw new Error('Usage tracking not found');
+      // Create usage tracking if it doesn't exist
+      const { error: insertError } = await supabase
+        .from('usage_tracking')
+        .insert({ user_id: user.id });
+      
+      if (insertError) throw insertError;
+      
+      // Get the newly created record
+      const { data: newUsage, error: fetchError } = await supabase
+        .from('usage_tracking')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (fetchError || !newUsage) throw new Error('Failed to create usage tracking');
+      usage = newUsage;
     }
 
     // Increment the appropriate counter
     let updateData: any = {};
     switch (usageType) {
+      case 'video_uploads':
       case 'video_upload':
         updateData = { video_uploads_count: usage.video_uploads_count + 1 };
         break;
+      case 'ai_captions':
       case 'ai_caption':
         updateData = { ai_captions_count: usage.ai_captions_count + 1 };
         break;
+      case 'youtube_channels':
       case 'youtube_channel':
         updateData = { youtube_channels_count: usage.youtube_channels_count + 1 };
         break;
