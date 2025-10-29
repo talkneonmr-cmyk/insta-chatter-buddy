@@ -75,6 +75,11 @@ export default function MusicGeneratorForm() {
       return;
     }
 
+    if (formData.lyrics && formData.instrumental) {
+      toast({ title: "Invalid combination", description: "Cannot generate instrumental music with lyrics. Please remove lyrics or turn off instrumental mode.", variant: "destructive" });
+      return;
+    }
+
     try {
       setIsGenerating(true);
       setAudioUrls([]);
@@ -229,8 +234,18 @@ export default function MusicGeneratorForm() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Switch checked={formData.instrumental} onCheckedChange={(c) => updateFormData({ instrumental: c })} />
-            <Label>Instrumental</Label>
+            <Switch 
+              checked={formData.instrumental} 
+              onCheckedChange={(c) => {
+                if (c && formData.lyrics) {
+                  toast({ title: "Lyrics cleared", description: "Instrumental mode enabled - lyrics have been removed.", variant: "default" });
+                  updateFormData({ instrumental: c, lyrics: "" });
+                } else {
+                  updateFormData({ instrumental: c });
+                }
+              }} 
+            />
+            <Label>Instrumental (no vocals)</Label>
           </div>
           <Button type="submit" disabled={isGenerating} className="w-full h-14 text-lg">
             {isGenerating ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating...</> : <><Music className="mr-2 h-5 w-5" /> Generate</>}
