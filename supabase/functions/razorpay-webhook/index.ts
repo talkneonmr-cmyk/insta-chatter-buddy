@@ -12,10 +12,45 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Only accept POST webhooks; for GET (e.g., user redirect), return a friendly page
+    // Handle GET requests (callback redirects after successful payment)
+    if (req.method === 'GET') {
+      // Extract origin to redirect back to the app
+      const referer = req.headers.get('referer');
+      let redirectUrl = 'https://lovable.app/payment-success';
+      
+      if (referer) {
+        try {
+          const refererUrl = new URL(referer);
+          redirectUrl = `${refererUrl.protocol}//${refererUrl.host}/payment-success`;
+        } catch (e) {
+          console.error('Invalid referer URL:', e);
+        }
+      }
+      
+      // Return HTML that redirects the user
+      return new Response(
+        `<!DOCTYPE html>
+        <html>
+          <head>
+            <title>Payment Successful</title>
+            <meta http-equiv="refresh" content="0;url=${redirectUrl}">
+          </head>
+          <body>
+            <p>Payment successful! Redirecting...</p>
+            <script>window.location.href="${redirectUrl}";</script>
+          </body>
+        </html>`,
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'text/html' },
+        }
+      );
+    }
+
+    // Only accept POST webhooks for actual payment events
     if (req.method !== 'POST') {
-      return new Response('<!doctype html><html><body style="font-family:system-ui;padding:24px">Payment processed. You can return to the app now.</body></html>', {
-        headers: { ...corsHeaders, 'Content-Type': 'text/html' },
+      return new Response('Method not allowed', {
+        status: 405,
+        headers: corsHeaders,
       });
     }
 

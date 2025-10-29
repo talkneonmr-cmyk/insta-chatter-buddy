@@ -44,6 +44,10 @@ Deno.serve(async (req) => {
 
     const email = profile?.email || user.email || 'user@example.com';
 
+    // Get the callback URL - this is where Razorpay redirects after payment
+    const baseUrl = req.headers.get('origin') || 'https://lovable.app';
+    const callbackUrl = `${baseUrl}/payment-success`;
+
     // Create payment link for Pro plan (₹699)
     const paymentLinkResponse = await fetch('https://api.razorpay.com/v1/payment_links', {
       method: 'POST',
@@ -63,6 +67,8 @@ Deno.serve(async (req) => {
           email: true,
         },
         reminder_enable: true,
+        callback_url: callbackUrl,
+        callback_method: 'get',
         notes: {
           user_id: user.id,
           plan: 'pro',
