@@ -6,16 +6,22 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Music, Loader2, Play, Download } from "lucide-react";
+import { Music, Loader2, Play, Download, X } from "lucide-react";
+
+const PRESET_TAGS = [
+  "rock", "pop", "jazz", "electronic", "acoustic", "upbeat", "mellow", 
+  "energetic", "calm", "guitar", "piano", "drums", "synth", "vocals"
+];
 
 export const MusicGeneratorForm = () => {
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [prompt, setPrompt] = useState("");
   const [lyrics, setLyrics] = useState("");
-  const [tags, setTags] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [instrumental, setInstrumental] = useState(false);
   const [numSongs, setNumSongs] = useState("1");
   const [outputFormat, setOutputFormat] = useState("mp3");
@@ -23,6 +29,16 @@ export const MusicGeneratorForm = () => {
   const [taskId, setTaskId] = useState<string | null>(null);
   const [audioUrls, setAudioUrls] = useState<string[]>([]);
   const [status, setStatus] = useState<string>("");
+
+  const addTag = (tag: string) => {
+    if (!selectedTags.includes(tag)) {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
+  };
 
   const checkStatus = async (id: string) => {
     try {
@@ -64,7 +80,7 @@ export const MusicGeneratorForm = () => {
   };
 
   const handleGenerate = async () => {
-    if (!prompt && !tags && !lyrics) {
+    if (!prompt && selectedTags.length === 0 && !lyrics) {
       toast({
         title: "Missing Information",
         description: "Please provide at least a prompt, tags, or lyrics",
@@ -83,7 +99,7 @@ export const MusicGeneratorForm = () => {
           title: title || undefined,
           prompt: prompt || undefined,
           lyrics: lyrics || undefined,
-          tags: tags ? tags.split(",").map(t => t.trim()) : undefined,
+          tags: selectedTags.length > 0 ? selectedTags : undefined,
           instrumental,
           num_songs: parseInt(numSongs),
           output_format: outputFormat,
@@ -154,21 +170,46 @@ export const MusicGeneratorForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tags">Tags (comma-separated)</Label>
-            <Input
-              id="tags"
-              placeholder="rock, energetic, guitar, upbeat"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-            />
+            <Label htmlFor="tags">Tags</Label>
+            
+            {/* Selected Tags */}
+            {selectedTags.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/50">
+                {selectedTags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="gap-1">
+                    {tag}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => removeTag(tag)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Preset Tags */}
+            <div className="flex flex-wrap gap-2">
+              {PRESET_TAGS.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant={selectedTags.includes(tag) ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary/80 transition-colors"
+                  onClick={() => addTag(tag)}
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+
             <p className="text-xs text-muted-foreground">
+              Click tags above or{" "}
               <a 
                 href="https://sonauto.ai/tag-explorer" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="underline hover:text-primary"
               >
-                View valid tags
+                view all valid tags
               </a>
             </p>
           </div>
