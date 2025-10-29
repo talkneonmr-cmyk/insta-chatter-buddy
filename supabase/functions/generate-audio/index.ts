@@ -13,6 +13,7 @@ serve(async (req) => {
 
   try {
     const { 
+      title,
       prompt, 
       tags, 
       lyrics, 
@@ -42,6 +43,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        title,
         prompt,
         tags,
         lyrics,
