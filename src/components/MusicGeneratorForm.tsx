@@ -209,7 +209,11 @@ export default function MusicGeneratorForm() {
           </div>
           <div>
             <Label>Prompt</Label>
-            <Textarea value={formData.prompt} onChange={(e) => updateFormData({ prompt: e.target.value })} className="min-h-24" />
+            <Textarea value={formData.prompt} onChange={(e) => updateFormData({ prompt: e.target.value })} className="min-h-24" placeholder="Describe the style and mood of your song..." />
+          </div>
+          <div>
+            <Label>Lyrics (Optional)</Label>
+            <Textarea value={formData.lyrics} onChange={(e) => updateFormData({ lyrics: e.target.value })} className="min-h-32" placeholder="Enter your song lyrics here..." />
           </div>
           <div>
             <Label>Tags</Label>
