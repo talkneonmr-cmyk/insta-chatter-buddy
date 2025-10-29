@@ -200,18 +200,6 @@ export const MusicGeneratorForm = () => {
                 </Badge>
               ))}
             </div>
-
-            <p className="text-xs text-muted-foreground">
-              Click tags above or{" "}
-              <a 
-                href="https://sonauto.ai/tag-explorer" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="underline hover:text-primary"
-              >
-                view all valid tags
-              </a>
-            </p>
           </div>
 
           {!instrumental && (
