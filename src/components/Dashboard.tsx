@@ -8,6 +8,7 @@ import { Sparkles, LogOut, Settings, Youtube, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import UsageStats from "./UsageStats";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -144,52 +145,60 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="card-3d border-2 overflow-hidden group animate-scale-in" style={{animationDelay: '0.1s'}}>
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <CardHeader className="relative z-10">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-red-500/10 group-hover:bg-red-500/20 transition-all duration-300">
-                  <Youtube className="w-5 h-5 text-red-500" />
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left Column - Action Cards */}
+          <div className="lg:col-span-2 grid md:grid-cols-2 gap-6">
+            <Card className="card-3d border-2 overflow-hidden group animate-scale-in" style={{animationDelay: '0.1s'}}>
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardHeader className="relative z-10">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-red-500/10 group-hover:bg-red-500/20 transition-all duration-300">
+                    <Youtube className="w-5 h-5 text-red-500" />
+                  </div>
+                  <CardTitle className="group-hover:text-red-500 transition-colors duration-300">YouTube Manager</CardTitle>
                 </div>
-                <CardTitle className="group-hover:text-red-500 transition-colors duration-300">YouTube Manager</CardTitle>
-              </div>
-              <CardDescription>Upload and schedule your videos</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 relative z-10">
-              <Button variant="outline" className="w-full justify-start bg-gradient-to-r from-red-500/5 to-red-500/10 btn-3d" onClick={() => navigate("/youtube-manager")}>
-                <Youtube className="w-4 h-4 mr-2 text-red-500" />
-                Manage YouTube Channel
-              </Button>
-            </CardContent>
-          </Card>
+                <CardDescription>Upload and schedule your videos</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 relative z-10">
+                <Button variant="outline" className="w-full justify-start bg-gradient-to-r from-red-500/5 to-red-500/10 btn-3d" onClick={() => navigate("/youtube-manager")}>
+                  <Youtube className="w-4 h-4 mr-2 text-red-500" />
+                  Manage YouTube Channel
+                </Button>
+              </CardContent>
+            </Card>
 
-          <Card className="card-3d border-2 overflow-hidden group animate-scale-in" style={{animationDelay: '0.2s'}}>
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <CardHeader className="relative z-10">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-all duration-300 animate-glow">
-                  <Sparkles className="w-5 h-5 text-primary" />
+            <Card className="card-3d border-2 overflow-hidden group animate-scale-in" style={{animationDelay: '0.2s'}}>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardHeader className="relative z-10">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-all duration-300 animate-glow">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                  </div>
+                  <CardTitle className="gradient-text">AI Tools</CardTitle>
                 </div>
-                <CardTitle className="gradient-text">AI Tools</CardTitle>
-              </div>
-              <CardDescription>AI-powered content creation</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 relative z-10">
-              <Button variant="outline" className="w-full justify-start bg-gradient-to-r from-primary/5 to-secondary/5 btn-3d" onClick={() => navigate("/caption-generator")}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                AI Caption Generator
-              </Button>
-              <Button variant="outline" className="w-full justify-start btn-3d" onClick={() => navigate("/channel-creator")}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                AI Channel Creator
-              </Button>
-              <Button variant="outline" className="w-full justify-start btn-3d" onClick={() => navigate("/music-generator")}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                AI Music Generator
-              </Button>
-            </CardContent>
-          </Card>
+                <CardDescription>AI-powered content creation</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 relative z-10">
+                <Button variant="outline" className="w-full justify-start bg-gradient-to-r from-primary/5 to-secondary/5 btn-3d" onClick={() => navigate("/caption-generator")}>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  AI Caption Generator
+                </Button>
+                <Button variant="outline" className="w-full justify-start btn-3d" onClick={() => navigate("/channel-creator")}>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  AI Channel Creator
+                </Button>
+                <Button variant="outline" className="w-full justify-start btn-3d" onClick={() => navigate("/music-generator")}>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  AI Music Generator
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Usage Stats */}
+          <div className="animate-scale-in" style={{animationDelay: '0.3s'}}>
+            <UsageStats />
+          </div>
         </div>
       </div>
     </div>
