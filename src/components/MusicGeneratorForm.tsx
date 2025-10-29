@@ -216,12 +216,11 @@ export const MusicGeneratorForm = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mp3">MP3 (Audio)</SelectItem>
-                  <SelectItem value="wav">WAV (Audio)</SelectItem>
-                  <SelectItem value="flac">FLAC (Audio)</SelectItem>
-                  <SelectItem value="ogg">OGG (Audio)</SelectItem>
-                  <SelectItem value="m4a">M4A (Audio)</SelectItem>
-                  <SelectItem value="mp4">MP4 (Video)</SelectItem>
+                  <SelectItem value="mp3">MP3</SelectItem>
+                  <SelectItem value="wav">WAV</SelectItem>
+                  <SelectItem value="flac">FLAC</SelectItem>
+                  <SelectItem value="ogg">OGG</SelectItem>
+                  <SelectItem value="m4a">M4A</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -252,25 +251,18 @@ export const MusicGeneratorForm = () => {
       {audioUrls.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Generated {outputFormat === 'mp4' ? 'Videos' : 'Music'}</CardTitle>
-            <CardDescription>Your AI-generated {outputFormat === 'mp4' ? 'videos are' : 'songs are'} ready!</CardDescription>
+            <CardTitle>Generated Music</CardTitle>
+            <CardDescription>Your AI-generated songs are ready!</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {audioUrls.map((url, index) => (
               <div key={index} className="space-y-2">
-                <Label>{outputFormat === 'mp4' ? 'Video' : 'Song'} {index + 1}</Label>
+                <Label>Song {index + 1}</Label>
                 <div className="flex items-center gap-2">
-                  {outputFormat === 'mp4' ? (
-                    <video controls className="flex-1 rounded-lg">
-                      <source src={url} type="video/mp4" />
-                      Your browser does not support the video element.
-                    </video>
-                  ) : (
-                    <audio controls className="flex-1">
-                      <source src={url} type={`audio/${outputFormat}`} />
-                      Your browser does not support the audio element.
-                    </audio>
-                  )}
+                  <audio controls className="flex-1">
+                    <source src={url} type={`audio/${outputFormat}`} />
+                    Your browser does not support the audio element.
+                  </audio>
                   <Button
                     variant="outline"
                     size="icon"
