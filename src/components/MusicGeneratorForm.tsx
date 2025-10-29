@@ -117,8 +117,8 @@ export default function MusicGeneratorForm() {
 
       console.log('Status response:', data);
 
-      if (data.status === "complete" && data.audio_url) {
-        const urls = [data.audio_url];
+      if (data.status === "SUCCESS" && data.song_paths) {
+        const urls = data.song_paths;
         setAudioUrls(urls);
         setIsGenerating(false);
 
