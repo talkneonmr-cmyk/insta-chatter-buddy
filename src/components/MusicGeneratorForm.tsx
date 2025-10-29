@@ -217,7 +217,17 @@ export default function MusicGeneratorForm() {
               {audioUrls.map((url, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <EnhancedAudioPlayer src={url} />
-                  <Button size="sm" variant="outline" onClick={() => window.open(url, '_blank')} className="gap-2">
+                  <Button 
+                    type="button"
+                    size="sm" 
+                    variant="outline" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.open(url, '_blank');
+                    }} 
+                    className="gap-2"
+                  >
                     <Download className="h-4 w-4" /> Download
                   </Button>
                 </div>

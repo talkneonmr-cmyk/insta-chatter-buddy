@@ -106,6 +106,7 @@ export default function EnhancedAudioPlayer({ src }: EnhancedAudioPlayerProps) {
       
       <div className="flex items-center gap-3">
         <Button
+          type="button"
           size="icon"
           variant="outline"
           onClick={togglePlay}
@@ -130,6 +131,7 @@ export default function EnhancedAudioPlayer({ src }: EnhancedAudioPlayerProps) {
 
         <div className="flex items-center gap-2">
           <Button
+            type="button"
             size="sm"
             variant={isLooping ? "default" : "outline"}
             onClick={toggleLoop}
@@ -139,6 +141,7 @@ export default function EnhancedAudioPlayer({ src }: EnhancedAudioPlayerProps) {
           </Button>
 
           <Button
+            type="button"
             size="sm"
             variant="outline"
             onClick={changePlaybackRate}
@@ -149,6 +152,7 @@ export default function EnhancedAudioPlayer({ src }: EnhancedAudioPlayerProps) {
 
           <div className="flex items-center gap-2 min-w-[120px]">
             <Button
+              type="button"
               size="icon"
               variant="ghost"
               onClick={toggleMute}
