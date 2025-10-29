@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Crown, Loader2, RefreshCw, Shield } from "lucide-react";
+import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
@@ -17,6 +17,9 @@ interface UserData {
   plan: string;
   status: string;
   role: string | null;
+  video_uploads: number;
+  ai_captions: number;
+  youtube_channels: number;
 }
 
 export default function Admin() {
@@ -69,10 +72,18 @@ export default function Admin() {
 
       if (rolesError) throw rolesError;
 
+      // Get usage tracking
+      const { data: usage, error: usageError } = await supabase
+        .from("usage_tracking")
+        .select("user_id, video_uploads_count, ai_captions_count, youtube_channels_count");
+
+      if (usageError) throw usageError;
+
       // Combine data
       const usersData: UserData[] = profiles?.map((profile) => {
         const subscription = subscriptions?.find((s) => s.user_id === profile.id);
         const userRole = roles?.find((r) => r.user_id === profile.id);
+        const userUsage = usage?.find((u) => u.user_id === profile.id);
 
         return {
           id: profile.id,
@@ -81,6 +92,9 @@ export default function Admin() {
           plan: subscription?.plan || "free",
           status: subscription?.status || "active",
           role: userRole?.role || null,
+          video_uploads: userUsage?.video_uploads_count || 0,
+          ai_captions: userUsage?.ai_captions_count || 0,
+          youtube_channels: userUsage?.youtube_channels_count || 0,
         };
       }) || [];
 
@@ -179,6 +193,40 @@ export default function Admin() {
     }
   };
 
+  const resetUsage = async (userId: string) => {
+    try {
+      setUpdating(userId);
+
+      const { error } = await supabase
+        .from("usage_tracking")
+        .update({
+          video_uploads_count: 0,
+          ai_captions_count: 0,
+          youtube_channels_count: 0,
+          reset_at: new Date().toISOString(),
+        })
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Usage limits reset successfully",
+      });
+
+      fetchUsers();
+    } catch (error) {
+      console.error("Error resetting usage:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reset usage limits",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   if (adminCheckLoading || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -258,12 +306,13 @@ export default function Admin() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Joined</TableHead>
-                      <TableHead>Actions</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Usage</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -293,6 +342,13 @@ export default function Admin() {
                           </Badge>
                         </TableCell>
                         <TableCell>
+                          <div className="text-xs space-y-1">
+                            <div>Videos: {user.video_uploads}</div>
+                            <div>Captions: {user.ai_captions}</div>
+                            <div>Channels: {user.youtube_channels}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
                           {user.role === "admin" ? (
                             <Badge variant="destructive" className="gap-1">
                               <Crown className="h-3 w-3" />
@@ -306,20 +362,35 @@ export default function Admin() {
                           {new Date(user.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => toggleAdminRole(user.id, user.role)}
-                            disabled={updating === user.id}
-                          >
-                            {updating === user.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : user.role === "admin" ? (
-                              "Remove Admin"
-                            ) : (
-                              "Make Admin"
-                            )}
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleAdminRole(user.id, user.role)}
+                              disabled={updating === user.id}
+                            >
+                              {updating === user.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : user.role === "admin" ? (
+                                "Remove Admin"
+                              ) : (
+                                "Make Admin"
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => resetUsage(user.id)}
+                              disabled={updating === user.id}
+                              title="Reset usage limits"
+                            >
+                              {updating === user.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <RotateCcw className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
