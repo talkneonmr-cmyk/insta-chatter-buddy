@@ -35,6 +35,45 @@ serve(async (req) => {
 
     console.log('Generating audio with Sonauto API');
 
+    // Sanitize tags
+    const sanitizedTags = Array.isArray(tags)
+      ? Array.from(new Set(
+          tags
+            .map((t: any) => String(t).toLowerCase().trim())
+            .map((t: string) => (t === "lofi" ? "chill" : t === "hiphop" ? "rap" : t))
+            .filter(Boolean)
+        ))
+      : undefined;
+
+    // API limitation: cannot provide all three (tags, lyrics, prompt)
+    // Priority: lyrics > tags > prompt
+    const payload: any = {
+      title,
+      instrumental,
+      num_songs,
+      output_format,
+      bpm,
+    };
+
+    if (lyrics) {
+      payload.lyrics = lyrics;
+      // If lyrics exist, prefer tags over prompt
+      if (sanitizedTags && sanitizedTags.length > 0) {
+        payload.tags = sanitizedTags;
+      } else if (prompt) {
+        payload.prompt = prompt;
+      }
+    } else if (prompt) {
+      payload.prompt = prompt;
+      if (sanitizedTags && sanitizedTags.length > 0) {
+        payload.tags = sanitizedTags;
+      }
+    } else if (sanitizedTags && sanitizedTags.length > 0) {
+      payload.tags = sanitizedTags;
+    }
+
+    console.log('Payload:', JSON.stringify(payload));
+
     // Call Sonauto API to start generation
     const response = await fetch('https://api.sonauto.ai/v1/generations', {
       method: 'POST',
@@ -42,23 +81,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${SONAUTO_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        title,
-        prompt,
-        tags: Array.isArray(tags)
-          ? Array.from(new Set(
-              tags
-                .map((t: any) => String(t).toLowerCase().trim())
-                .map((t: string) => (t === "lofi" ? "chill" : t === "hiphop" ? "rap" : t))
-                .filter(Boolean)
-            ))
-          : undefined,
-        lyrics,
-        instrumental,
-        num_songs,
-        output_format,
-        bpm,
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
