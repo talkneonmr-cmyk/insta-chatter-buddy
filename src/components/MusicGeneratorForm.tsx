@@ -136,50 +136,57 @@ export const MusicGeneratorForm = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="slide-in">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Music className="h-5 w-5 float-animation" />
-            AI Music Generator
+    <div className="space-y-6 animate-fade-in">
+      <Card className="border-primary/20 shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-card/95">
+        <CardHeader className="space-y-1 pb-6">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Music className="h-6 w-6 text-primary" />
+            </div>
+            Create Your Music
           </CardTitle>
-          <CardDescription>
-            Generate custom music using AI. Provide a prompt, tags, or lyrics to create your song.
+          <CardDescription className="text-base">
+            Fill in the details below to generate your custom AI music
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title (optional)</Label>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <Label htmlFor="title" className="text-base font-medium">Song Title (optional)</Label>
             <Input
               id="title"
               placeholder="My Amazing Song"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              className="h-11 border-primary/20 focus:border-primary transition-colors"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="prompt">Prompt</Label>
+          <div className="space-y-3">
+            <Label htmlFor="prompt" className="text-base font-medium">Music Style & Description</Label>
             <Textarea
               id="prompt"
               placeholder="Describe the style of music you want... (e.g., 'An upbeat rock song with heavy guitar riffs')"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              rows={3}
+              rows={4}
+              className="resize-none border-primary/20 focus:border-primary transition-colors"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Music Tags</Label>
             
             {/* Selected Tags */}
             {selectedTags.length > 0 && (
-              <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/50">
+              <div className="flex flex-wrap gap-2 p-4 border-2 border-primary/20 rounded-xl bg-primary/5 backdrop-blur-sm">
                 {selectedTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1">
+                  <Badge 
+                    key={tag} 
+                    className="gap-2 px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-105"
+                  >
                     {tag}
                     <X 
-                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      className="h-3.5 w-3.5 cursor-pointer hover:opacity-70 transition-opacity" 
                       onClick={() => removeTag(tag)}
                     />
                   </Badge>
@@ -188,12 +195,12 @@ export const MusicGeneratorForm = () => {
             )}
 
             {/* Preset Tags */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 p-4 border-2 border-dashed border-primary/20 rounded-xl bg-muted/30">
               {PRESET_TAGS.map((tag) => (
                 <Badge
                   key={tag}
                   variant={selectedTags.includes(tag) ? "default" : "outline"}
-                  className="cursor-pointer hover:bg-primary/80 transition-colors"
+                  className="cursor-pointer hover:scale-110 transition-all duration-200 px-3 py-1.5 hover:shadow-lg"
                   onClick={() => addTag(tag)}
                 >
                   {tag}
@@ -203,32 +210,36 @@ export const MusicGeneratorForm = () => {
           </div>
 
           {!instrumental && (
-            <div className="space-y-2">
-              <Label htmlFor="lyrics">Lyrics (optional)</Label>
+            <div className="space-y-3">
+              <Label htmlFor="lyrics" className="text-base font-medium">Custom Lyrics (optional)</Label>
               <Textarea
                 id="lyrics"
                 placeholder="Enter custom lyrics or leave empty for AI-generated lyrics"
                 value={lyrics}
                 onChange={(e) => setLyrics(e.target.value)}
-                rows={4}
+                rows={5}
+                className="resize-none border-primary/20 focus:border-primary transition-colors font-mono"
               />
             </div>
           )}
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3 p-4 bg-muted/50 rounded-xl border border-primary/10">
             <Switch
               id="instrumental"
               checked={instrumental}
               onCheckedChange={setInstrumental}
+              className="data-[state=checked]:bg-primary"
             />
-            <Label htmlFor="instrumental">Instrumental (no vocals)</Label>
+            <Label htmlFor="instrumental" className="cursor-pointer text-base font-medium">
+              Instrumental Mode (no vocals)
+            </Label>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="numSongs">Number of Songs</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="numSongs" className="text-base font-medium">Number of Songs</Label>
               <Select value={numSongs} onValueChange={setNumSongs}>
-                <SelectTrigger id="numSongs">
+                <SelectTrigger id="numSongs" className="h-11 border-primary/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -238,10 +249,10 @@ export const MusicGeneratorForm = () => {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="format">Output Format</Label>
+            <div className="space-y-3">
+              <Label htmlFor="format" className="text-base font-medium">Output Format</Label>
               <Select value={outputFormat} onValueChange={setOutputFormat}>
-                <SelectTrigger id="format">
+                <SelectTrigger id="format" className="h-11 border-primary/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -258,18 +269,17 @@ export const MusicGeneratorForm = () => {
           <Button
             onClick={handleGenerate}
             disabled={isGenerating}
-            variant="gradient"
-            className="w-full"
+            className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl"
             size="lg"
           >
             {isGenerating ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-3 h-5 w-5 animate-spin" />
                 Generating... ({status})
               </>
             ) : (
               <>
-                <Music className="mr-2 h-4 w-4" />
+                <Music className="mr-3 h-5 w-5" />
                 Generate Music
               </>
             )}
@@ -278,28 +288,44 @@ export const MusicGeneratorForm = () => {
       </Card>
 
       {audioUrls.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Music</CardTitle>
-            <CardDescription>Your AI-generated songs are ready!</CardDescription>
+        <Card className="border-primary/20 shadow-xl backdrop-blur-sm bg-card/95 animate-scale-in">
+          <CardHeader className="space-y-1 pb-6">
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Music className="h-6 w-6 text-primary" />
+              </div>
+              Your Generated Music
+            </CardTitle>
+            <CardDescription className="text-base">
+              🎉 Your AI-generated songs are ready! Download or play them below.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {audioUrls.map((url, index) => (
-              <div key={index} className="space-y-2">
-                <Label>Song {index + 1}</Label>
-                <div className="flex items-center gap-2">
-                  <audio controls className="flex-1">
-                    <source src={url} type={`audio/${outputFormat}`} />
-                    Your browser does not support the audio element.
-                  </audio>
+              <div 
+                key={index} 
+                className="space-y-3 p-5 bg-muted/50 rounded-xl border-2 border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <Label className="text-lg font-semibold flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                      {index + 1}
+                    </div>
+                    Song {index + 1}
+                  </Label>
                   <Button
                     variant="outline"
                     size="icon"
+                    className="hover:bg-primary hover:text-primary-foreground transition-all duration-200 hover:scale-110"
                     onClick={() => window.open(url, "_blank")}
                   >
                     <Download className="h-4 w-4" />
                   </Button>
                 </div>
+                <audio controls className="w-full h-12">
+                  <source src={url} type={`audio/${outputFormat}`} />
+                  Your browser does not support the audio element.
+                </audio>
               </div>
             ))}
           </CardContent>
