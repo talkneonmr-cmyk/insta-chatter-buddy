@@ -9,18 +9,21 @@ interface UsageLimits {
   videoUploads: number;
   aiCaptions: number;
   youtubeChannels: number;
+  aiMusic: number;
 }
 
 const PLAN_LIMITS = {
   free: {
-    videoUploads: 5,
-    aiCaptions: 10,
+    videoUploads: 2,
+    aiCaptions: 2,
     youtubeChannels: 1,
+    aiMusic: 2,
   },
   pro: {
     videoUploads: -1, // unlimited
     aiCaptions: -1, // unlimited
-    youtubeChannels: 3,
+    youtubeChannels: -1,
+    aiMusic: 30,
   },
 };
 
@@ -102,7 +105,15 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You can add ${limit - currentUsage} more channel(s)`
-          : `You've reached your limit of ${limit} channel(s). Upgrade to Pro for up to 3 channels.`;
+          : `You've reached your limit of ${limit} channel(s). Upgrade to Pro for unlimited channels.`;
+        break;
+      case 'ai_music':
+        currentUsage = usage?.ai_music_count || 0;
+        limit = limits.aiMusic;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI music generations remaining`
+          : `You've reached your limit of ${limit} AI music generations. Upgrade to Pro for ${plan === 'free' ? '30 generations' : 'unlimited'}.`;
         break;
     }
 

@@ -11,20 +11,21 @@ interface UsageData {
   video_uploads_count: number;
   ai_captions_count: number;
   youtube_channels_count: number;
+  ai_music_count: number;
 }
 
 const PLAN_LIMITS = {
   free: {
-    video_uploads: 5,
-    ai_captions: 10,
+    video_uploads: 2,
+    ai_captions: 2,
     youtube_channels: 1,
-    music_generations: 0,
+    ai_music: 2,
   },
   pro: {
     video_uploads: -1, // unlimited
     ai_captions: -1,
-    youtube_channels: 3,
-    music_generations: -1,
+    youtube_channels: -1,
+    ai_music: 30,
   },
 };
 
@@ -65,7 +66,7 @@ export default function UsageStats() {
 
       const { data, error } = await supabase
         .from("usage_tracking")
-        .select("video_uploads_count, ai_captions_count, youtube_channels_count")
+        .select("video_uploads_count, ai_captions_count, youtube_channels_count, ai_music_count")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -88,6 +89,7 @@ export default function UsageStats() {
           video_uploads_count: 0,
           ai_captions_count: 0,
           youtube_channels_count: 0,
+          ai_music_count: 0,
         });
         return;
       }
@@ -205,15 +207,13 @@ export default function UsageStats() {
           limit={limits.youtube_channels}
           color="text-red-600"
         />
-        {plan === "pro" && (
-          <UsageItem
-            icon={Music}
-            label="Music Generations"
-            used={0}
-            limit={limits.music_generations}
-            color="text-purple-500"
-          />
-        )}
+        <UsageItem
+          icon={Music}
+          label="AI Music"
+          used={usage?.ai_music_count || 0}
+          limit={limits.ai_music}
+          color="text-purple-500"
+        />
 
         {plan === "free" && (
           <div className="pt-4 border-t">

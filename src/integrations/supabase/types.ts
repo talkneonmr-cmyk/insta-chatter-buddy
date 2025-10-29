@@ -519,6 +519,7 @@ export type Database = {
       usage_tracking: {
         Row: {
           ai_captions_count: number
+          ai_music_count: number
           created_at: string
           id: string
           reset_at: string
@@ -529,6 +530,7 @@ export type Database = {
         }
         Insert: {
           ai_captions_count?: number
+          ai_music_count?: number
           created_at?: string
           id?: string
           reset_at?: string
@@ -539,6 +541,7 @@ export type Database = {
         }
         Update: {
           ai_captions_count?: number
+          ai_music_count?: number
           created_at?: string
           id?: string
           reset_at?: string

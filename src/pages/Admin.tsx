@@ -20,6 +20,7 @@ interface UserData {
   video_uploads: number;
   ai_captions: number;
   youtube_channels: number;
+  ai_music: number;
 }
 
 export default function Admin() {
@@ -75,7 +76,7 @@ export default function Admin() {
       // Get usage tracking
       const { data: usage, error: usageError } = await supabase
         .from("usage_tracking")
-        .select("user_id, video_uploads_count, ai_captions_count, youtube_channels_count");
+        .select("user_id, video_uploads_count, ai_captions_count, youtube_channels_count, ai_music_count");
 
       if (usageError) throw usageError;
 
@@ -95,6 +96,7 @@ export default function Admin() {
           video_uploads: userUsage?.video_uploads_count || 0,
           ai_captions: userUsage?.ai_captions_count || 0,
           youtube_channels: userUsage?.youtube_channels_count || 0,
+          ai_music: userUsage?.ai_music_count || 0,
         };
       }) || [];
 
@@ -203,6 +205,7 @@ export default function Admin() {
           video_uploads_count: 0,
           ai_captions_count: 0,
           youtube_channels_count: 0,
+          ai_music_count: 0,
           reset_at: new Date().toISOString(),
         })
         .eq("user_id", userId);
@@ -346,6 +349,7 @@ export default function Admin() {
                             <div>Videos: {user.video_uploads}</div>
                             <div>Captions: {user.ai_captions}</div>
                             <div>Channels: {user.youtube_channels}</div>
+                            <div>Music: {user.ai_music}</div>
                           </div>
                         </TableCell>
                         <TableCell>

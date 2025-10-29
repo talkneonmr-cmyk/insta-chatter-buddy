@@ -84,11 +84,15 @@ export default function MusicGeneratorForm() {
       return;
     }
 
-    // Free plan users get limited music generation
-    if (plan === 'free') {
+    // Check usage limit
+    const { data: limitCheck, error: limitError } = await supabase.functions.invoke('check-usage-limit', {
+      body: { limitType: 'ai_music' }
+    });
+
+    if (limitError || !limitCheck?.canUse) {
       toast({ 
-        title: "Pro Feature", 
-        description: "Music generation is available for Pro subscribers. Upgrade to create unlimited AI music!", 
+        title: "Limit Reached", 
+        description: limitCheck?.message || "You've reached your AI music generation limit. Upgrade to Pro for more!", 
         variant: "destructive" 
       });
       setTimeout(() => navigate('/pricing'), 2000);
@@ -177,6 +181,11 @@ export default function MusicGeneratorForm() {
             audio_urls: urls,
             task_id: id,
             generation_time_ms: Date.now() - generationStartTime,
+          });
+
+          // Increment usage counter
+          await supabase.functions.invoke('increment-usage', {
+            body: { usageType: 'ai_music' }
           });
         }
 
