@@ -12,6 +12,7 @@ export default function PaymentSuccess() {
   const { plan, status, isLoading } = useSubscription();
   const [checking, setChecking] = useState(true);
   const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [verifiedSuccess, setVerifiedSuccess] = useState(false);
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -44,6 +45,7 @@ export default function PaymentSuccess() {
           setVerificationError(error.message);
         } else if (data?.success) {
           console.log('Payment verified successfully!');
+          setVerifiedSuccess(true);
           // Clear the stored payment link ID
           localStorage.removeItem('razorpay_payment_link_id');
         } else {
@@ -79,7 +81,7 @@ export default function PaymentSuccess() {
     );
   }
 
-  const isSuccess = plan === "pro" && status === "active";
+  const isSuccess = verifiedSuccess || (plan === "pro" && status === "active");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex items-center justify-center p-4">
@@ -113,11 +115,11 @@ export default function PaymentSuccess() {
           <div className="bg-muted/50 p-4 rounded-lg space-y-2">
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Plan:</span>
-              <span className="text-sm font-medium capitalize">{plan}</span>
+              <span className="text-sm font-medium capitalize">{isSuccess ? 'pro' : plan}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Status:</span>
-              <span className="text-sm font-medium capitalize">{status}</span>
+              <span className="text-sm font-medium capitalize">{isSuccess ? 'active' : status}</span>
             </div>
           </div>
 

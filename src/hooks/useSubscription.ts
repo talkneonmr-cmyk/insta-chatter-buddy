@@ -29,13 +29,26 @@ export function useSubscription() {
           .from("user_subscriptions")
           .select("plan, status")
           .eq("user_id", user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error("Error fetching subscription:", error);
           setSubscription({ plan: "free", status: "active", isLoading: false });
           return;
         }
+
+        if (!data) {
+          // Create a default free subscription row for the user
+          const { error: insertError } = await supabase
+            .from("user_subscriptions")
+            .insert({ user_id: user.id, plan: "free", status: "active" });
+          if (insertError) {
+            console.warn("Could not create default subscription row:", insertError);
+          }
+          setSubscription({ plan: "free", status: "active", isLoading: false });
+          return;
+        }
+
 
         setSubscription({
           plan: data.plan as SubscriptionPlan,

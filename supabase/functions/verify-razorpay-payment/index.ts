@@ -63,26 +63,47 @@ Deno.serve(async (req) => {
 
     // Check if payment was successful
     if (paymentLink.status === 'paid') {
-      // Update user subscription
-      const currentDate = new Date();
-      const nextMonthDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+      // Compute period
+      const now = new Date();
+      const nextMonth = new Date(now);
+      nextMonth.setMonth(now.getMonth() + 1);
 
-      const { error: updateError } = await supabase
+      // See if a subscription row exists
+      const { data: existing, error: selErr } = await supabase
         .from('user_subscriptions')
-        .update({
-          plan: 'pro',
-          status: 'active',
-          current_period_start: new Date().toISOString(),
-          current_period_end: nextMonthDate.toISOString(),
-        })
-        .eq('user_id', user.id);
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (updateError) {
-        console.error('Error updating subscription:', updateError);
-        throw updateError;
+      if (selErr) {
+        console.error('Error checking existing subscription:', selErr);
       }
 
-      console.log('Subscription updated successfully for user:', user.id);
+      if (existing) {
+        const { error: updateError } = await supabase
+          .from('user_subscriptions')
+          .update({
+            plan: 'pro',
+            status: 'active',
+            current_period_start: now.toISOString(),
+            current_period_end: nextMonth.toISOString(),
+          })
+          .eq('user_id', user.id);
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from('user_subscriptions')
+          .insert({
+            user_id: user.id,
+            plan: 'pro',
+            status: 'active',
+            current_period_start: now.toISOString(),
+            current_period_end: nextMonth.toISOString(),
+          });
+        if (insertError) throw insertError;
+      }
+
+      console.log('Subscription set to Pro for user:', user.id);
 
       return new Response(
         JSON.stringify({ 
