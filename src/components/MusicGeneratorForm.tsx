@@ -70,7 +70,7 @@ export default function MusicGeneratorForm() {
         body: {
           title: formData.title,
           prompt: formData.prompt || undefined,
-          tags: formData.tags.length > 0 ? formData.tags.join(", ") : undefined,
+          tags: formData.tags.length > 0 ? formData.tags : undefined,
           lyrics: formData.lyrics || undefined,
           instrumental: formData.instrumental,
           num_songs: formData.numSongs,
