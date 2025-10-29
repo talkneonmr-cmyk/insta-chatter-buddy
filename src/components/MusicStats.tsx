@@ -27,6 +27,26 @@ export default function MusicStats() {
 
   useEffect(() => {
     fetchStats();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('music-stats-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'music_generations'
+        },
+        () => {
+          fetchStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchStats = async () => {

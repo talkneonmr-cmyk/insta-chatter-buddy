@@ -34,6 +34,26 @@ export default function MusicHistory() {
 
   useEffect(() => {
     fetchGenerations();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('music-generations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'music_generations'
+        },
+        () => {
+          fetchGenerations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
