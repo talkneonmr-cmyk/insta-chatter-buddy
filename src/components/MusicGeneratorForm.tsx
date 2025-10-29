@@ -21,17 +21,31 @@ const PRESET_TAGS = [
 
 const DRAFT_KEY = "music-generator-draft";
 
+const sanitizeTags = (tags: any): string[] => {
+  if (!Array.isArray(tags)) return [];
+  const mapped = tags.map((t: any) => {
+    const v = String(t).toLowerCase().trim();
+    if (v === "lofi") return "chill";
+    if (v === "hiphop") return "rap";
+    return v;
+  });
+  return Array.from(new Set(mapped.filter(Boolean)));
+};
+
 export default function MusicGeneratorForm() {
   const [formData, setFormData] = useState(() => {
+    const base = { title: "", prompt: "", lyrics: "", tags: [], instrumental: false, numSongs: 1, outputFormat: "mp3", bpm: 120 };
     const saved = localStorage.getItem(DRAFT_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.tags) parsed.tags = sanitizeTags(parsed.tags);
+        return { ...base, ...parsed };
       } catch {
-        return { title: "", prompt: "", lyrics: "", tags: [], instrumental: false, numSongs: 1, outputFormat: "mp3", bpm: 120 };
+        return base;
       }
     }
-    return { title: "", prompt: "", lyrics: "", tags: [], instrumental: false, numSongs: 1, outputFormat: "mp3", bpm: 120 };
+    return base;
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -72,11 +86,17 @@ export default function MusicGeneratorForm() {
         bpm: formData.bpm,
       });
 
+      const cleanedTags = sanitizeTags(formData.tags);
+      if (JSON.stringify(cleanedTags) !== JSON.stringify(formData.tags)) {
+        toast({ title: "Adjusted tags", description: "Some tags were replaced to meet generator requirements (e.g., lofi → chill, hiphop → rap)." });
+        setFormData((prev: any) => ({ ...prev, tags: cleanedTags }));
+      }
+
       const { data, error } = await supabase.functions.invoke("generate-audio", {
         body: {
           title: formData.title,
           prompt: formData.prompt || undefined,
-          tags: formData.tags.length > 0 ? formData.tags : undefined,
+          tags: cleanedTags.length > 0 ? cleanedTags : undefined,
           lyrics: formData.lyrics || undefined,
           instrumental: formData.instrumental,
           num_songs: formData.numSongs,

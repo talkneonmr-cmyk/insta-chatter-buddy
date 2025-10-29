@@ -45,7 +45,14 @@ serve(async (req) => {
       body: JSON.stringify({
         title,
         prompt,
-        tags,
+        tags: Array.isArray(tags)
+          ? Array.from(new Set(
+              tags
+                .map((t: any) => String(t).toLowerCase().trim())
+                .map((t: string) => (t === "lofi" ? "chill" : t === "hiphop" ? "rap" : t))
+                .filter(Boolean)
+            ))
+          : undefined,
         lyrics,
         instrumental,
         num_songs,
