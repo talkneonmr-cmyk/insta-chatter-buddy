@@ -4,14 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, LogOut, Settings, Youtube } from "lucide-react";
+import { Sparkles, LogOut, Settings, Youtube, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { plan, isLoading: subscriptionLoading } = useSubscription();
 
   useEffect(() => {
     // Check initial session
@@ -46,7 +48,7 @@ const Dashboard = () => {
     navigate("/auth");
   };
 
-  if (loading) {
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -79,9 +81,16 @@ const Dashboard = () => {
               <span className="text-sm text-muted-foreground hidden sm:inline">
                 {user?.email}
               </span>
-              <Button variant="outline" size="sm" onClick={() => navigate("/pricing")} className="btn-3d">
-                Upgrade
-              </Button>
+              {plan === "pro" ? (
+                <Button variant="outline" size="sm" className="btn-3d gap-2" disabled>
+                  <Crown className="w-4 h-4 text-yellow-500" />
+                  Pro Plan
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => navigate("/pricing")} className="btn-3d">
+                  Upgrade to Pro
+                </Button>
+              )}
               <Button variant="ghost" size="icon" onClick={() => navigate("/settings")} className="btn-3d">
                 <Settings className="w-5 h-5" />
               </Button>
