@@ -34,7 +34,7 @@ const sanitizeTags = (tags: any): string[] => {
 
 export default function MusicGeneratorForm() {
   const [formData, setFormData] = useState(() => {
-    const base = { title: "", prompt: "", lyrics: "", tags: [], instrumental: false, numSongs: 1, outputFormat: "mp3", bpm: 120 };
+    const base = { title: "", prompt: "", lyrics: "", tags: [], instrumental: false, numSongs: 1, outputFormat: "mp3", bpm: 120, vocalistGender: "female" };
     const saved = localStorage.getItem(DRAFT_KEY);
     if (saved) {
       try {
@@ -107,6 +107,7 @@ export default function MusicGeneratorForm() {
           num_songs: formData.numSongs,
           output_format: formData.outputFormat,
           bpm: formData.bpm,
+          vocalist_gender: formData.vocalistGender,
         },
       });
 
@@ -232,6 +233,18 @@ export default function MusicGeneratorForm() {
                 <button key={t} type="button" onClick={() => updateFormData({ tags: [...formData.tags, t] })} className="px-3 py-1 bg-background border rounded-full text-sm">{t}</button>
               ))}
             </div>
+          </div>
+          <div>
+            <Label>Vocalist Gender</Label>
+            <Select value={formData.vocalistGender} onValueChange={(v) => updateFormData({ vocalistGender: v })} disabled={formData.instrumental}>
+              <SelectTrigger className="h-12">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="female">Female Vocalist</SelectItem>
+                <SelectItem value="male">Male Vocalist</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex items-center gap-3">
             <Switch 

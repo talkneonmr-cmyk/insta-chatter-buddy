@@ -20,7 +20,8 @@ serve(async (req) => {
       instrumental = false,
       num_songs = 1,
       output_format = 'mp3',
-      bpm = null
+      bpm = null,
+      vocalist_gender = 'female'
     } = await req.json();
 
     // At least one of prompt, tags, or lyrics must be provided
@@ -53,6 +54,7 @@ serve(async (req) => {
       num_songs,
       output_format,
       bpm,
+      vocalist_gender,
     };
 
     if (lyrics) {
