@@ -14,7 +14,7 @@ import MusicPresets from "./MusicPresets";
 import EnhancedAudioPlayer from "./EnhancedAudioPlayer";
 
 const PRESET_TAGS = [
-  "pop", "rock", "jazz", "classical", "electronic", "hip-hop", "rap", "country", 
+  "pop", "rock", "jazz", "classical", "electronic", "hiphop", "rap", "country", 
   "blues", "reggae", "metal", "punk", "folk", "indie", "soul", "funk", "disco", "edm",
   "lofi", "chill", "upbeat", "energetic", "relaxing", "ambient", "cinematic"
 ];
