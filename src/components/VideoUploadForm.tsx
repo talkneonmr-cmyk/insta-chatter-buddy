@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -31,6 +33,8 @@ const VideoUploadForm = () => {
   const [uploading, setUploading] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
   const { toast } = useToast();
+  const { plan } = useSubscription();
+  const navigate = useNavigate();
 
   const form = useForm<VideoFormData>({
     resolver: zodResolver(videoSchema),
@@ -116,6 +120,27 @@ const VideoUploadForm = () => {
         return;
       }
 
+      // Check usage limit
+      const { data: limitCheck, error: limitError } = await supabase.functions.invoke('check-usage-limit', {
+        body: { limitType: 'video_uploads' }
+      });
+
+      if (limitError) throw limitError;
+      
+      if (!limitCheck.canUse) {
+        toast({
+          title: "Limit Reached",
+          description: limitCheck.message,
+          variant: "destructive",
+        });
+        
+        if (plan === 'free') {
+          setTimeout(() => navigate('/pricing'), 2000);
+        }
+        setUploading(false);
+        return;
+      }
+
       // Upload video file to storage
       const videoFileName = `${user.id}/${Date.now()}_${videoFile.name}`;
       const { error: uploadError } = await supabase.storage
@@ -168,6 +193,11 @@ const VideoUploadForm = () => {
         });
 
       if (insertError) throw insertError;
+
+      // Increment usage
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'video_uploads' }
+      });
 
       toast({
         title: "Success",

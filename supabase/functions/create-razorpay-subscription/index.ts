@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
 
     const email = profile?.email || user.email || 'user@example.com';
 
-    // Create payment link for Pro plan (₹1900)
+    // Create payment link for Pro plan (₹699)
     const paymentLinkResponse = await fetch('https://api.razorpay.com/v1/payment_links', {
       method: 'POST',
       headers: {
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        amount: 190000, // ₹1900 in paise
+        amount: 69900, // ₹699 in paise
         currency: 'INR',
         description: 'YouTube Manager Pro Plan - Monthly Subscription',
         customer: {

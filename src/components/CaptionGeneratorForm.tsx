@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -48,9 +50,33 @@ const CaptionGeneratorForm = ({ onCaptionGenerated }: CaptionGeneratorFormProps)
     },
   });
 
+  const { plan } = useSubscription();
+  const navigate = useNavigate();
+
   const onSubmit = async (values: FormValues) => {
     setIsGenerating(true);
     try {
+      // Check usage limit
+      const { data: limitCheck, error: limitError } = await supabase.functions.invoke('check-usage-limit', {
+        body: { limitType: 'ai_captions' }
+      });
+
+      if (limitError) throw limitError;
+      
+      if (!limitCheck.canUse) {
+        toast({
+          title: "Limit Reached",
+          description: limitCheck.message,
+          variant: "destructive",
+        });
+        
+        if (plan === 'free') {
+          setTimeout(() => navigate('/pricing'), 2000);
+        }
+        setIsGenerating(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('generate-caption', {
         body: {
           reelIdea: values.reelIdea,
@@ -86,6 +112,11 @@ const CaptionGeneratorForm = ({ onCaptionGenerated }: CaptionGeneratorFormProps)
         });
 
         if (dbError) console.error('Error saving caption:', dbError);
+
+        // Increment usage
+        await supabase.functions.invoke('increment-usage', {
+          body: { usageType: 'ai_captions' }
+        });
 
         toast({
           title: "Caption Generated! ✨",

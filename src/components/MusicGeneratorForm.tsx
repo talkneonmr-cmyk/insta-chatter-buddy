@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +35,8 @@ const sanitizeTags = (tags: any): string[] => {
 };
 
 export default function MusicGeneratorForm() {
+  const { plan } = useSubscription();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState(() => {
     const base = { title: "", prompt: "", lyrics: "", tags: [], instrumental: false, numSongs: 1, outputFormat: "mp3", bpm: 120, vocalistGender: "female" };
     const saved = localStorage.getItem(DRAFT_KEY);
@@ -77,6 +81,17 @@ export default function MusicGeneratorForm() {
 
     if (formData.lyrics && formData.instrumental) {
       toast({ title: "Invalid combination", description: "Cannot generate instrumental music with lyrics. Please remove lyrics or turn off instrumental mode.", variant: "destructive" });
+      return;
+    }
+
+    // Free plan users get limited music generation
+    if (plan === 'free') {
+      toast({ 
+        title: "Pro Feature", 
+        description: "Music generation is available for Pro subscribers. Upgrade to create unlimited AI music!", 
+        variant: "destructive" 
+      });
+      setTimeout(() => navigate('/pricing'), 2000);
       return;
     }
 

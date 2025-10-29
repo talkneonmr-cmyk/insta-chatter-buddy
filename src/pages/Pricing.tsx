@@ -51,6 +51,7 @@ export default function Pricing() {
   const proPlanFeatures = [
     "Unlimited video uploads",
     "Unlimited AI captions",
+    "Unlimited AI music generation",
     "Up to 3 YouTube channels",
     "Advanced analytics",
     "Priority support",
@@ -117,7 +118,7 @@ export default function Pricing() {
               </CardTitle>
               <CardDescription>For serious content creators</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold">₹1,900</span>
+                <span className="text-4xl font-bold">₹699</span>
                 <span className="text-muted-foreground">/month</span>
               </div>
             </CardHeader>
