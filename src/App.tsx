@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Layout } from "./components/Layout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
@@ -23,17 +24,21 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          {/* Auth route without layout */}
           <Route path="/auth" element={<Auth />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/caption-generator" element={<CaptionGenerator />} />
-          <Route path="/youtube-manager" element={<YouTubeManager />} />
-          <Route path="/music-generator" element={<MusicGenerator />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/admin" element={<Admin />} />
+          
+          {/* All other routes with sidebar layout */}
+          <Route path="/" element={<Layout><Index /></Layout>} />
+          <Route path="/settings" element={<Layout><Settings /></Layout>} />
+          <Route path="/caption-generator" element={<Layout><CaptionGenerator /></Layout>} />
+          <Route path="/youtube-manager" element={<Layout><YouTubeManager /></Layout>} />
+          <Route path="/music-generator" element={<Layout><MusicGenerator /></Layout>} />
+          <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+          <Route path="/payment-success" element={<Layout><PaymentSuccess /></Layout>} />
+          <Route path="/admin" element={<Layout><Admin /></Layout>} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
