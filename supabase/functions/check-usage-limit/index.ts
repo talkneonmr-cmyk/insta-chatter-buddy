@@ -17,13 +17,13 @@ const PLAN_LIMITS = {
     videoUploads: 2,
     aiCaptions: 2,
     youtubeChannels: 1,
-    aiMusic: 2,
+    aiMusic: 5,
   },
   pro: {
     videoUploads: -1, // unlimited
     aiCaptions: -1, // unlimited
     youtubeChannels: -1,
-    aiMusic: 30,
+    aiMusic: 200,
   },
 };
 

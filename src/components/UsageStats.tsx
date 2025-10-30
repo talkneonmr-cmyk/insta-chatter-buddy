@@ -19,13 +19,13 @@ const PLAN_LIMITS = {
     video_uploads: 2,
     ai_captions: 2,
     youtube_channels: 1,
-    ai_music: 2,
+    ai_music: 5,
   },
   pro: {
     video_uploads: -1, // unlimited
     ai_captions: -1,
     youtube_channels: -1,
-    ai_music: 30,
+    ai_music: 200,
   },
 };
 
