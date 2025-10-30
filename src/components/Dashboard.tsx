@@ -134,10 +134,6 @@ const Dashboard = () => {
                     <Youtube className="w-4 h-4 mr-2" />
                     Open YouTube Manager
                   </Button>
-                  <Button variant="outline" onClick={() => navigate("/channel-creator")} className="btn-3d">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    AI Channel Creator
-                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -182,10 +178,6 @@ const Dashboard = () => {
                 <Button variant="outline" className="w-full justify-start bg-gradient-to-r from-primary/5 to-secondary/5 btn-3d" onClick={() => navigate("/caption-generator")}>
                   <Sparkles className="w-4 h-4 mr-2" />
                   AI Caption Generator
-                </Button>
-                <Button variant="outline" className="w-full justify-start btn-3d" onClick={() => navigate("/channel-creator")}>
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  AI Channel Creator
                 </Button>
                 <Button variant="outline" className="w-full justify-start btn-3d" onClick={() => navigate("/music-generator")}>
                   <Sparkles className="w-4 h-4 mr-2" />

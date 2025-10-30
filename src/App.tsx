@@ -8,7 +8,6 @@ import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
 import CaptionGenerator from "./pages/CaptionGenerator";
 import YouTubeManager from "./pages/YouTubeManager";
-import ChannelCreator from "./pages/ChannelCreator";
 import Pricing from "./pages/Pricing";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import MusicGenerator from "./pages/MusicGenerator";
@@ -29,7 +28,6 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           <Route path="/caption-generator" element={<CaptionGenerator />} />
           <Route path="/youtube-manager" element={<YouTubeManager />} />
-          <Route path="/channel-creator" element={<ChannelCreator />} />
           <Route path="/music-generator" element={<MusicGenerator />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
