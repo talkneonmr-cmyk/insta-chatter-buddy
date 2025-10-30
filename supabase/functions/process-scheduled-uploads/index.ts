@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
         // Update status to 'uploading' to prevent duplicate processing
         const { error: updateError } = await supabase
           .from('scheduled_videos')
-          .update({ status: 'uploading' })
+          .update({ status: 'processing' })
           .eq('id', video.id);
 
         if (updateError) {
