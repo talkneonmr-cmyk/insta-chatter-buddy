@@ -91,7 +91,18 @@ const YouTubeAccountConnect = () => {
       // Get OAuth URL
       const { data: authData, error: authError } = await supabase.functions.invoke('youtube-oauth/auth-url');
       
-      if (authError) throw authError;
+      if (authError) {
+        // Check if it's a limit error
+        if (authError.message && authError.message.includes('limit')) {
+          toast({
+            title: "Limit Reached",
+            description: authError.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        throw authError;
+      }
 
       // Try top-level redirect; fallback to new tab; final fallback copies link
       try {

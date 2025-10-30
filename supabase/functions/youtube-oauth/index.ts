@@ -47,8 +47,56 @@ serve(async (req) => {
 
     // Generate OAuth URL
     if (url.pathname.endsWith('/auth-url')) {
+      // Check if user already has a channel connected (prevent creating multiple)
+      const { data: existingChannel } = await supabase
+        .from('youtube_accounts')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingChannel) {
+        // Allow reconnecting/updating existing channel without counting as new usage
+        const clientId = Deno.env.get('YOUTUBE_CLIENT_ID');
+        const referer = req.headers.get('referer') || req.headers.get('origin') || '';
+        const appUrl = new URL(referer);
+        const redirectUri = `${appUrl.origin}/youtube-manager`;
+        
+        const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+        authUrl.searchParams.set('client_id', clientId!);
+        authUrl.searchParams.set('redirect_uri', redirectUri);
+        authUrl.searchParams.set('response_type', 'code');
+        authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly');
+        authUrl.searchParams.set('access_type', 'offline');
+        authUrl.searchParams.set('prompt', 'consent');
+        authUrl.searchParams.set('state', user.id);
+
+        return new Response(
+          JSON.stringify({ authUrl: authUrl.toString() }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Check usage limit for new channel connections
+      const limitCheckRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/check-usage-limit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': req.headers.get('Authorization')!,
+          'apikey': Deno.env.get('SUPABASE_ANON_KEY')!,
+        },
+        body: JSON.stringify({ limitType: 'youtube_channels' }),
+      });
+
+      const limitCheck = await limitCheckRes.json();
+      
+      if (!limitCheck.canUse) {
+        return new Response(
+          JSON.stringify({ error: limitCheck.message || 'YouTube channel limit reached' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       const clientId = Deno.env.get('YOUTUBE_CLIENT_ID');
-      // Use the referer header to get the actual app URL
       const referer = req.headers.get('referer') || req.headers.get('origin') || '';
       const appUrl = new URL(referer);
       const redirectUri = `${appUrl.origin}/youtube-manager`;
@@ -117,6 +165,15 @@ serve(async (req) => {
 
       const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
 
+      // Check if this is a new channel connection
+      const { data: existingChannel } = await supabase
+        .from('youtube_accounts')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const isNewChannel = !existingChannel;
+
       // Store in database
       const { error: insertError } = await supabase
         .from('youtube_accounts')
@@ -130,6 +187,19 @@ serve(async (req) => {
         });
 
       if (insertError) throw insertError;
+
+      // Increment usage only for new channel connections
+      if (isNewChannel) {
+        await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/increment-usage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+            'apikey': Deno.env.get('SUPABASE_ANON_KEY')!,
+          },
+          body: JSON.stringify({ usageType: 'youtube_channels' }),
+        });
+      }
 
       return new Response(
         JSON.stringify({ success: true, channelTitle: channel.snippet.title }),
