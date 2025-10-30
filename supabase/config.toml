@@ -4,6 +4,9 @@ project_id = "swuryncvasdwlxtwagnb"
 enabled = true
 site_url = "http://localhost:54323"
 
+[functions.process-scheduled-uploads]
+verify_jwt = false
+
 [functions.process-comment]
 verify_jwt = false
 
