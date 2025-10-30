@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     const { data: scheduledVideos, error: queryError } = await supabase
       .from('scheduled_videos')
       .select('id, title, scheduled_for, user_id')
-      .eq('status', 'scheduled')
+      .in('status', ['pending', 'scheduled'])
       .lte('scheduled_for', new Date().toISOString())
       .order('scheduled_for', { ascending: true });
 
