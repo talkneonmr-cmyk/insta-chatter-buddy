@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,7 @@ import {
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAdmin } = useIsAdmin();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -184,6 +186,37 @@ const Settings = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Admin Panel - Only visible to admins */}
+          {isAdmin && (
+            <Card className="border-2 border-yellow-500/50 bg-gradient-to-br from-yellow-500/5 to-orange-500/5">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-yellow-500" />
+                  <CardTitle className="text-yellow-500">Admin Panel</CardTitle>
+                </div>
+                <CardDescription>Manage users, subscriptions, and system settings</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Administrator Access</p>
+                    <p className="text-sm text-muted-foreground">
+                      Access advanced settings and user management
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate("/admin")}
+                    className="border-yellow-500/50 hover:bg-yellow-500/10"
+                  >
+                    Open Admin Panel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Danger Zone */}
           <Card className="border-2 border-destructive/50">

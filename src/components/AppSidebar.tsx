@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Shield } from "lucide-react";
+import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +13,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -35,7 +34,6 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { plan } = useSubscription();
-  const { isAdmin } = useIsAdmin();
   const currentPath = location.pathname;
 
   const isActive = (path: string) => currentPath === path;
@@ -114,27 +112,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Admin Section */}
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-xs uppercase text-muted-foreground px-4">
-              <Shield className="h-3 w-3 inline mr-1" />
-              Admin
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="h-12">
-                    <NavLink to="/admin" className={getNavCls("/admin")}>
-                      <Shield className={`h-5 w-5 ${isActive("/admin") ? 'text-primary' : 'text-yellow-500'}`} />
-                      {open && <span className="ml-3">Admin Panel</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
       {/* Footer */}
