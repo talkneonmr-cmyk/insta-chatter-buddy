@@ -182,6 +182,40 @@ serve(async (req) => {
 
     console.log('Video uploaded successfully! YouTube ID:', youtubeVideoId);
 
+    // Upload thumbnail if available
+    if (video.thumbnail_path) {
+      try {
+        console.log('Uploading thumbnail from:', video.thumbnail_path);
+        const { data: thumbnailFile, error: thumbnailError } = await supabase
+          .storage
+          .from('videos')
+          .download(video.thumbnail_path.replace('videos/', ''));
+
+        if (!thumbnailError && thumbnailFile) {
+          const thumbnailResponse = await fetch(
+            `https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId=${youtubeVideoId}`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'image/jpeg',
+              },
+              body: thumbnailFile,
+            }
+          );
+
+          if (thumbnailResponse.ok) {
+            console.log('Thumbnail uploaded successfully');
+          } else {
+            console.error('Thumbnail upload failed:', await thumbnailResponse.text());
+          }
+        }
+      } catch (thumbnailErr) {
+        console.error('Error uploading thumbnail:', thumbnailErr);
+        // Don't fail the entire upload if thumbnail fails
+      }
+    }
+
     // Update scheduled video with YouTube video ID
     await supabase
       .from('scheduled_videos')
