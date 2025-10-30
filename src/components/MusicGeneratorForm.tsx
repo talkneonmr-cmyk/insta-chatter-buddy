@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
@@ -55,6 +55,7 @@ export default function MusicGeneratorForm() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrls, setAudioUrls] = useState<string[]>([]);
   const [generationStartTime, setGenerationStartTime] = useState(0);
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
@@ -74,6 +75,12 @@ export default function MusicGeneratorForm() {
   };
 
   const handleGenerate = async () => {
+    // Prevent double submissions
+    if (isSubmittingRef.current || isGenerating) {
+      console.log('Generation already in progress, ignoring duplicate call');
+      return;
+    }
+
     if (!formData.title.trim()) {
       toast({ title: "Error", description: "Please enter a song title", variant: "destructive" });
       return;
@@ -84,12 +91,15 @@ export default function MusicGeneratorForm() {
       return;
     }
 
+    isSubmittingRef.current = true;
+
     // Check usage limit
     const { data: limitCheck, error: limitError } = await supabase.functions.invoke('check-usage-limit', {
       body: { limitType: 'ai_music' }
     });
 
     if (limitError || !limitCheck?.canUse) {
+      isSubmittingRef.current = false;
       toast({ 
         title: "Limit Reached", 
         description: limitCheck?.message || "You've reached your AI music generation limit. Upgrade to Pro for more!", 
@@ -146,6 +156,7 @@ export default function MusicGeneratorForm() {
     } catch (error: any) {
       console.error('Error in handleGenerate:', error);
       setIsGenerating(false);
+      isSubmittingRef.current = false;
       toast({ title: "Error", description: error.message || "Failed to generate music", variant: "destructive" });
     }
   };
@@ -166,6 +177,7 @@ export default function MusicGeneratorForm() {
         const urls = data.song_paths;
         setAudioUrls(urls);
         setIsGenerating(false);
+        isSubmittingRef.current = false;
 
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -196,6 +208,7 @@ export default function MusicGeneratorForm() {
       if (data.status === "failed" || data.status === "FAILURE") {
         console.error('Generation failed:', data);
         setIsGenerating(false);
+        isSubmittingRef.current = false;
         toast({ title: "Failed", description: data.error || "Music generation failed", variant: "destructive" });
         return;
       }
@@ -206,6 +219,7 @@ export default function MusicGeneratorForm() {
     } catch (error: any) {
       console.error('Error in checkStatus:', error);
       setIsGenerating(false);
+      isSubmittingRef.current = false;
       toast({ 
         title: "Error", 
         description: error.message || "Failed to check generation status", 
