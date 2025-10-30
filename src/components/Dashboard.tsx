@@ -98,10 +98,10 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-      <div className="container mx-auto px-4 py-8 space-y-8 animate-fade-in">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in">
         
         {/* Hero Section with Greeting */}
-        <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 p-8 md:p-12 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
+        <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 p-4 sm:p-6 md:p-8 lg:p-12 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary)/0.1),transparent_50%),radial-gradient(circle_at_70%_50%,hsl(var(--secondary)/0.1),transparent_50%)]"></div>
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -115,10 +115,10 @@ const Dashboard = () => {
                     </span>
                   )}
                 </div>
-                <h1 className="text-3xl md:text-4xl font-bold gradient-text">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text">
                   {getGreeting()}, {user?.email?.split("@")[0]}!
                 </h1>
-                <p className="text-muted-foreground text-lg max-w-2xl">
+                <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-2xl">
                   Ready to create amazing content? Your AI-powered studio is ready to help you shine.
                 </p>
               </div>
@@ -138,13 +138,13 @@ const Dashboard = () => {
         </div>
 
         {/* Stats Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all">
-            <CardContent className="p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Total Uploads</p>
-                  <p className="text-3xl font-bold">{stats.totalUploads}</p>
+                <div className="space-y-1 sm:space-y-2">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Uploads</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{stats.totalUploads}</p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <TrendingUp className="w-3 h-3 text-green-500" />
                     <span>Videos uploaded</span>
@@ -157,12 +157,12 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all">
-            <CardContent className="p-6">
+          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">AI Captions</p>
-                  <p className="text-3xl font-bold">{stats.totalCaptions}</p>
+                <div className="space-y-1 sm:space-y-2">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">AI Captions</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{stats.totalCaptions}</p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Activity className="w-3 h-3 text-primary" />
                     <span>Generated</span>
@@ -175,12 +175,12 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all">
-            <CardContent className="p-6">
+          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">AI Music</p>
-                  <p className="text-3xl font-bold">{stats.totalMusic}</p>
+                <div className="space-y-1 sm:space-y-2">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">AI Music</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{stats.totalMusic}</p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Zap className="w-3 h-3 text-purple-500" />
                     <span>Tracks created</span>
@@ -193,12 +193,12 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all">
-            <CardContent className="p-6">
+          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Channels</p>
-                  <p className="text-3xl font-bold">{stats.channelsConnected}</p>
+                <div className="space-y-1 sm:space-y-2">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Channels</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{stats.channelsConnected}</p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Youtube className="w-3 h-3 text-red-500" />
                     <span>Connected</span>
@@ -213,20 +213,20 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           
           {/* Quick Actions */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <div>
-              <h2 className="text-2xl font-bold mb-1">Quick Actions</h2>
-              <p className="text-muted-foreground text-sm mb-4">Jump into your creative workflow</p>
+              <h2 className="text-xl sm:text-2xl font-bold mb-1">Quick Actions</h2>
+              <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">Jump into your creative workflow</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
               {/* YouTube Manager Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-red-500/30 cursor-pointer" onClick={() => navigate("/youtube-manager")}>
+              <Card className="card-3d border-2 overflow-hidden group hover:border-red-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/youtube-manager")}>
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-3">
+                <CardHeader className="relative z-10 pb-2 sm:pb-3">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2.5 rounded-xl bg-red-500/10 group-hover:bg-red-500/20 transition-all">
                       <Youtube className="w-5 h-5 text-red-500" />
@@ -244,9 +244,9 @@ const Dashboard = () => {
               </Card>
 
               {/* Caption Generator Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 cursor-pointer" onClick={() => navigate("/caption-generator")}>
+              <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/caption-generator")}>
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-3">
+                <CardHeader className="relative z-10 pb-2 sm:pb-3">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-all">
                       <Sparkles className="w-5 h-5 text-primary" />
@@ -264,9 +264,9 @@ const Dashboard = () => {
               </Card>
 
               {/* Music Generator Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-purple-500/30 cursor-pointer" onClick={() => navigate("/music-generator")}>
+              <Card className="card-3d border-2 overflow-hidden group hover:border-purple-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/music-generator")}>
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-3">
+                <CardHeader className="relative z-10 pb-2 sm:pb-3">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2.5 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 transition-all">
                       <Music className="w-5 h-5 text-purple-500" />
@@ -285,9 +285,9 @@ const Dashboard = () => {
 
               {/* Pricing/Upgrade Card */}
               {plan === "free" && (
-                <Card className="card-3d border-2 border-yellow-500/30 overflow-hidden group hover:border-yellow-500/50 cursor-pointer bg-gradient-to-br from-yellow-500/5 to-orange-500/5" onClick={() => navigate("/pricing")}>
+                <Card className="card-3d border-2 border-yellow-500/30 overflow-hidden group hover:border-yellow-500/50 cursor-pointer bg-gradient-to-br from-yellow-500/5 to-orange-500/5 active:scale-[0.98] transition-transform" onClick={() => navigate("/pricing")}>
                   <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <CardHeader className="relative z-10 pb-3">
+                  <CardHeader className="relative z-10 pb-2 sm:pb-3">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="p-2.5 rounded-xl bg-yellow-500/10 group-hover:bg-yellow-500/20 transition-all">
                         <Crown className="w-5 h-5 text-yellow-500" />
