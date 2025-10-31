@@ -87,9 +87,6 @@ Deno.serve(async (req) => {
       case 'ai_hashtags':
         updateData = { ai_hashtags_count: usage.ai_hashtags_count + 1 };
         break;
-      case 'ai_repurpose':
-        updateData = { ai_repurpose_count: usage.ai_repurpose_count + 1 };
-        break;
       default:
         throw new Error('Invalid usage type');
     }

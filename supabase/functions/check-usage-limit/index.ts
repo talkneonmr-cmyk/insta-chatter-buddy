@@ -15,7 +15,6 @@ interface UsageLimits {
   aiTrends: number;
   aiSeo: number;
   aiHashtags: number;
-  aiRepurpose: number;
 }
 
 const PLAN_LIMITS = {
@@ -29,7 +28,6 @@ const PLAN_LIMITS = {
     aiTrends: 5,      // 5 per day
     aiSeo: 5,         // 5 per day
     aiHashtags: 5,    // 5 per day
-    aiRepurpose: 5,   // 5 per day
   },
   pro: {
     videoUploads: -1, // unlimited
@@ -41,7 +39,6 @@ const PLAN_LIMITS = {
     aiTrends: 20,     // 20 per day
     aiSeo: 20,        // 20 per day
     aiHashtags: 20,   // 20 per day
-    aiRepurpose: 20,  // 20 per day
   },
 };
 
@@ -172,14 +169,6 @@ Deno.serve(async (req) => {
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} hashtag generations remaining today`
           : `You've reached your daily limit of ${limit} hashtag generations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
-        break;
-      case 'ai_repurpose':
-        currentUsage = usage?.ai_repurpose_count || 0;
-        limit = limits.aiRepurpose;
-        canUse = limit === -1 || currentUsage < limit;
-        message = canUse 
-          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} content repurposings remaining today`
-          : `You've reached your daily limit of ${limit} content repurposings. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
         break;
     }
 
