@@ -45,8 +45,8 @@ export default function Pricing() {
   const freePlanFeatures = [
     "2 Video Uploads per month",
     "2 AI Captions per month",
-    "2 AI Thumbnails per month",
-    "2 AI Scripts per month",
+    "2 AI Thumbnails per day",
+    "5 AI Scripts per day",
     "5 AI Music tracks per month",
     "1 YouTube Channel",
     "Basic Support"
@@ -55,8 +55,8 @@ export default function Pricing() {
   const proPlanFeatures = [
     "Unlimited Video Uploads",
     "Unlimited AI Captions",
-    "50 AI Thumbnails per month",
-    "20 AI Scripts per month",
+    "10 AI Thumbnails per day",
+    "50 AI Scripts per day",
     "200 AI Music tracks per month",
     "Unlimited YouTube Channels",
     "Priority Processing",

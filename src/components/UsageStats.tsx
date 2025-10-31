@@ -22,16 +22,16 @@ const PLAN_LIMITS = {
     ai_captions: 2,
     youtube_channels: 1,
     ai_music: 5,
-    ai_thumbnails: 2,
-    ai_scripts: 2,
+    ai_thumbnails: 2,  // 2 per day
+    ai_scripts: 5,     // 5 per day
   },
   pro: {
     video_uploads: -1,
     ai_captions: -1,
     youtube_channels: -1,
     ai_music: 200,
-    ai_thumbnails: 50,
-    ai_scripts: 20,
+    ai_thumbnails: 10,  // 10 per day
+    ai_scripts: 50,     // 50 per day
   },
 };
 
@@ -217,14 +217,14 @@ export default function UsageStats() {
         />
         <UsageItem
           icon={Image}
-          label="AI Thumbnails"
+          label="AI Thumbnails (Daily)"
           used={usage?.ai_thumbnails_count || 0}
           limit={limits.ai_thumbnails}
           color="text-purple-500"
         />
         <UsageItem
           icon={FileText}
-          label="AI Scripts"
+          label="AI Scripts (Daily)"
           used={usage?.ai_scripts_count || 0}
           limit={limits.ai_scripts}
           color="text-blue-500"
@@ -247,7 +247,7 @@ export default function UsageStats() {
         {plan === "free" && (
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground text-center">
-              Want unlimited access? Upgrade to Pro for just ₹699/month
+              Want more? Upgrade to Pro for 10 thumbnails/day, 50 scripts/day, and unlimited uploads!
             </p>
           </div>
         )}

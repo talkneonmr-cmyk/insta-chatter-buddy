@@ -20,16 +20,16 @@ const PLAN_LIMITS = {
     aiCaptions: 2,
     youtubeChannels: 1,
     aiMusic: 5,
-    aiThumbnails: 2,
-    aiScripts: 2,
+    aiThumbnails: 2,  // 2 per day
+    aiScripts: 5,     // 5 per day
   },
   pro: {
     videoUploads: -1, // unlimited
     aiCaptions: -1, // unlimited
     youtubeChannels: -1,
     aiMusic: 200,
-    aiThumbnails: 50,
-    aiScripts: 20,
+    aiThumbnails: 10,  // 10 per day
+    aiScripts: 50,     // 50 per day
   },
 };
 
@@ -126,16 +126,16 @@ Deno.serve(async (req) => {
         limit = limits.aiThumbnails;
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
-          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI thumbnails remaining`
-          : `You've reached your limit of ${limit} AI thumbnails. Upgrade to Pro for 50 thumbnails/month.`;
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI thumbnails remaining today`
+          : `You've reached your daily limit of ${limit} AI thumbnails. ${plan === 'free' ? 'Upgrade to Pro for 10 thumbnails/day.' : 'Resets tomorrow!'}`;
         break;
       case 'ai_scripts':
         currentUsage = usage?.ai_scripts_count || 0;
         limit = limits.aiScripts;
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
-          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI scripts remaining`
-          : `You've reached your limit of ${limit} AI scripts. Upgrade to Pro for 20 scripts/month.`;
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI scripts remaining today`
+          : `You've reached your daily limit of ${limit} AI scripts. ${plan === 'free' ? 'Upgrade to Pro for 50 scripts/day.' : 'Resets tomorrow!'}`;
         break;
     }
 

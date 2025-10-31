@@ -38,12 +38,12 @@ Deno.serve(async (req) => {
 
     // Check usage limit
     const { data: limitCheck } = await supabase.functions.invoke('check-usage-limit', {
-      body: { usageType: 'ai_thumbnails' }
+      body: { limitType: 'ai_thumbnails' }
     });
 
     if (!limitCheck?.allowed) {
       return new Response(
-        JSON.stringify({ error: 'Usage limit reached. Please upgrade to Pro for more thumbnails.' }),
+        JSON.stringify({ error: 'Daily limit reached. Free: 2/day, Pro: 10/day. Upgrade for more!' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
