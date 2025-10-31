@@ -72,7 +72,7 @@ export default function UsageStats() {
 
       const { data, error } = await supabase
         .from("usage_tracking")
-        .select("video_uploads_count, ai_captions_count, youtube_channels_count, ai_music_count")
+        .select("video_uploads_count, ai_captions_count, youtube_channels_count, ai_music_count, ai_thumbnails_count, ai_scripts_count")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -96,11 +96,20 @@ export default function UsageStats() {
           ai_captions_count: 0,
           youtube_channels_count: 0,
           ai_music_count: 0,
+          ai_thumbnails_count: 0,
+          ai_scripts_count: 0,
         });
         return;
       }
 
-      setUsage(data);
+      setUsage({
+        video_uploads_count: data.video_uploads_count || 0,
+        ai_captions_count: data.ai_captions_count || 0,
+        youtube_channels_count: data.youtube_channels_count || 0,
+        ai_music_count: data.ai_music_count || 0,
+        ai_thumbnails_count: data.ai_thumbnails_count || 0,
+        ai_scripts_count: data.ai_scripts_count || 0,
+      });
     } catch (error) {
       console.error("Error in fetchUsage:", error);
     } finally {
@@ -207,6 +216,20 @@ export default function UsageStats() {
           color="text-primary"
         />
         <UsageItem
+          icon={Image}
+          label="AI Thumbnails"
+          used={usage?.ai_thumbnails_count || 0}
+          limit={limits.ai_thumbnails}
+          color="text-purple-500"
+        />
+        <UsageItem
+          icon={FileText}
+          label="AI Scripts"
+          used={usage?.ai_scripts_count || 0}
+          limit={limits.ai_scripts}
+          color="text-blue-500"
+        />
+        <UsageItem
           icon={Youtube}
           label="YouTube Channels"
           used={usage?.youtube_channels_count || 0}
@@ -218,7 +241,7 @@ export default function UsageStats() {
           label="AI Music"
           used={usage?.ai_music_count || 0}
           limit={limits.ai_music}
-          color="text-purple-500"
+          color="text-pink-500"
         />
 
         {plan === "free" && (

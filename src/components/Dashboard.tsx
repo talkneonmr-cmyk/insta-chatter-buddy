@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Youtube, Music, Video, TrendingUp, Zap, Crown, ArrowRight, Activity } from "lucide-react";
+import { Sparkles, Youtube, Music, Video, TrendingUp, Zap, Crown, ArrowRight, Activity, Image, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import UsageStats from "./UsageStats";
@@ -257,6 +257,46 @@ const Dashboard = () => {
                 <CardContent className="relative z-10">
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>{stats.totalMusic} tracks generated</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Thumbnail Generator Card */}
+              <Card className="card-3d border-2 overflow-hidden group hover:border-blue-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/thumbnail-generator")}>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <CardHeader className="relative z-10 pb-2 sm:pb-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2.5 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-all">
+                      <Image className="w-5 h-5 text-blue-500" />
+                    </div>
+                    <CardTitle className="text-lg">AI Thumbnail Generator</CardTitle>
+                  </div>
+                  <CardDescription>Create eye-catching thumbnails with AI</CardDescription>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>Design stunning thumbnails</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Script Writer Card */}
+              <Card className="card-3d border-2 overflow-hidden group hover:border-green-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/script-writer")}>
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <CardHeader className="relative z-10 pb-2 sm:pb-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2.5 rounded-xl bg-green-500/10 group-hover:bg-green-500/20 transition-all">
+                      <FileText className="w-5 h-5 text-green-500" />
+                    </div>
+                    <CardTitle className="text-lg">AI Script Writer</CardTitle>
+                  </div>
+                  <CardDescription>Generate engaging video scripts</CardDescription>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>Write perfect scripts</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </CardContent>
