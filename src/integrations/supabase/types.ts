@@ -147,6 +147,36 @@ export type Database = {
           },
         ]
       }
+      content_repurposing: {
+        Row: {
+          content_type: string
+          created_at: string
+          id: string
+          original_content: string
+          repurposed_content: string
+          suggestions: Json | null
+          user_id: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          id?: string
+          original_content: string
+          repurposed_content: string
+          suggestions?: Json | null
+          user_id: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          id?: string
+          original_content?: string
+          repurposed_content?: string
+          suggestions?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       dms_sent: {
         Row: {
           comment_log_id: string
@@ -361,6 +391,33 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           video_id?: string | null
+        }
+        Relationships: []
+      }
+      hashtag_generations: {
+        Row: {
+          category: string | null
+          created_at: string
+          hashtags: Json
+          id: string
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          hashtags: Json
+          id?: string
+          topic: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          hashtags?: Json
+          id?: string
+          topic?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -624,12 +681,82 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_optimizations: {
+        Row: {
+          created_at: string
+          id: string
+          keywords: Json | null
+          optimized_description: string | null
+          optimized_title: string
+          original_title: string
+          seo_score: number | null
+          tags: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          keywords?: Json | null
+          optimized_description?: string | null
+          optimized_title: string
+          original_title: string
+          seo_score?: number | null
+          tags?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          keywords?: Json | null
+          optimized_description?: string | null
+          optimized_title?: string
+          original_title?: string
+          seo_score?: number | null
+          tags?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trend_analyses: {
+        Row: {
+          analysis_content: string
+          created_at: string
+          id: string
+          niche: string
+          suggestions: Json | null
+          trends: Json | null
+          user_id: string
+        }
+        Insert: {
+          analysis_content: string
+          created_at?: string
+          id?: string
+          niche: string
+          suggestions?: Json | null
+          trends?: Json | null
+          user_id: string
+        }
+        Update: {
+          analysis_content?: string
+          created_at?: string
+          id?: string
+          niche?: string
+          suggestions?: Json | null
+          trends?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       usage_tracking: {
         Row: {
           ai_captions_count: number
+          ai_hashtags_count: number | null
           ai_music_count: number
+          ai_repurpose_count: number | null
           ai_scripts_count: number
+          ai_seo_count: number | null
           ai_thumbnails_count: number
+          ai_trends_count: number | null
           created_at: string
           id: string
           reset_at: string
@@ -640,9 +767,13 @@ export type Database = {
         }
         Insert: {
           ai_captions_count?: number
+          ai_hashtags_count?: number | null
           ai_music_count?: number
+          ai_repurpose_count?: number | null
           ai_scripts_count?: number
+          ai_seo_count?: number | null
           ai_thumbnails_count?: number
+          ai_trends_count?: number | null
           created_at?: string
           id?: string
           reset_at?: string
@@ -653,9 +784,13 @@ export type Database = {
         }
         Update: {
           ai_captions_count?: number
+          ai_hashtags_count?: number | null
           ai_music_count?: number
+          ai_repurpose_count?: number | null
           ai_scripts_count?: number
+          ai_seo_count?: number | null
           ai_thumbnails_count?: number
+          ai_trends_count?: number | null
           created_at?: string
           id?: string
           reset_at?: string

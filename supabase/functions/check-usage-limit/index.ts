@@ -12,6 +12,10 @@ interface UsageLimits {
   aiMusic: number;
   aiThumbnails: number;
   aiScripts: number;
+  aiTrends: number;
+  aiSeo: number;
+  aiHashtags: number;
+  aiRepurpose: number;
 }
 
 const PLAN_LIMITS = {
@@ -22,6 +26,10 @@ const PLAN_LIMITS = {
     aiMusic: 5,
     aiThumbnails: 2,  // 2 per day
     aiScripts: 5,     // 5 per day
+    aiTrends: 5,      // 5 per day
+    aiSeo: 5,         // 5 per day
+    aiHashtags: 5,    // 5 per day
+    aiRepurpose: 5,   // 5 per day
   },
   pro: {
     videoUploads: -1, // unlimited
@@ -30,6 +38,10 @@ const PLAN_LIMITS = {
     aiMusic: 200,     // 200 per day
     aiThumbnails: 10,  // 10 per day
     aiScripts: -1,     // unlimited
+    aiTrends: 20,     // 20 per day
+    aiSeo: 20,        // 20 per day
+    aiHashtags: 20,   // 20 per day
+    aiRepurpose: 20,  // 20 per day
   },
 };
 
@@ -136,6 +148,38 @@ Deno.serve(async (req) => {
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI scripts remaining today`
           : `You've reached your daily limit of ${limit} AI scripts. ${plan === 'free' ? 'Upgrade to Pro for unlimited scripts.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_trends':
+        currentUsage = usage?.ai_trends_count || 0;
+        limit = limits.aiTrends;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} trend analyses remaining today`
+          : `You've reached your daily limit of ${limit} trend analyses. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_seo':
+        currentUsage = usage?.ai_seo_count || 0;
+        limit = limits.aiSeo;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} SEO optimizations remaining today`
+          : `You've reached your daily limit of ${limit} SEO optimizations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_hashtags':
+        currentUsage = usage?.ai_hashtags_count || 0;
+        limit = limits.aiHashtags;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} hashtag generations remaining today`
+          : `You've reached your daily limit of ${limit} hashtag generations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_repurpose':
+        currentUsage = usage?.ai_repurpose_count || 0;
+        limit = limits.aiRepurpose;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} content repurposings remaining today`
+          : `You've reached your daily limit of ${limit} content repurposings. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
         break;
     }
 

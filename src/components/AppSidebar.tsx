@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText } from "lucide-react";
+import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, RefreshCw } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +28,10 @@ const aiTools = [
   { title: "Thumbnail Generator", url: "/thumbnail-generator", icon: Image },
   { title: "Script Writer", url: "/script-writer", icon: FileText },
   { title: "Music Generator", url: "/music-generator", icon: Music },
+  { title: "Trend Analyzer", url: "/trend-analyzer", icon: TrendingUp },
+  { title: "SEO Optimizer", url: "/seo-optimizer", icon: Search },
+  { title: "Hashtag Generator", url: "/hashtag-generator", icon: Hash },
+  { title: "Content Repurposer", url: "/content-repurposer", icon: RefreshCw },
 ];
 
 export function AppSidebar() {

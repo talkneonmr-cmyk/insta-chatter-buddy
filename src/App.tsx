@@ -16,6 +16,10 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ThumbnailGenerator from "./pages/ThumbnailGenerator";
 import ScriptWriter from "./pages/ScriptWriter";
+import TrendAnalyzer from "./pages/TrendAnalyzer";
+import SEOOptimizer from "./pages/SEOOptimizer";
+import HashtagGenerator from "./pages/HashtagGenerator";
+import ContentRepurposer from "./pages/ContentRepurposer";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +41,10 @@ const App = () => (
           <Route path="/script-writer" element={<Layout><ScriptWriter /></Layout>} />
           <Route path="/youtube-manager" element={<Layout><YouTubeManager /></Layout>} />
           <Route path="/music-generator" element={<Layout><MusicGenerator /></Layout>} />
+          <Route path="/trend-analyzer" element={<Layout><TrendAnalyzer /></Layout>} />
+          <Route path="/seo-optimizer" element={<Layout><SEOOptimizer /></Layout>} />
+          <Route path="/hashtag-generator" element={<Layout><HashtagGenerator /></Layout>} />
+          <Route path="/content-repurposer" element={<Layout><ContentRepurposer /></Layout>} />
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/payment-success" element={<Layout><PaymentSuccess /></Layout>} />
           <Route path="/admin" element={<Layout><Admin /></Layout>} />
