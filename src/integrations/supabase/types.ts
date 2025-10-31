@@ -147,36 +147,6 @@ export type Database = {
           },
         ]
       }
-      content_repurposing: {
-        Row: {
-          content_type: string
-          created_at: string
-          id: string
-          original_content: string
-          repurposed_content: string
-          suggestions: Json | null
-          user_id: string
-        }
-        Insert: {
-          content_type: string
-          created_at?: string
-          id?: string
-          original_content: string
-          repurposed_content: string
-          suggestions?: Json | null
-          user_id: string
-        }
-        Update: {
-          content_type?: string
-          created_at?: string
-          id?: string
-          original_content?: string
-          repurposed_content?: string
-          suggestions?: Json | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       dms_sent: {
         Row: {
           comment_log_id: string
@@ -752,7 +722,6 @@ export type Database = {
           ai_captions_count: number
           ai_hashtags_count: number | null
           ai_music_count: number
-          ai_repurpose_count: number | null
           ai_scripts_count: number
           ai_seo_count: number | null
           ai_thumbnails_count: number
@@ -769,7 +738,6 @@ export type Database = {
           ai_captions_count?: number
           ai_hashtags_count?: number | null
           ai_music_count?: number
-          ai_repurpose_count?: number | null
           ai_scripts_count?: number
           ai_seo_count?: number | null
           ai_thumbnails_count?: number
@@ -786,7 +754,6 @@ export type Database = {
           ai_captions_count?: number
           ai_hashtags_count?: number | null
           ai_music_count?: number
-          ai_repurpose_count?: number | null
           ai_scripts_count?: number
           ai_seo_count?: number | null
           ai_thumbnails_count?: number
