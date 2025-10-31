@@ -14,6 +14,8 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import MusicGenerator from "./pages/MusicGenerator";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import ThumbnailGenerator from "./pages/ThumbnailGenerator";
+import ScriptWriter from "./pages/ScriptWriter";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,8 @@ const App = () => (
           <Route path="/" element={<Layout><Index /></Layout>} />
           <Route path="/settings" element={<Layout><Settings /></Layout>} />
           <Route path="/caption-generator" element={<Layout><CaptionGenerator /></Layout>} />
+          <Route path="/thumbnail-generator" element={<Layout><ThumbnailGenerator /></Layout>} />
+          <Route path="/script-writer" element={<Layout><ScriptWriter /></Layout>} />
           <Route path="/youtube-manager" element={<Layout><YouTubeManager /></Layout>} />
           <Route path="/music-generator" element={<Layout><MusicGenerator /></Layout>} />
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />

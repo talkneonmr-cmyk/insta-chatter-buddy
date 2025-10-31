@@ -48,3 +48,9 @@ verify_jwt = false
 
 [functions.check-audio-status]
 verify_jwt = false
+
+[functions.generate-thumbnail]
+verify_jwt = false
+
+[functions.generate-script]
+verify_jwt = false

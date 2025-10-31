@@ -10,6 +10,8 @@ interface UsageLimits {
   aiCaptions: number;
   youtubeChannels: number;
   aiMusic: number;
+  aiThumbnails: number;
+  aiScripts: number;
 }
 
 const PLAN_LIMITS = {
@@ -18,12 +20,16 @@ const PLAN_LIMITS = {
     aiCaptions: 2,
     youtubeChannels: 1,
     aiMusic: 5,
+    aiThumbnails: 2,
+    aiScripts: 2,
   },
   pro: {
     videoUploads: -1, // unlimited
     aiCaptions: -1, // unlimited
     youtubeChannels: -1,
     aiMusic: 200,
+    aiThumbnails: 50,
+    aiScripts: 20,
   },
 };
 
@@ -114,6 +120,22 @@ Deno.serve(async (req) => {
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI music generations remaining`
           : `You've reached your limit of ${limit} AI music generations. Upgrade to Pro for ${plan === 'free' ? '30 generations' : 'unlimited'}.`;
+        break;
+      case 'ai_thumbnails':
+        currentUsage = usage?.ai_thumbnails_count || 0;
+        limit = limits.aiThumbnails;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI thumbnails remaining`
+          : `You've reached your limit of ${limit} AI thumbnails. Upgrade to Pro for 50 thumbnails/month.`;
+        break;
+      case 'ai_scripts':
+        currentUsage = usage?.ai_scripts_count || 0;
+        limit = limits.aiScripts;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI scripts remaining`
+          : `You've reached your limit of ${limit} AI scripts. Upgrade to Pro for 20 scripts/month.`;
         break;
     }
 

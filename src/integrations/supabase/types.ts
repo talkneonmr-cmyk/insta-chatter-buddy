@@ -256,6 +256,114 @@ export type Database = {
           },
         ]
       }
+      generated_scripts: {
+        Row: {
+          ai_model_used: string | null
+          call_to_action: string | null
+          created_at: string | null
+          generation_time_ms: number | null
+          hook: string | null
+          id: string
+          is_favorite: boolean | null
+          key_points: Json | null
+          script_content: string
+          target_audience: string | null
+          timestamps: Json | null
+          title: string
+          tone: string
+          updated_at: string | null
+          user_id: string
+          video_id: string | null
+          video_length: string
+          video_topic: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          call_to_action?: string | null
+          created_at?: string | null
+          generation_time_ms?: number | null
+          hook?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          key_points?: Json | null
+          script_content: string
+          target_audience?: string | null
+          timestamps?: Json | null
+          title: string
+          tone: string
+          updated_at?: string | null
+          user_id: string
+          video_id?: string | null
+          video_length: string
+          video_topic: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          call_to_action?: string | null
+          created_at?: string | null
+          generation_time_ms?: number | null
+          hook?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          key_points?: Json | null
+          script_content?: string
+          target_audience?: string | null
+          timestamps?: Json | null
+          title?: string
+          tone?: string
+          updated_at?: string | null
+          user_id?: string
+          video_id?: string | null
+          video_length?: string
+          video_topic?: string
+        }
+        Relationships: []
+      }
+      generated_thumbnails: {
+        Row: {
+          ai_model_used: string | null
+          created_at: string | null
+          generation_time_ms: number | null
+          id: string
+          is_favorite: boolean | null
+          prompt: string
+          style: string
+          thumbnail_url: string
+          title: string
+          updated_at: string | null
+          user_id: string
+          video_id: string | null
+        }
+        Insert: {
+          ai_model_used?: string | null
+          created_at?: string | null
+          generation_time_ms?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          prompt: string
+          style: string
+          thumbnail_url: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+          video_id?: string | null
+        }
+        Update: {
+          ai_model_used?: string | null
+          created_at?: string | null
+          generation_time_ms?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          prompt?: string
+          style?: string
+          thumbnail_url?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          video_id?: string | null
+        }
+        Relationships: []
+      }
       instagram_accounts: {
         Row: {
           access_token: string
@@ -520,6 +628,8 @@ export type Database = {
         Row: {
           ai_captions_count: number
           ai_music_count: number
+          ai_scripts_count: number
+          ai_thumbnails_count: number
           created_at: string
           id: string
           reset_at: string
@@ -531,6 +641,8 @@ export type Database = {
         Insert: {
           ai_captions_count?: number
           ai_music_count?: number
+          ai_scripts_count?: number
+          ai_thumbnails_count?: number
           created_at?: string
           id?: string
           reset_at?: string
@@ -542,6 +654,8 @@ export type Database = {
         Update: {
           ai_captions_count?: number
           ai_music_count?: number
+          ai_scripts_count?: number
+          ai_thumbnails_count?: number
           created_at?: string
           id?: string
           reset_at?: string

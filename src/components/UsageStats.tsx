@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Video, Sparkles, Youtube, Music, Crown } from "lucide-react";
+import { Video, Sparkles, Youtube, Music, Crown, Image, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -12,6 +12,8 @@ interface UsageData {
   ai_captions_count: number;
   youtube_channels_count: number;
   ai_music_count: number;
+  ai_thumbnails_count: number;
+  ai_scripts_count: number;
 }
 
 const PLAN_LIMITS = {
@@ -20,12 +22,16 @@ const PLAN_LIMITS = {
     ai_captions: 2,
     youtube_channels: 1,
     ai_music: 5,
+    ai_thumbnails: 2,
+    ai_scripts: 2,
   },
   pro: {
-    video_uploads: -1, // unlimited
+    video_uploads: -1,
     ai_captions: -1,
     youtube_channels: -1,
     ai_music: 200,
+    ai_thumbnails: 50,
+    ai_scripts: 20,
   },
 };
 

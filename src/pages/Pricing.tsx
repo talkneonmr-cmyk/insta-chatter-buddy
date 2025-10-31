@@ -43,22 +43,24 @@ export default function Pricing() {
   };
 
   const freePlanFeatures = [
-    "5 video uploads per month",
-    "10 AI captions per month",
-    "1 YouTube channel",
-    "Basic analytics",
-    "Community support",
+    "2 Video Uploads per month",
+    "2 AI Captions per month",
+    "2 AI Thumbnails per month",
+    "2 AI Scripts per month",
+    "5 AI Music tracks per month",
+    "1 YouTube Channel",
+    "Basic Support"
   ];
 
   const proPlanFeatures = [
-    "Unlimited video uploads",
-    "Unlimited AI captions",
-    "Unlimited AI music generation",
-    "Up to 3 YouTube channels",
-    "Advanced analytics",
-    "Priority support",
-    "AI channel setup assistant",
-    "Custom branding",
+    "Unlimited Video Uploads",
+    "Unlimited AI Captions",
+    "50 AI Thumbnails per month",
+    "20 AI Scripts per month",
+    "200 AI Music tracks per month",
+    "Unlimited YouTube Channels",
+    "Priority Processing",
+    "Premium Support"
   ];
 
   return (

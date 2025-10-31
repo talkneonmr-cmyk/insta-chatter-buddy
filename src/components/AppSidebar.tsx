@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut } from "lucide-react";
+import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +25,8 @@ const mainItems = [
 
 const aiTools = [
   { title: "Caption Generator", url: "/caption-generator", icon: Sparkles },
+  { title: "Thumbnail Generator", url: "/thumbnail-generator", icon: Image },
+  { title: "Script Writer", url: "/script-writer", icon: FileText },
   { title: "Music Generator", url: "/music-generator", icon: Music },
 ];
 
