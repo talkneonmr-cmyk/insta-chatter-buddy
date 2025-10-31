@@ -13,7 +13,6 @@ interface DashboardStats {
   totalUploads: number;
   totalCaptions: number;
   totalMusic: number;
-  channelsConnected: number;
 }
 
 const Dashboard = () => {
@@ -25,7 +24,6 @@ const Dashboard = () => {
     totalUploads: 0,
     totalCaptions: 0,
     totalMusic: 0,
-    channelsConnected: 0,
   });
   const { plan, isLoading: subscriptionLoading } = useSubscription();
 
@@ -70,7 +68,6 @@ const Dashboard = () => {
           totalUploads: usage.video_uploads_count || 0,
           totalCaptions: usage.ai_captions_count || 0,
           totalMusic: usage.ai_music_count || 0,
-          channelsConnected: usage.youtube_channels_count || 0,
         });
       }
     } catch (error) {
@@ -138,7 +135,7 @@ const Dashboard = () => {
         </div>
 
         {/* Stats Overview Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
@@ -188,24 +185,6 @@ const Dashboard = () => {
                 </div>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 group-hover:from-purple-500/20 group-hover:to-pink-500/20 transition-all">
                   <Music className="w-6 h-6 text-purple-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1 sm:space-y-2">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Channels</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.channelsConnected}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Youtube className="w-3 h-3 text-red-500" />
-                    <span>Connected</span>
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-red-500/10 to-orange-500/10 group-hover:from-red-500/20 group-hover:to-orange-500/20 transition-all">
-                  <Youtube className="w-6 h-6 text-red-500" />
                 </div>
               </div>
             </CardContent>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Youtube, Sparkles } from "lucide-react";
+import { ArrowLeft, Youtube } from "lucide-react";
 import VideoUploadForm from "@/components/VideoUploadForm";
 import ScheduledVideosList from "@/components/ScheduledVideosList";
 import YouTubeAccountConnect from "@/components/YouTubeAccountConnect";
@@ -36,25 +36,6 @@ const YouTubeManager = () => {
             </div>
           </div>
         </div>
-
-        {/* AI Channel Creator Button */}
-        <Card className="p-4 bg-gradient-to-r from-red-500/10 to-purple-500/10 border-red-500/20 glow-effect">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-lg flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-red-500" />
-                Create New Viral Channel
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Generate AI-optimized channel setup for maximum growth
-              </p>
-            </div>
-            <Button onClick={() => navigate("/channel-creator")} size="lg" variant="gradient">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Start Channel Creator
-            </Button>
-          </div>
-        </Card>
 
         {/* YouTube Account Connection */}
         <YouTubeAccountConnect />
