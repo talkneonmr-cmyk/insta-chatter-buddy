@@ -29,9 +29,9 @@ const PLAN_LIMITS = {
     video_uploads: -1,
     ai_captions: -1,
     youtube_channels: -1,
-    ai_music: 200,
+    ai_music: 200,     // 200 per day
     ai_thumbnails: 10,  // 10 per day
-    ai_scripts: 50,     // 50 per day
+    ai_scripts: -1,     // unlimited
   },
 };
 
@@ -238,7 +238,7 @@ export default function UsageStats() {
         />
         <UsageItem
           icon={Music}
-          label="AI Music"
+          label="AI Music (Daily)"
           used={usage?.ai_music_count || 0}
           limit={limits.ai_music}
           color="text-pink-500"
@@ -247,7 +247,7 @@ export default function UsageStats() {
         {plan === "free" && (
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground text-center">
-              Want more? Upgrade to Pro for 10 thumbnails/day, 50 scripts/day, and unlimited uploads!
+              Want more? Upgrade to Pro for 10 thumbnails/day, unlimited scripts, 200 music/day, and unlimited uploads!
             </p>
           </div>
         )}

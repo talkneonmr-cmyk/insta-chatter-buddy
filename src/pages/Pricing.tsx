@@ -56,8 +56,8 @@ export default function Pricing() {
     "Unlimited Video Uploads",
     "Unlimited AI Captions",
     "10 AI Thumbnails per day",
-    "50 AI Scripts per day",
-    "200 AI Music tracks per month",
+    "Unlimited AI Scripts",
+    "200 AI Music tracks per day",
     "Unlimited YouTube Channels",
     "Priority Processing",
     "Premium Support"

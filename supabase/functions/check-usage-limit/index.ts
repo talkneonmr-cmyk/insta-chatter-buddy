@@ -27,9 +27,9 @@ const PLAN_LIMITS = {
     videoUploads: -1, // unlimited
     aiCaptions: -1, // unlimited
     youtubeChannels: -1,
-    aiMusic: 200,
+    aiMusic: 200,     // 200 per day
     aiThumbnails: 10,  // 10 per day
-    aiScripts: 50,     // 50 per day
+    aiScripts: -1,     // unlimited
   },
 };
 
@@ -118,8 +118,8 @@ Deno.serve(async (req) => {
         limit = limits.aiMusic;
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
-          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI music generations remaining`
-          : `You've reached your limit of ${limit} AI music generations. Upgrade to Pro for ${plan === 'free' ? '30 generations' : 'unlimited'}.`;
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI music generations remaining today`
+          : `You've reached your daily limit of ${limit} AI music generations. ${plan === 'free' ? 'Upgrade to Pro for 200 generations/day.' : 'Resets tomorrow!'}`;
         break;
       case 'ai_thumbnails':
         currentUsage = usage?.ai_thumbnails_count || 0;
@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI scripts remaining today`
-          : `You've reached your daily limit of ${limit} AI scripts. ${plan === 'free' ? 'Upgrade to Pro for 50 scripts/day.' : 'Resets tomorrow!'}`;
+          : `You've reached your daily limit of ${limit} AI scripts. ${plan === 'free' ? 'Upgrade to Pro for unlimited scripts.' : 'Resets tomorrow!'}`;
         break;
     }
 
