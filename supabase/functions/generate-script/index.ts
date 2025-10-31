@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
       body: { limitType: 'ai_scripts' }
     });
 
-    if (!limitCheck?.allowed) {
+    if (!limitCheck?.canUse) {
       return new Response(
         JSON.stringify({ error: 'Daily limit reached. Free: 5/day, Pro: 50/day. Upgrade for more!' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
