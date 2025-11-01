@@ -63,3 +63,6 @@ verify_jwt = false
 
 [functions.speech-to-text]
 verify_jwt = false
+
+[functions.classify-image]
+verify_jwt = false

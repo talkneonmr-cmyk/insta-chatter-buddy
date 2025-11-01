@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Upload, Tag, Loader2, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { pipeline } from "@huggingface/transformers";
+import { supabase } from "@/integrations/supabase/client";
 
 const ImageClassification = () => {
   const navigate = useNavigate();
@@ -38,35 +38,43 @@ const ImageClassification = () => {
     }
 
     setProcessing(true);
+    toast({
+      title: "Analyzing image...",
+      description: "AI is processing your image"
+    });
+
     try {
-      toast({
-        title: "Loading AI model...",
-        description: "First time may take a moment"
+      const { data, error } = await supabase.functions.invoke('classify-image', {
+        body: { imageData: uploadedImage }
       });
 
-      const classifier = await pipeline(
-        "image-classification",
-        "onnx-community/mobilenetv4_conv_small.e2400_r224_in1k",
-        { device: "webgpu" }
-      );
+      if (error) {
+        throw error;
+      }
 
-      toast({
-        title: "Analyzing image...",
-        description: "AI is detecting content"
-      });
+      if (!data?.tags || data.tags.length === 0) {
+        throw new Error('No tags detected in image');
+      }
 
-      const output = await classifier(uploadedImage);
-      setTags(output as Array<{ label: string; score: number }>);
+      setTags(data.tags);
       
       toast({
         title: "Classification complete!",
-        description: `Found ${output.length} tags`
+        description: `Found ${data.tags.length} relevant tags`
       });
     } catch (error: any) {
       console.error('Classification error:', error);
+      let errorMessage = "Failed to classify image";
+      
+      if (error.message?.includes('Rate limit')) {
+        errorMessage = "Too many requests. Please wait a moment.";
+      } else if (error.message?.includes('credits')) {
+        errorMessage = "AI credits depleted. Please try again later.";
+      }
+      
       toast({
         title: "Classification failed",
-        description: error.message || "Make sure WebGPU is supported",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -104,10 +112,10 @@ const ImageClassification = () => {
             <div className="flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-1">
-                <h3 className="font-semibold text-orange-500">MobileNetV4 - Fast & Accurate</h3>
+                <h3 className="font-semibold text-orange-500">AI-Powered Classification - Fast & Accurate</h3>
                 <p className="text-sm text-muted-foreground">
-                  Automatically detect and tag content in your images. Perfect for organizing thumbnails, 
-                  categorizing content, or adding relevant tags to your media library.
+                  Automatically detect and tag content in your images with advanced AI. Get results in 5-15 seconds. 
+                  Perfect for organizing thumbnails, categorizing content, or adding relevant tags to your media library.
                 </p>
               </div>
             </div>
@@ -179,7 +187,7 @@ const ImageClassification = () => {
 
                   <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                     <Sparkles className="h-3 w-3" />
-                    <span>Processing in browser - instant results</span>
+                    <span>AI-powered classification - results in 5-15 seconds</span>
                   </div>
                 </>
               )}
