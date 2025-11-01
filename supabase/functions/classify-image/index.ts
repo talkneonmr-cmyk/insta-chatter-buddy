@@ -84,25 +84,37 @@ serve(async (req) => {
       throw new Error('No response from AI');
     }
 
+    console.log('AI Response:', content);
+
     // Extract JSON from response
     let tags;
+    let jsonString = content.trim();
+    
     try {
-      // Try to parse as direct JSON
-      tags = JSON.parse(content);
-    } catch (e) {
-      // Try to extract JSON from markdown code block
-      const jsonMatch = content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/);
+      // Try to extract JSON from markdown code block first
+      const jsonMatch = jsonString.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
       if (jsonMatch) {
-        tags = JSON.parse(jsonMatch[1]);
-      } else {
-        // Try to find array in text
-        const arrayMatch = content.match(/\[[\s\S]*\]/);
-        if (arrayMatch) {
-          tags = JSON.parse(arrayMatch[0]);
-        } else {
-          throw new Error('Could not parse AI response');
-        }
+        jsonString = jsonMatch[1].trim();
       }
+      
+      // Try to find JSON array in text
+      const arrayMatch = jsonString.match(/\[[\s\S]*\]/);
+      if (arrayMatch) {
+        jsonString = arrayMatch[0];
+      }
+      
+      // Clean up common JSON formatting issues
+      jsonString = jsonString
+        .replace(/\/\/.*$/gm, '')  // Remove single-line comments
+        .replace(/\/\*[\s\S]*?\*\//g, '')  // Remove multi-line comments
+        .replace(/,(\s*[}\]])/g, '$1');  // Remove trailing commas
+      
+      tags = JSON.parse(jsonString);
+    } catch (e) {
+      console.error('Failed to parse JSON:', e);
+      console.error('Content was:', content);
+      const errorMessage = e instanceof Error ? e.message : 'Unknown parse error';
+      throw new Error(`Could not parse AI response: ${errorMessage}`);
     }
 
     // Sort by score and limit to top 10
