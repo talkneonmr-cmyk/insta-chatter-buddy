@@ -6,12 +6,15 @@ import { Upload, Download, Loader2, ImageIcon, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { enhanceImage } from "@/lib/imageEnhancement";
 import { Slider } from "@/components/ui/slider";
+import { Progress } from "@/components/ui/progress";
 
 const ImageEnhancement = () => {
   const [image, setImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [scale, setScale] = useState([2]);
+  const [progress, setProgress] = useState(0);
+  const [progressStage, setProgressStage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -31,21 +34,30 @@ const ImageEnhancement = () => {
     if (!image) return;
 
     setIsProcessing(true);
+    setProgress(0);
+    setProgressStage("");
+    
     try {
-      const result = await enhanceImage(image, scale[0]);
+      const result = await enhanceImage(image, scale[0], (stage, prog) => {
+        setProgressStage(stage);
+        setProgress(prog);
+      });
       setEnhancedImage(result);
       toast({
         title: "Success!",
         description: `Image enhanced ${scale[0]}x successfully`,
       });
     } catch (error) {
+      console.error("Enhancement error:", error);
       toast({
         title: "Error",
-        description: "Failed to enhance image. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to enhance image. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsProcessing(false);
+      setProgress(0);
+      setProgressStage("");
     }
   };
 
@@ -137,6 +149,15 @@ const ImageEnhancement = () => {
                   </>
                 )}
               </Button>
+
+              {isProcessing && (
+                <div className="space-y-2">
+                  <Progress value={progress} className="w-full" />
+                  <p className="text-sm text-muted-foreground text-center">
+                    {progressStage} {Math.round(progress)}%
+                  </p>
+                </div>
+              )}
             </div>
           </Card>
 
