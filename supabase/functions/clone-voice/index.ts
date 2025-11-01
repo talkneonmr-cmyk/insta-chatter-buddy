@@ -11,10 +11,14 @@ serve(async (req) => {
   }
 
   try {
-    const { audioUrl, text } = await req.json();
+    const { audioUrl, text, voiceId, usePreMadeVoice } = await req.json();
 
-    if (!audioUrl || !text) {
-      throw new Error("Missing required fields: audioUrl and text");
+    if (!text) {
+      throw new Error("Missing required field: text");
+    }
+
+    if (!usePreMadeVoice && !audioUrl) {
+      throw new Error("Missing required field: audioUrl for voice cloning");
     }
 
     const ELEVEN_LABS_API_KEY = Deno.env.get("ELEVEN_LABS_API_KEY");
@@ -22,41 +26,52 @@ serve(async (req) => {
       throw new Error("ELEVEN_LABS_API_KEY is not configured");
     }
 
-    console.log("Cloning voice with Eleven Labs...");
+    let finalVoiceId = voiceId;
+    let shouldCleanup = false;
 
-    // Step 1: Download the audio sample
-    const audioResponse = await fetch(audioUrl);
-    if (!audioResponse.ok) {
-      throw new Error("Failed to fetch audio sample");
+    // If using pre-made voice, use the provided voice ID
+    if (usePreMadeVoice) {
+      console.log("Using pre-made voice:", voiceId);
+      finalVoiceId = voiceId || "9BWtsMINqrJLrRacOk9x"; // Default to Aria
+    } else {
+      // Clone voice from audio sample
+      console.log("Cloning voice with Eleven Labs...");
+
+      // Step 1: Download the audio sample
+      const audioResponse = await fetch(audioUrl);
+      if (!audioResponse.ok) {
+        throw new Error("Failed to fetch audio sample");
+      }
+      const audioBlob = await audioResponse.blob();
+
+      // Step 2: Create a voice with Eleven Labs
+      const formData = new FormData();
+      formData.append("name", `Voice_${Date.now()}`);
+      formData.append("files", audioBlob, "sample.mp3");
+      formData.append("description", "Cloned voice from user upload");
+
+      const addVoiceResponse = await fetch("https://api.elevenlabs.io/v1/voices/add", {
+        method: "POST",
+        headers: {
+          "xi-api-key": ELEVEN_LABS_API_KEY,
+        },
+        body: formData,
+      });
+
+      if (!addVoiceResponse.ok) {
+        const errorText = await addVoiceResponse.text();
+        console.error("Eleven Labs add voice error:", errorText);
+        throw new Error(`Failed to create voice: ${errorText}`);
+      }
+
+      const voiceData = await addVoiceResponse.json();
+      finalVoiceId = voiceData.voice_id;
+      shouldCleanup = true;
+      console.log("Voice created with ID:", finalVoiceId);
     }
-    const audioBlob = await audioResponse.blob();
 
-    // Step 2: Create a voice with Eleven Labs
-    const formData = new FormData();
-    formData.append("name", `Voice_${Date.now()}`);
-    formData.append("files", audioBlob, "sample.mp3");
-    formData.append("description", "Cloned voice from user upload");
-
-    const addVoiceResponse = await fetch("https://api.elevenlabs.io/v1/voices/add", {
-      method: "POST",
-      headers: {
-        "xi-api-key": ELEVEN_LABS_API_KEY,
-      },
-      body: formData,
-    });
-
-    if (!addVoiceResponse.ok) {
-      const errorText = await addVoiceResponse.text();
-      console.error("Eleven Labs add voice error:", errorText);
-      throw new Error(`Failed to create voice: ${errorText}`);
-    }
-
-    const voiceData = await addVoiceResponse.json();
-    const voiceId = voiceData.voice_id;
-    console.log("Voice created with ID:", voiceId);
-
-    // Step 3: Generate speech using the cloned voice
-    const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    // Step 3: Generate speech using the voice
+    const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${finalVoiceId}`, {
       method: "POST",
       headers: {
         "xi-api-key": ELEVEN_LABS_API_KEY,
@@ -81,17 +96,19 @@ serve(async (req) => {
     const audioArrayBuffer = await ttsResponse.arrayBuffer();
     const base64 = btoa(String.fromCharCode(...new Uint8Array(audioArrayBuffer)));
 
-    // Step 4: Clean up - delete the voice (optional, to avoid cluttering account)
-    try {
-      await fetch(`https://api.elevenlabs.io/v1/voices/${voiceId}`, {
-        method: "DELETE",
-        headers: {
-          "xi-api-key": ELEVEN_LABS_API_KEY,
-        },
-      });
-      console.log("Voice cleaned up");
-    } catch (cleanupError) {
-      console.warn("Failed to clean up voice:", cleanupError);
+    // Step 4: Clean up - delete the voice if we cloned it
+    if (shouldCleanup) {
+      try {
+        await fetch(`https://api.elevenlabs.io/v1/voices/${finalVoiceId}`, {
+          method: "DELETE",
+          headers: {
+            "xi-api-key": ELEVEN_LABS_API_KEY,
+          },
+        });
+        console.log("Voice cleaned up");
+      } catch (cleanupError) {
+        console.warn("Failed to clean up voice:", cleanupError);
+      }
     }
 
     return new Response(
