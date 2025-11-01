@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,13 +6,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Image, Sparkles, Loader2, Upload, Scissors } from "lucide-react";
+import { ArrowLeft, Image, Sparkles, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ThumbnailHistory from "@/components/ThumbnailHistory";
 import ThumbnailPresets from "@/components/ThumbnailPresets";
-import { removeBackground, loadImage } from "@/lib/backgroundRemoval";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ThumbnailGenerator = () => {
   const navigate = useNavigate();
@@ -23,12 +21,6 @@ const ThumbnailGenerator = () => {
   const [style, setStyle] = useState("gaming");
   const [generatedThumbnail, setGeneratedThumbnail] = useState<string | null>(null);
   const [refreshHistory, setRefreshHistory] = useState(0);
-  
-  // Background removal states
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [processedImage, setProcessedImage] = useState<string | null>(null);
-  const [removingBg, setRemovingBg] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -96,64 +88,6 @@ const ThumbnailGenerator = () => {
     setStyle(presetStyle);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setUploadedImage(e.target?.result as string);
-        setProcessedImage(null);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRemoveBackground = async () => {
-    if (!uploadedImage) {
-      toast({
-        title: "No image uploaded",
-        description: "Please upload an image first",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setRemovingBg(true);
-    try {
-      // Convert data URL to blob
-      const response = await fetch(uploadedImage);
-      const blob = await response.blob();
-      
-      // Load image
-      const img = await loadImage(blob);
-      
-      // Remove background
-      toast({
-        title: "Processing...",
-        description: "Removing background with AI. This may take a moment."
-      });
-      
-      const resultBlob = await removeBackground(img);
-      const resultUrl = URL.createObjectURL(resultBlob);
-      
-      setProcessedImage(resultUrl);
-      
-      toast({
-        title: "Background removed!",
-        description: "Your image is ready to download"
-      });
-    } catch (error: any) {
-      console.error('Background removal error:', error);
-      toast({
-        title: "Processing failed",
-        description: error.message || "Failed to remove background. Make sure WebGPU is supported.",
-        variant: "destructive"
-      });
-    } finally {
-      setRemovingBg(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -181,23 +115,9 @@ const ThumbnailGenerator = () => {
         {/* Presets Section */}
         <ThumbnailPresets onSelectPreset={handlePresetSelect} />
 
-        <Tabs defaultValue="generate" className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-            <TabsTrigger value="generate">
-              <Sparkles className="h-4 w-4 mr-2" />
-              AI Generate
-            </TabsTrigger>
-            <TabsTrigger value="remove-bg">
-              <Scissors className="h-4 w-4 mr-2" />
-              Remove Background
-            </TabsTrigger>
-          </TabsList>
-
-          {/* AI Generate Tab */}
-          <TabsContent value="generate" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Generator Form */}
-              <Card className="h-fit">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Generator Form */}
+          <Card className="h-fit">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-purple-500" />
@@ -308,120 +228,7 @@ const ThumbnailGenerator = () => {
               </CardContent>
             </Card>
           )}
-            </div>
-          </TabsContent>
-
-          {/* Remove Background Tab */}
-          <TabsContent value="remove-bg" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Upload Section */}
-              <Card className="h-fit">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Upload className="h-5 w-5 text-blue-500" />
-                    Upload Image
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  
-                  <Button
-                    variant="outline"
-                    className="w-full h-32 border-2 border-dashed"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <div className="text-center">
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">
-                        Click to upload an image
-                      </p>
-                    </div>
-                  </Button>
-
-                  {uploadedImage && (
-                    <>
-                      <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                        <img 
-                          src={uploadedImage} 
-                          alt="Uploaded" 
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-
-                      <Button
-                        onClick={handleRemoveBackground}
-                        disabled={removingBg}
-                        className="w-full"
-                        size="lg"
-                      >
-                        {removingBg ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Removing Background...
-                          </>
-                        ) : (
-                          <>
-                            <Scissors className="mr-2 h-4 w-4" />
-                            Remove Background (Free AI)
-                          </>
-                        )}
-                      </Button>
-
-                      <p className="text-xs text-muted-foreground text-center">
-                        🚀 100% Free • Runs in your browser • No API keys needed
-                      </p>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Result Section */}
-              {processedImage && (
-                <Card className="h-fit">
-                  <CardHeader>
-                    <CardTitle>Background Removed</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="relative aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-muted via-background to-muted">
-                      <img 
-                        src={processedImage} 
-                        alt="Processed" 
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <div className="mt-4 flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => window.open(processedImage, '_blank')}
-                        className="flex-1"
-                      >
-                        <Image className="mr-2 h-4 w-4" />
-                        View Full Size
-                      </Button>
-                      <Button 
-                        onClick={() => {
-                          const link = document.createElement('a');
-                          link.href = processedImage;
-                          link.download = 'no-background.png';
-                          link.click();
-                        }}
-                        className="flex-1"
-                      >
-                        Download PNG
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+        </div>
 
         {/* History Section */}
         <ThumbnailHistory key={refreshHistory} />
