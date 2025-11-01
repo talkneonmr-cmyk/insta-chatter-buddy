@@ -85,10 +85,10 @@ const Auth = () => {
             <Sparkles className="w-8 h-8 text-primary-foreground" />
           </div>
           <CardTitle className="text-3xl gradient-text">
-            Lovable Me Assistant
+            Fabulous Creators
           </CardTitle>
           <CardDescription>
-            Sign in to manage your Instagram automations
+            Sign in to your AI-powered content creation studio
           </CardDescription>
         </CardHeader>
         <CardContent>

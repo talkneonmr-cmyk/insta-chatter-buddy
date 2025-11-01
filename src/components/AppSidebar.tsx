@@ -66,7 +66,7 @@ export function AppSidebar() {
           </div>
           {open && (
             <div>
-              <h1 className="font-bold text-lg gradient-text">Lovable Me</h1>
+              <h1 className="font-bold text-lg gradient-text">Fabulous Creators</h1>
               <p className="text-xs text-muted-foreground">Content Studio</p>
             </div>
           )}
