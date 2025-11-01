@@ -30,13 +30,29 @@ const BackgroundRemoval = () => {
 
     setIsProcessing(true);
     try {
-      const result = await removeBackground(image);
-      setProcessedImage(result);
-      toast({
-        title: "Success!",
-        description: "Background removed successfully",
-      });
+      // Convert data URL to blob
+      const response = await fetch(image);
+      const blob = await response.blob();
+      
+      // Load image element
+      const { loadImage } = await import("@/lib/backgroundRemoval");
+      const imageElement = await loadImage(blob);
+      
+      // Remove background
+      const resultBlob = await removeBackground(imageElement);
+      
+      // Convert blob to data URL for display
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProcessedImage(reader.result as string);
+        toast({
+          title: "Success!",
+          description: "Background removed successfully",
+        });
+      };
+      reader.readAsDataURL(resultBlob);
     } catch (error) {
+      console.error('Background removal error:', error);
       toast({
         title: "Error",
         description: "Failed to remove background. Please try again.",
