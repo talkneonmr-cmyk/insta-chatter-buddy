@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Upload, Eye, Loader2, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { pipeline } from "@huggingface/transformers";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DetectedObject {
   label: string;
@@ -46,29 +46,35 @@ const ObjectDetection = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = image.width;
-    canvas.height = image.height;
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
 
     ctx.drawImage(image, 0, 0);
 
-    // Draw bounding boxes
+    // Draw bounding boxes - convert percentages to pixels
     detections.forEach((detection) => {
       const { box, label, score } = detection;
       
+      // Convert percentage coordinates to pixels
+      const xmin = (box.xmin / 100) * canvas.width;
+      const ymin = (box.ymin / 100) * canvas.height;
+      const xmax = (box.xmax / 100) * canvas.width;
+      const ymax = (box.ymax / 100) * canvas.height;
+      
       ctx.strokeStyle = '#10b981';
       ctx.lineWidth = 3;
-      ctx.strokeRect(box.xmin, box.ymin, box.xmax - box.xmin, box.ymax - box.ymin);
+      ctx.strokeRect(xmin, ymin, xmax - xmin, ymax - ymin);
 
       // Draw label background
       ctx.fillStyle = '#10b981';
       const text = `${label} ${(score * 100).toFixed(0)}%`;
       const textMetrics = ctx.measureText(text);
-      ctx.fillRect(box.xmin, box.ymin - 25, textMetrics.width + 10, 25);
+      ctx.fillRect(xmin, ymin - 25, textMetrics.width + 10, 25);
 
       // Draw label text
       ctx.fillStyle = 'white';
       ctx.font = 'bold 14px sans-serif';
-      ctx.fillText(text, box.xmin + 5, box.ymin - 7);
+      ctx.fillText(text, xmin + 5, ymin - 7);
     });
   };
 
@@ -83,42 +89,48 @@ const ObjectDetection = () => {
     }
 
     setProcessing(true);
+    toast({
+      title: "Detecting objects...",
+      description: "AI is analyzing your image"
+    });
+
     try {
-      toast({
-        title: "Loading AI model...",
-        description: "First time may take a moment"
+      const { data, error } = await supabase.functions.invoke('detect-objects', {
+        body: { imageData: uploadedImage }
       });
 
-      const detector = await pipeline(
-        "object-detection",
-        "Xenova/detr-resnet-50",
-        { device: "webgpu" }
-      );
+      if (error) {
+        throw error;
+      }
 
-      toast({
-        title: "Detecting objects...",
-        description: "AI is analyzing your image"
-      });
+      if (!data?.detections || data.detections.length === 0) {
+        throw new Error('No objects detected in image');
+      }
 
       const img = new Image();
       img.src = uploadedImage;
       await new Promise((resolve) => { img.onload = resolve; });
 
-      const output = await detector(uploadedImage);
-      const detectedObjects = output as DetectedObject[];
-      
-      setDetections(detectedObjects);
-      drawDetections(img, detectedObjects);
+      setDetections(data.detections);
+      drawDetections(img, data.detections);
       
       toast({
         title: "Detection complete!",
-        description: `Found ${detectedObjects.length} objects`
+        description: `Found ${data.detections.length} objects`
       });
     } catch (error: any) {
       console.error('Detection error:', error);
+      let errorMessage = "Failed to detect objects";
+      
+      if (error.message?.includes('Rate limit')) {
+        errorMessage = "Too many requests. Please wait a moment.";
+      } else if (error.message?.includes('credits')) {
+        errorMessage = "AI credits depleted. Please try again later.";
+      }
+      
       toast({
         title: "Detection failed",
-        description: error.message || "Make sure WebGPU is supported",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -156,10 +168,10 @@ const ObjectDetection = () => {
             <div className="flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-cyan-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-1">
-                <h3 className="font-semibold text-cyan-500">DETR - Powerful Object Detection</h3>
+                <h3 className="font-semibold text-cyan-500">AI-Powered Object Detection - Fast & Accurate</h3>
                 <p className="text-sm text-muted-foreground">
-                  Identify and locate multiple objects in images with bounding boxes. Great for analyzing 
-                  thumbnail content, understanding visual composition, or automated content insights.
+                  Identify and locate multiple objects in images with bounding boxes using advanced AI. Get results in 5-15 seconds. 
+                  Great for analyzing thumbnail content, understanding visual composition, or automated content insights.
                 </p>
               </div>
             </div>
@@ -231,7 +243,7 @@ const ObjectDetection = () => {
 
                   <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                     <Sparkles className="h-3 w-3" />
-                    <span>Processing in browser with DETR model</span>
+                    <span>AI-powered detection - results in 5-15 seconds</span>
                   </div>
                 </>
               )}

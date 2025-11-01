@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { ArrowLeft, FileText, Loader2, Copy, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { pipeline } from "@huggingface/transformers";
+import { supabase } from "@/integrations/supabase/client";
 
 const TextSummarizer = () => {
   const navigate = useNavigate();
@@ -28,29 +28,28 @@ const TextSummarizer = () => {
     }
 
     setProcessing(true);
+    toast({
+      title: "Summarizing...",
+      description: "AI is generating your summary"
+    });
+
     try {
-      toast({
-        title: "Loading AI model...",
-        description: "First time may take a moment"
+      const { data, error } = await supabase.functions.invoke('summarize-text', {
+        body: { 
+          text: inputText,
+          maxLength: summaryLength[0]
+        }
       });
 
-      const summarizer = await pipeline(
-        "summarization",
-        "Xenova/distilbart-cnn-6-6",
-        { device: "webgpu" }
-      );
+      if (error) {
+        throw error;
+      }
 
-      toast({
-        title: "Summarizing...",
-        description: "AI is generating your summary"
-      });
+      if (!data?.summary) {
+        throw new Error('No summary generated');
+      }
 
-      const output: any = await summarizer(inputText, {
-        max_length: summaryLength[0],
-        min_length: Math.floor(summaryLength[0] / 2),
-      } as any);
-      
-      setSummary(output[0]?.summary_text || output?.summary_text || "");
+      setSummary(data.summary);
       
       toast({
         title: "Summary complete!",
@@ -58,9 +57,17 @@ const TextSummarizer = () => {
       });
     } catch (error: any) {
       console.error('Summarization error:', error);
+      let errorMessage = "Failed to summarize text";
+      
+      if (error.message?.includes('Rate limit')) {
+        errorMessage = "Too many requests. Please wait a moment.";
+      } else if (error.message?.includes('credits')) {
+        errorMessage = "AI credits depleted. Please try again later.";
+      }
+      
       toast({
         title: "Summarization failed",
-        description: error.message || "Make sure WebGPU is supported",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -106,10 +113,10 @@ const TextSummarizer = () => {
             <div className="flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-indigo-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-1">
-                <h3 className="font-semibold text-indigo-500">DistilBART - Fast Summarization</h3>
+                <h3 className="font-semibold text-indigo-500">AI-Powered Summarization - Fast & Accurate</h3>
                 <p className="text-sm text-muted-foreground">
-                  Automatically generate concise summaries from long texts. Perfect for video descriptions, 
-                  blog posts, or any content that needs a quick overview.
+                  Automatically generate concise summaries from long texts with advanced AI. Get results in 5-15 seconds. 
+                  Perfect for video descriptions, blog posts, or any content that needs a quick overview.
                 </p>
               </div>
             </div>
@@ -178,7 +185,7 @@ const TextSummarizer = () => {
 
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <Sparkles className="h-3 w-3" />
-                <span>Processing in browser - instant results</span>
+                <span>AI-powered summarization - results in 5-15 seconds</span>
               </div>
             </CardContent>
           </Card>

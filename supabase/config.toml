@@ -66,3 +66,9 @@ verify_jwt = false
 
 [functions.classify-image]
 verify_jwt = false
+
+[functions.summarize-text]
+verify_jwt = false
+
+[functions.detect-objects]
+verify_jwt = false
