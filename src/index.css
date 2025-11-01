@@ -9,50 +9,68 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 220 13% 13%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 13% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 13% 13%;
 
-    /* Instagram-inspired gradient colors */
-    --primary: 291 64% 42%;  /* Instagram purple */
+    /* Premium Color Palette */
+    --primary: 262 83% 58%;  /* Vibrant purple */
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 262 83% 68%;
 
-    --secondary: 340 82% 52%;  /* Instagram pink */
+    --secondary: 340 82% 58%;  /* Rich pink */
     --secondary-foreground: 0 0% 100%;
+    --secondary-glow: 340 82% 68%;
 
-    --accent: 24 95% 53%;  /* Instagram orange */
+    --accent: 24 95% 58%;  /* Warm orange */
     --accent-foreground: 0 0% 100%;
+    --accent-glow: 24 95% 68%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 13% 95%;
+    --muted-foreground: 220 9% 46%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 291 64% 42%;
+    --border: 220 13% 88%;
+    --input: 220 13% 91%;
+    --ring: 262 83% 58%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
     
-    /* Modern 3D Gradients */
-    --gradient-instagram: linear-gradient(135deg, hsl(291 64% 42%), hsl(340 82% 52%), hsl(24 95% 53%));
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --gradient-3d: linear-gradient(145deg, hsl(291 64% 42%), hsl(340 82% 52%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 99%));
+    /* Premium Gradients */
+    --gradient-instagram: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(340 82% 58%) 50%, hsl(24 95% 58%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(262 83% 68%));
+    --gradient-secondary: linear-gradient(135deg, hsl(340 82% 58%), hsl(340 82% 68%));
+    --gradient-accent: linear-gradient(135deg, hsl(24 95% 58%), hsl(24 95% 68%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 13% 98%));
+    --gradient-3d: linear-gradient(145deg, hsl(262 83% 58%), hsl(340 82% 58%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 13% 99%));
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.9), hsl(0 0% 100% / 0.7));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(262 83% 58% / 0.15) 0, transparent 50%), 
+                     radial-gradient(at 100% 0%, hsl(340 82% 58% / 0.15) 0, transparent 50%),
+                     radial-gradient(at 100% 100%, hsl(24 95% 58% / 0.15) 0, transparent 50%),
+                     radial-gradient(at 0% 100%, hsl(262 83% 58% / 0.15) 0, transparent 50%);
     
-    /* Modern 3D Shadows */
-    --shadow-3d: 0 10px 30px -10px hsl(291 64% 42% / 0.3), 0 4px 8px -2px hsl(340 82% 52% / 0.2);
-    --shadow-card: 0 4px 20px -4px hsl(222.2 84% 4.9% / 0.1), 0 2px 8px -2px hsl(222.2 84% 4.9% / 0.05);
-    --shadow-glow: 0 0 30px hsl(291 64% 42% / 0.4), 0 0 20px hsl(340 82% 52% / 0.3), 0 0 40px hsl(291 64% 42% / 0.2);
+    /* Premium Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 13% 13% / 0.05);
+    --shadow: 0 4px 6px -1px hsl(220 13% 13% / 0.1), 0 2px 4px -2px hsl(220 13% 13% / 0.1);
+    --shadow-md: 0 10px 15px -3px hsl(220 13% 13% / 0.1), 0 4px 6px -4px hsl(220 13% 13% / 0.1);
+    --shadow-lg: 0 20px 25px -5px hsl(220 13% 13% / 0.1), 0 8px 10px -6px hsl(220 13% 13% / 0.1);
+    --shadow-xl: 0 25px 50px -12px hsl(220 13% 13% / 0.25);
+    --shadow-3d: 0 20px 40px -10px hsl(262 83% 58% / 0.3), 0 8px 16px -4px hsl(340 82% 58% / 0.2);
+    --shadow-card: 0 8px 24px -8px hsl(220 13% 13% / 0.1), 0 4px 12px -4px hsl(220 13% 13% / 0.08);
+    --shadow-glow: 0 0 40px hsl(262 83% 68% / 0.4), 0 0 25px hsl(340 82% 68% / 0.3), 0 0 50px hsl(262 83% 68% / 0.2);
+    --shadow-glass: 0 8px 32px 0 hsl(220 13% 13% / 0.08);
     
     /* Smooth Transitions */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -65,44 +83,61 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 13% 9%;
+    --foreground: 220 9% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 13% 11%;
+    --card-foreground: 220 9% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 13% 11%;
+    --popover-foreground: 220 9% 95%;
 
-    --primary: 291 64% 52%;
+    --primary: 262 83% 63%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 262 83% 73%;
 
-    --secondary: 340 82% 62%;
+    --secondary: 340 82% 63%;
     --secondary-foreground: 0 0% 100%;
+    --secondary-glow: 340 82% 73%;
 
     --accent: 24 95% 63%;
     --accent-foreground: 0 0% 100%;
+    --accent-glow: 24 95% 73%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 13% 16%;
+    --muted-foreground: 220 9% 65%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 291 64% 52%;
+    --border: 220 13% 20%;
+    --input: 220 13% 20%;
+    --ring: 262 83% 63%;
     
-    /* Modern 3D Gradients - Dark Mode */
-    --gradient-instagram: linear-gradient(135deg, hsl(291 64% 52%), hsl(340 82% 62%), hsl(24 95% 63%));
-    --gradient-subtle: linear-gradient(180deg, hsl(222.2 84% 4.9%), hsl(217.2 32.6% 17.5%));
-    --gradient-3d: linear-gradient(145deg, hsl(291 64% 52%), hsl(340 82% 62%));
-    --gradient-card: linear-gradient(145deg, hsl(222.2 84% 6%), hsl(217.2 32.6% 19%));
+    /* Premium Gradients - Dark Mode */
+    --gradient-instagram: linear-gradient(135deg, hsl(262 83% 63%) 0%, hsl(340 82% 63%) 50%, hsl(24 95% 63%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 63%), hsl(262 83% 73%));
+    --gradient-secondary: linear-gradient(135deg, hsl(340 82% 63%), hsl(340 82% 73%));
+    --gradient-accent: linear-gradient(135deg, hsl(24 95% 63%), hsl(24 95% 73%));
+    --gradient-subtle: linear-gradient(180deg, hsl(220 13% 9%), hsl(220 13% 16%));
+    --gradient-3d: linear-gradient(145deg, hsl(262 83% 63%), hsl(340 82% 63%));
+    --gradient-card: linear-gradient(145deg, hsl(220 13% 11%), hsl(220 13% 14%));
+    --gradient-glass: linear-gradient(135deg, hsl(220 13% 11% / 0.9), hsl(220 13% 11% / 0.7));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(262 83% 63% / 0.2) 0, transparent 50%), 
+                     radial-gradient(at 100% 0%, hsl(340 82% 63% / 0.2) 0, transparent 50%),
+                     radial-gradient(at 100% 100%, hsl(24 95% 63% / 0.2) 0, transparent 50%),
+                     radial-gradient(at 0% 100%, hsl(262 83% 63% / 0.2) 0, transparent 50%);
     
-    /* Modern 3D Shadows - Dark Mode */
-    --shadow-3d: 0 10px 30px -10px hsl(291 64% 52% / 0.4), 0 4px 8px -2px hsl(340 82% 62% / 0.3);
-    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3), 0 2px 8px -2px hsl(0 0% 0% / 0.2);
-    --shadow-glow: 0 0 35px hsl(291 64% 52% / 0.5), 0 0 25px hsl(340 82% 62% / 0.35), 0 0 45px hsl(291 64% 52% / 0.25);
+    /* Premium Shadows - Dark Mode */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.25);
+    --shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.25);
+    --shadow-md: 0 10px 15px -3px hsl(0 0% 0% / 0.35), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 20px 25px -5px hsl(0 0% 0% / 0.4), 0 8px 10px -6px hsl(0 0% 0% / 0.35);
+    --shadow-xl: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
+    --shadow-3d: 0 20px 40px -10px hsl(262 83% 63% / 0.4), 0 8px 16px -4px hsl(340 82% 63% / 0.3);
+    --shadow-card: 0 8px 24px -8px hsl(0 0% 0% / 0.35), 0 4px 12px -4px hsl(0 0% 0% / 0.3);
+    --shadow-glow: 0 0 45px hsl(262 83% 73% / 0.5), 0 0 30px hsl(340 82% 73% / 0.4), 0 0 55px hsl(262 83% 73% / 0.3);
+    --shadow-glass: 0 8px 32px 0 hsl(0 0% 0% / 0.4);
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -121,22 +156,36 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+    font-feature-settings: 'cv11', 'ss01';
   }
 }
 
-/* Modern 3D Utility Classes */
+/* Premium Utility Classes */
 @layer utilities {
   .card-3d {
     background: var(--gradient-card);
     box-shadow: var(--shadow-card);
     transition: var(--transition-smooth);
     transform: translateZ(0);
+    backdrop-filter: blur(10px);
   }
   
   .card-3d:hover {
-    transform: translateY(-4px) scale(1.02);
+    transform: translateY(-6px) scale(1.01);
     box-shadow: var(--shadow-3d);
+  }
+  
+  .card-glass {
+    background: var(--gradient-glass);
+    box-shadow: var(--shadow-glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsl(var(--border) / 0.5);
   }
   
   .btn-3d {
@@ -160,6 +209,25 @@ All colors MUST be HSL.
   
   .gradient-text {
     background: var(--gradient-instagram);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+  }
+  
+  .bg-mesh {
+    background: var(--gradient-mesh);
+  }
+  
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .text-gradient-secondary {
+    background: var(--gradient-secondary);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
