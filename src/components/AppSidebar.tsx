@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors } from "lucide-react";
+import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, Tag, FileCheck, Eye } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -26,12 +26,16 @@ const mainItems = [
 const aiTools = [
   { title: "Caption Generator", url: "/caption-generator", icon: Sparkles },
   { title: "Thumbnail Generator", url: "/thumbnail-generator", icon: Image },
-  { title: "Background Removal", url: "/background-removal", icon: Scissors },
   { title: "Script Writer", url: "/script-writer", icon: FileText },
   { title: "Music Generator", url: "/music-generator", icon: Music },
   { title: "Trend Analyzer", url: "/trend-analyzer", icon: TrendingUp },
   { title: "SEO Optimizer", url: "/seo-optimizer", icon: Search },
   { title: "Hashtag Generator", url: "/hashtag-generator", icon: Hash },
+  { title: "Background Removal", url: "/background-removal", icon: Scissors },
+  { title: "Speech-to-Text", url: "/speech-to-text", icon: Mic },
+  { title: "Image Classification", url: "/image-classification", icon: Tag },
+  { title: "Text Summarizer", url: "/text-summarizer", icon: FileCheck },
+  { title: "Object Detection", url: "/object-detection", icon: Eye },
 ];
 
 export function AppSidebar() {

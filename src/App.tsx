@@ -20,6 +20,10 @@ import TrendAnalyzer from "./pages/TrendAnalyzer";
 import SEOOptimizer from "./pages/SEOOptimizer";
 import HashtagGenerator from "./pages/HashtagGenerator";
 import BackgroundRemoval from "./pages/BackgroundRemoval";
+import SpeechToText from "./pages/SpeechToText";
+import ImageClassification from "./pages/ImageClassification";
+import TextSummarizer from "./pages/TextSummarizer";
+import ObjectDetection from "./pages/ObjectDetection";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +49,10 @@ const App = () => (
           <Route path="/seo-optimizer" element={<Layout><SEOOptimizer /></Layout>} />
           <Route path="/hashtag-generator" element={<Layout><HashtagGenerator /></Layout>} />
           <Route path="/background-removal" element={<Layout><BackgroundRemoval /></Layout>} />
+          <Route path="/speech-to-text" element={<Layout><SpeechToText /></Layout>} />
+          <Route path="/image-classification" element={<Layout><ImageClassification /></Layout>} />
+          <Route path="/text-summarizer" element={<Layout><TextSummarizer /></Layout>} />
+          <Route path="/object-detection" element={<Layout><ObjectDetection /></Layout>} />
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/payment-success" element={<Layout><PaymentSuccess /></Layout>} />
           <Route path="/admin" element={<Layout><Admin /></Layout>} />
