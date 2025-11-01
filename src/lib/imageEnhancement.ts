@@ -4,11 +4,19 @@ let upscaler: any = null;
 
 async function loadModel() {
   if (!upscaler) {
-    upscaler = await pipeline(
-      "image-to-image",
-      "Xenova/swin2SR-classical-sr-x2-64",
-      { device: "webgpu" }
-    );
+    try {
+      upscaler = await pipeline(
+        "image-to-image",
+        "Xenova/swin2SR-classical-sr-x2-64",
+        { device: "webgpu" }
+      );
+    } catch (error) {
+      console.warn("WebGPU not available, falling back to WASM:", error);
+      upscaler = await pipeline(
+        "image-to-image",
+        "Xenova/swin2SR-classical-sr-x2-64"
+      );
+    }
   }
   return upscaler;
 }

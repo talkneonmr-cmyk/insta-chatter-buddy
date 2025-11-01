@@ -34,7 +34,7 @@ serve(async (req) => {
     try {
       const res = await hf.textToSpeech(
         { 
-          model: "espnet/kan-bayashi_ljspeech_vits", 
+          model: "facebook/mms-tts-eng", 
           inputs: text 
         },
         { wait_for_model: true }
@@ -43,7 +43,7 @@ serve(async (req) => {
     } catch (e) {
       console.error("HF library error:", e);
       // If the helper threw a generic blob error, try a manual call to surface the real message
-      const resp = await fetch("https://api-inference.huggingface.co/models/espnet/kan-bayashi_ljspeech_vits", {
+      const resp = await fetch("https://api-inference.huggingface.co/models/facebook/mms-tts-eng", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${HF_TOKEN}`,
