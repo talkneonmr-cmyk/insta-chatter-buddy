@@ -16,8 +16,20 @@ const PREMADE_VOICES = [
   { id: "FGY2WhTYpPnrIDTdsKH5", name: "Laura", description: "Soft and pleasant female voice" },
   { id: "IKne3meq5aSn9XLyUdCD", name: "Charlie", description: "Energetic male voice" },
   { id: "JBFqnCBsd6RMkjVDRZzb", name: "George", description: "Deep and authoritative male voice" },
+  { id: "N2lVS1w4EtoT3dr4eOWO", name: "Callum", description: "Smooth male voice" },
+  { id: "SAz9YHcvj6GT2YYXdXww", name: "River", description: "Versatile voice" },
   { id: "TX3LPaxmHKxFdv7VOQHJ", name: "Liam", description: "Young and dynamic male voice" },
   { id: "XB0fDUnXU5powFXDhCwa", name: "Charlotte", description: "Elegant female voice" },
+  { id: "Xb7hH8MSUJpSbSDYk0k2", name: "Alice", description: "Bright female voice" },
+  { id: "XrExE9yKIg1WjnnlVkGX", name: "Matilda", description: "Mature female voice" },
+  { id: "bIHbv24MWmeRgasZH58o", name: "Will", description: "Confident male voice" },
+  { id: "cgSgspJ2msm6clMCkdW9", name: "Jessica", description: "Professional female voice" },
+  { id: "cjVigY5qzO86Huf0OWal", name: "Eric", description: "Strong male voice" },
+  { id: "iP95p4xoKVk53GoZ742B", name: "Chris", description: "Casual male voice" },
+  { id: "nPczCjzI2devNBz1zQrb", name: "Brian", description: "Friendly male voice" },
+  { id: "onwK4e9ZLuTAKqWW03F9", name: "Daniel", description: "Articulate male voice" },
+  { id: "pFZP5JQG7iQjIQuC4Bku", name: "Lily", description: "Sweet female voice" },
+  { id: "pqHfZKP75CvOlQylNhV4", name: "Bill", description: "Mature male voice" },
 ];
 
 const VoiceCloning = () => {
