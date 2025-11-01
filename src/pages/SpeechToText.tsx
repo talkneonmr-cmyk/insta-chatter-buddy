@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Upload, Mic, Loader2, Copy, Download, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { pipeline } from "@huggingface/transformers";
+import { supabase } from "@/integrations/supabase/client";
 
 const SpeechToText = () => {
   const navigate = useNavigate();
@@ -36,25 +36,31 @@ const SpeechToText = () => {
     setProcessing(true);
     try {
       toast({
-        title: "Loading AI model...",
-        description: "First time may take a moment to download the model"
-      });
-
-      const transcriber = await pipeline(
-        "automatic-speech-recognition",
-        "onnx-community/whisper-tiny.en",
-        { device: "webgpu" }
-      );
-
-      toast({
         title: "Transcribing...",
-        description: "Processing your audio with Whisper AI"
+        description: "Processing your audio with OpenAI Whisper"
       });
 
-      const url = URL.createObjectURL(audioFile);
-      const output: any = await transcriber(url);
+      // Convert audio file to base64
+      const reader = new FileReader();
+      const base64Audio = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          // Remove data URL prefix to get pure base64
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(audioFile);
+      });
+
+      // Call edge function
+      const { data, error } = await supabase.functions.invoke('speech-to-text', {
+        body: { audio: base64Audio }
+      });
+
+      if (error) throw error;
       
-      setTranscript(output.text || output[0]?.text || "");
+      setTranscript(data.text || "");
       
       toast({
         title: "Transcription complete!",
@@ -64,7 +70,7 @@ const SpeechToText = () => {
       console.error('Transcription error:', error);
       toast({
         title: "Transcription failed",
-        description: error.message || "Make sure WebGPU is supported in your browser",
+        description: error.message || "Failed to transcribe audio. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -119,10 +125,10 @@ const SpeechToText = () => {
             <div className="flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-1">
-                <h3 className="font-semibold text-green-500">OpenAI Whisper AI - Free Forever</h3>
+                <h3 className="font-semibold text-green-500">OpenAI Whisper AI - Fast & Accurate</h3>
                 <p className="text-sm text-muted-foreground">
-                  Powered by OpenAI's Whisper model running in your browser. Perfect for transcribing YouTube videos, 
-                  podcasts, or any audio content. No server uploads, unlimited usage!
+                  Powered by OpenAI's Whisper model. Perfect for transcribing YouTube videos, 
+                  podcasts, or any audio content. Fast processing in 10-20 seconds!
                 </p>
               </div>
             </div>
@@ -198,7 +204,7 @@ const SpeechToText = () => {
 
                   <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                     <Sparkles className="h-3 w-3" />
-                    <span>Powered by OpenAI Whisper - runs in your browser</span>
+                    <span>Powered by OpenAI Whisper API - Fast & Reliable</span>
                   </div>
                 </>
               )}
