@@ -110,10 +110,10 @@ const Dashboard = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur-md opacity-75 group-hover:opacity-100 transition-opacity"></div>
-                    <div className="relative p-2.5 rounded-2xl bg-gradient-to-br from-primary/90 via-secondary/90 to-accent/90 backdrop-blur-xl shadow-lg border border-white/20">
-                      <Sparkles className="w-7 h-7 text-white drop-shadow-lg" />
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-xl blur-sm opacity-60"></div>
+                    <div className="relative p-2 rounded-xl bg-gradient-to-br from-primary/80 via-secondary/80 to-accent/80 backdrop-blur-sm shadow-lg">
+                      <Sparkles className="w-5 h-5 text-white" />
                     </div>
                   </div>
                   {plan === "pro" && (
