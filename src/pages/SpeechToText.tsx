@@ -141,9 +141,16 @@ const SpeechToText = () => {
       });
     } catch (error: any) {
       console.error('Transcription error:', error);
+      const msg = (error?.message ?? '').toString();
+      let description = "Failed to transcribe audio. Please try again.";
+      if (msg.includes('detected_unusual_activity') || msg.includes('402')) {
+        description = "ElevenLabs blocked free-tier usage due to unusual activity. Use a paid ElevenLabs plan or try again without VPN. Live mic still works.";
+      } else if (msg.includes('429')) {
+        description = "Rate limited by provider. Please wait a minute and try again.";
+      }
       toast({
         title: "Transcription failed",
-        description: error.message || "Failed to transcribe audio. Please try again.",
+        description,
         variant: "destructive"
       });
     } finally {

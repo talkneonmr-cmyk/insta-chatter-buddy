@@ -74,9 +74,37 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("ElevenLabs API error:", errorText);
-      throw new Error(`ElevenLabs API error: ${errorText}`);
+      let status = response.status;
+      let detail: any = null;
+      const raw = await response.text();
+      try { detail = JSON.parse(raw); } catch { /* ignore parse error */ }
+      const message = detail?.detail?.message || detail?.error || raw || 'Unknown error';
+
+      // Map specific ElevenLabs conditions to clearer HTTP statuses
+      if (detail?.detail?.status === 'detected_unusual_activity') {
+        return new Response(JSON.stringify({ error: message, code: 'detected_unusual_activity' }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (status === 429 || detail?.detail?.status === 'rate_limited') {
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again in a minute.' }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (detail?.detail?.status === 'invalid_parameters' || detail?.detail?.status === 'invalid_model_id') {
+        return new Response(JSON.stringify({ error: message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      console.error("ElevenLabs API error:", raw);
+      return new Response(JSON.stringify({ error: message }), {
+        status: status || 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const result = await response.json();
