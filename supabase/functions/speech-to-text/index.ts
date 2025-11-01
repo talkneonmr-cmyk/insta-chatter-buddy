@@ -48,35 +48,35 @@ serve(async (req) => {
       throw new Error("No audio data provided");
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured");
+    const ELEVEN_LABS_API_KEY = Deno.env.get("ELEVEN_LABS_API_KEY");
+    if (!ELEVEN_LABS_API_KEY) {
+      throw new Error("ELEVEN_LABS_API_KEY is not configured");
     }
 
-    console.log("Processing audio transcription...");
+    console.log("Processing audio transcription with ElevenLabs...");
 
     // Process audio in chunks
     const binaryAudio = processBase64Chunks(audio);
     
-    // Prepare form data
+    // Prepare form data for ElevenLabs
     const formData = new FormData();
     const blob = new Blob([binaryAudio], { type: "audio/webm" });
-    formData.append("file", blob, "audio.webm");
-    formData.append("model", "whisper-1");
+    formData.append("audio", blob, "audio.webm");
+    formData.append("model_id", "scribe-v1");
 
-    // Send to OpenAI
-    const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+    // Send to ElevenLabs Speech to Text API
+    const response = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        "xi-api-key": ELEVEN_LABS_API_KEY,
       },
       body: formData,
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("OpenAI API error:", errorText);
-      throw new Error(`OpenAI API error: ${errorText}`);
+      console.error("ElevenLabs API error:", errorText);
+      throw new Error(`ElevenLabs API error: ${errorText}`);
     }
 
     const result = await response.json();

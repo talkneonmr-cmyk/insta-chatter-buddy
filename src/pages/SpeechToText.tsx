@@ -113,7 +113,7 @@ const SpeechToText = () => {
     try {
       toast({
         title: "Transcribing...",
-        description: "Processing with OpenAI Whisper (10-20 seconds)"
+        description: "Processing with ElevenLabs Scribe (10-20 seconds)"
       });
 
       const reader = new FileReader();
@@ -143,7 +143,7 @@ const SpeechToText = () => {
       console.error('Transcription error:', error);
       toast({
         title: "Transcription failed",
-        description: error.message || "Please make sure OpenAI API key is configured",
+        description: error.message || "Failed to transcribe audio. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -201,7 +201,7 @@ const SpeechToText = () => {
                 <h3 className="font-semibold text-green-500">Two Ways to Transcribe</h3>
                 <p className="text-sm text-muted-foreground">
                   🎤 <strong>Live Speech:</strong> Free, instant using Web Speech API (Chrome/Edge)<br/>
-                  📁 <strong>File Upload:</strong> Fast transcription with OpenAI Whisper API (requires API key)
+                  📁 <strong>File Upload:</strong> Fast transcription with ElevenLabs Scribe (99 languages)
                 </p>
               </div>
             </div>
@@ -338,7 +338,7 @@ const SpeechToText = () => {
 
                   <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                     <Sparkles className="h-3 w-3" />
-                    <span>OpenAI Whisper - Requires API Key</span>
+                    <span>ElevenLabs Scribe - Fast & Accurate</span>
                   </div>
                 </>
               )}
