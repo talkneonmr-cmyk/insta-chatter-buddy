@@ -14,7 +14,7 @@ function configureEnv() {
   }
 }
 
-async function loadModel() {
+async function loadModel(onProgress?: ProgressCallback) {
   if (!upscaler) {
     configureEnv();
     try {
@@ -24,7 +24,8 @@ async function loadModel() {
         { device: "webgpu", dtype: "fp32" }
       );
     } catch (error) {
-      console.warn("WebGPU not available, falling back to WASM:", error);
+      console.warn("WebGPU not available, falling back to WASM (this will be slower):", error);
+      onProgress?.("WebGPU unavailable, using slower CPU mode...", 5);
       upscaler = await pipeline(
         "image-to-image",
         "Xenova/swin2SR-classical-sr-x2-64",
@@ -40,21 +41,21 @@ export async function enhanceImage(
   scale: number = 2, 
   onProgress?: ProgressCallback
 ): Promise<string> {
-  const TIMEOUT_MS = 60000; // 60 second timeout
+  const TIMEOUT_MS = 180000; // 3 minute timeout (WASM is slower than WebGPU)
 
   const enhanceWithTimeout = async () => {
     try {
       // Stage 1: Loading model (0-30%)
       onProgress?.("Loading AI model...", 0);
-      const model = await loadModel();
-      onProgress?.("Loading AI model...", 30);
+      const model = await loadModel(onProgress);
+      onProgress?.("AI model loaded", 30);
 
       // Stage 2: Preparing image (30-40%)
       onProgress?.("Preparing image...", 30);
       const image = await RawImage.fromURL(imageUrl);
 
       // Downscale very large images to prevent long/blocked processing
-      const MAX_DIM = 1024;
+      const MAX_DIM = 800; // Reduced for faster WASM processing
       let currentImage: any = image;
       if (image.width > MAX_DIM || image.height > MAX_DIM) {
         const factor = Math.min(MAX_DIM / image.width, MAX_DIM / image.height);
@@ -111,7 +112,7 @@ export async function enhanceImage(
 
   // Add timeout protection
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error("Enhancement timed out after 60 seconds. Try a smaller image or lower scale.")), TIMEOUT_MS);
+    setTimeout(() => reject(new Error("Enhancement timed out after 3 minutes. Please try a smaller image or lower scale factor.")), TIMEOUT_MS);
   });
 
   return Promise.race([enhanceWithTimeout(), timeoutPromise]);
