@@ -95,14 +95,13 @@ serve(async (req) => {
 
     const audioArrayBuffer = await ttsResponse.arrayBuffer();
     
-    // Convert to base64 in chunks to avoid stack overflow
+    // Convert to base64 using smaller chunks to avoid stack overflow
     const uint8Array = new Uint8Array(audioArrayBuffer);
-    const chunkSize = 8192;
     let binaryString = '';
     
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.slice(i, i + chunkSize);
-      binaryString += String.fromCharCode(...chunk);
+    // Process byte by byte to avoid any stack issues
+    for (let i = 0; i < uint8Array.length; i++) {
+      binaryString += String.fromCharCode(uint8Array[i]);
     }
     
     const base64 = btoa(binaryString);
