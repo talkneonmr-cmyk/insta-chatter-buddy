@@ -94,17 +94,17 @@ const VoiceCloning = () => {
 
   return (
     <Layout>
-      <div className="relative">
+      <div className="relative min-h-[calc(100vh-4rem)]">
         {/* Background Content - Blurred */}
-        <div className="blur-md pointer-events-none select-none space-y-6">
+        <div className="blur-md pointer-events-none select-none space-y-4 sm:space-y-6 p-4 sm:p-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">AI Voice Cloning</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">AI Voice Cloning</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Clone custom voices using advanced AI technology
             </p>
           </div>
 
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">
@@ -113,9 +113,9 @@ const VoiceCloning = () => {
                 <p className="text-xs text-muted-foreground mb-2">
                   Upload at least 30 seconds of clear audio.
                 </p>
-                <div className="border-2 border-dashed rounded-lg p-8 text-center bg-muted/30">
-                  <Upload className="w-12 h-12 mx-auto text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mt-2">
+                <div className="border-2 border-dashed rounded-lg p-6 sm:p-8 text-center bg-muted/30">
+                  <Upload className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground" />
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-2">
                     Click to upload MP3, WAV, or M4A
                   </p>
                 </div>
@@ -139,14 +139,14 @@ const VoiceCloning = () => {
             </div>
           </Card>
 
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Volume2 className="w-5 h-5" />
+          <Card className="p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
+              <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
               Generated Audio
             </h2>
-            <div className="border-2 rounded-lg p-12 text-center bg-muted/30">
-              <Volume2 className="w-16 h-16 mx-auto text-muted-foreground/50" />
-              <p className="text-muted-foreground mt-4">
+            <div className="border-2 rounded-lg p-8 sm:p-12 text-center bg-muted/30">
+              <Volume2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground/50" />
+              <p className="text-sm sm:text-base text-muted-foreground mt-4">
                 Generated audio will appear here
               </p>
             </div>
@@ -154,28 +154,28 @@ const VoiceCloning = () => {
         </div>
 
         {/* Development Notice Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <Card className="p-8 max-w-lg mx-4 border-2 border-orange-500/50 shadow-2xl">
-            <div className="text-center space-y-4">
-              <div className="w-20 h-20 mx-auto rounded-full bg-orange-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-10 h-10 text-orange-500" />
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+          <Card className="p-6 sm:p-8 w-full max-w-md sm:max-w-lg border-2 border-orange-500/50 shadow-2xl">
+            <div className="text-center space-y-3 sm:space-y-4">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-orange-500/20 flex items-center justify-center">
+                <AlertTriangle className="w-8 h-8 sm:w-10 sm:h-10 text-orange-500" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold mb-2">Feature Under Development</h2>
-                <p className="text-muted-foreground mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold mb-2">Feature Under Development</h2>
+                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
                   Voice cloning is currently in active development and testing phase.
                 </p>
               </div>
-              <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-left">
-                <p className="text-sm font-semibold">What's Coming:</p>
-                <ul className="text-sm text-muted-foreground space-y-1">
+              <div className="bg-muted/50 rounded-lg p-3 sm:p-4 space-y-2 text-left">
+                <p className="text-xs sm:text-sm font-semibold">What's Coming:</p>
+                <ul className="text-xs sm:text-sm text-muted-foreground space-y-1">
                   <li>• Advanced voice cloning with high accuracy</li>
                   <li>• Multiple language support</li>
                   <li>• Real-time voice synthesis</li>
                   <li>• Custom voice profiles</li>
                 </ul>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 This feature will be available soon. Thank you for your patience!
               </p>
             </div>
