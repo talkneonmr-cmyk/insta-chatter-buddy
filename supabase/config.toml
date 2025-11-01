@@ -54,3 +54,6 @@ verify_jwt = false
 
 [functions.generate-script]
 verify_jwt = false
+
+[functions.clone-voice]
+verify_jwt = false
