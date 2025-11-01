@@ -94,7 +94,18 @@ serve(async (req) => {
     }
 
     const audioArrayBuffer = await ttsResponse.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(audioArrayBuffer)));
+    
+    // Convert to base64 in chunks to avoid stack overflow
+    const uint8Array = new Uint8Array(audioArrayBuffer);
+    const chunkSize = 8192;
+    let binaryString = '';
+    
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.slice(i, i + chunkSize);
+      binaryString += String.fromCharCode(...chunk);
+    }
+    
+    const base64 = btoa(binaryString);
 
     // Step 4: Clean up - delete the voice if we cloned it
     if (shouldCleanup) {
