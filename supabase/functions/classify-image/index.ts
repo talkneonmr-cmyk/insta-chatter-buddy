@@ -41,7 +41,7 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: 'Analyze this image and provide 5-10 relevant classification tags/labels with confidence scores. Return ONLY a JSON array of objects with "label" and "score" (0-1) fields. Be specific and accurate. Example: [{"label":"mountain landscape","score":0.95},{"label":"sunset","score":0.87}]'
+                text: 'Analyze this image and provide 5-10 relevant classification tags/labels with confidence scores. Be specific and accurate about what you see.'
               },
               {
                 type: 'image_url',
@@ -52,7 +52,36 @@ serve(async (req) => {
             ]
           }
         ],
-        max_completion_tokens: 500
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'classify_image',
+              description: 'Return classification tags with confidence scores',
+              parameters: {
+                type: 'object',
+                properties: {
+                  tags: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        label: { type: 'string', description: 'Classification tag/label' },
+                        score: { type: 'number', description: 'Confidence score between 0 and 1' }
+                      },
+                      required: ['label', 'score'],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ['tags'],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: { type: 'function', function: { name: 'classify_image' } },
+        max_completion_tokens: 1000
       }),
     });
 
@@ -78,41 +107,20 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
 
-    if (!content) {
-      throw new Error('No response from AI');
+    if (!toolCall || toolCall.function.name !== 'classify_image') {
+      throw new Error('No valid tool call in AI response');
     }
 
-    console.log('AI Response:', content);
+    console.log('AI Tool Call:', toolCall.function.arguments);
 
-    // Extract JSON from response
     let tags;
-    let jsonString = content.trim();
-    
     try {
-      // Try to extract JSON from markdown code block first
-      const jsonMatch = jsonString.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (jsonMatch) {
-        jsonString = jsonMatch[1].trim();
-      }
-      
-      // Try to find JSON array in text
-      const arrayMatch = jsonString.match(/\[[\s\S]*\]/);
-      if (arrayMatch) {
-        jsonString = arrayMatch[0];
-      }
-      
-      // Clean up common JSON formatting issues
-      jsonString = jsonString
-        .replace(/\/\/.*$/gm, '')  // Remove single-line comments
-        .replace(/\/\*[\s\S]*?\*\//g, '')  // Remove multi-line comments
-        .replace(/,(\s*[}\]])/g, '$1');  // Remove trailing commas
-      
-      tags = JSON.parse(jsonString);
+      const args = JSON.parse(toolCall.function.arguments);
+      tags = args.tags || [];
     } catch (e) {
-      console.error('Failed to parse JSON:', e);
-      console.error('Content was:', content);
+      console.error('Failed to parse tool call arguments:', e);
       const errorMessage = e instanceof Error ? e.message : 'Unknown parse error';
       throw new Error(`Could not parse AI response: ${errorMessage}`);
     }
