@@ -24,6 +24,8 @@ import ImageClassification from "./pages/ImageClassification";
 import TextSummarizer from "./pages/TextSummarizer";
 import ObjectDetection from "./pages/ObjectDetection";
 import BackgroundRemoval from "./pages/BackgroundRemoval";
+import ImageEnhancement from "./pages/ImageEnhancement";
+import VoiceCloning from "./pages/VoiceCloning";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,8 @@ const App = () => (
           <Route path="/image-classification" element={<Layout><ImageClassification /></Layout>} />
           <Route path="/text-summarizer" element={<Layout><TextSummarizer /></Layout>} />
           <Route path="/object-detection" element={<Layout><ObjectDetection /></Layout>} />
+          <Route path="/image-enhancement" element={<Layout><ImageEnhancement /></Layout>} />
+          <Route path="/voice-cloning" element={<Layout><VoiceCloning /></Layout>} />
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/payment-success" element={<Layout><PaymentSuccess /></Layout>} />
           <Route path="/admin" element={<Layout><Admin /></Layout>} />

@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, Tag, FileCheck, Eye } from "lucide-react";
+import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, Tag, FileCheck, Eye, Wand2, Volume2 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -36,6 +36,8 @@ const aiTools = [
   { title: "Image Classification", url: "/image-classification", icon: Tag },
   { title: "Text Summarizer", url: "/text-summarizer", icon: FileCheck },
   { title: "Object Detection", url: "/object-detection", icon: Eye },
+  { title: "Image Enhancement", url: "/image-enhancement", icon: Wand2 },
+  { title: "Voice Cloning", url: "/voice-cloning", icon: Volume2 },
 ];
 
 export function AppSidebar() {
