@@ -1,80 +1,89 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Upload, Mic, Loader2, Copy, Download, Sparkles } from "lucide-react";
+import { ArrowLeft, Mic, MicOff, Copy, Download, Sparkles, Play, Pause } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 const SpeechToText = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [transcript, setTranscript] = useState("");
-  const [processing, setProcessing] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [recognition, setRecognition] = useState<any>(null);
+  const [isSupported, setIsSupported] = useState(true);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setAudioFile(file);
-      setTranscript("");
-    }
-  };
-
-  const handleTranscribe = async () => {
-    if (!audioFile) {
+  useEffect(() => {
+    // Check if Web Speech API is supported
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      setIsSupported(false);
       toast({
-        title: "No audio file",
-        description: "Please upload an audio or video file first",
+        title: "Not Supported",
+        description: "Speech recognition is not supported in this browser. Try Chrome or Edge.",
         variant: "destructive"
       });
       return;
     }
 
-    setProcessing(true);
-    try {
-      toast({
-        title: "Transcribing...",
-        description: "Processing your audio with OpenAI Whisper"
-      });
+    const recognitionInstance = new SpeechRecognition();
+    recognitionInstance.continuous = true;
+    recognitionInstance.interimResults = true;
+    recognitionInstance.lang = 'en-US';
 
-      // Convert audio file to base64
-      const reader = new FileReader();
-      const base64Audio = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => {
-          const result = reader.result as string;
-          // Remove data URL prefix to get pure base64
-          const base64 = result.split(',')[1];
-          resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(audioFile);
-      });
+    recognitionInstance.onresult = (event: any) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
 
-      // Call edge function
-      const { data, error } = await supabase.functions.invoke('speech-to-text', {
-        body: { audio: base64Audio }
-      });
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcriptPiece = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcriptPiece + ' ';
+        } else {
+          interimTranscript += transcriptPiece;
+        }
+      }
 
-      if (error) throw error;
-      
-      setTranscript(data.text || "");
-      
+      setTranscript(prev => prev + finalTranscript);
+    };
+
+    recognitionInstance.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
       toast({
-        title: "Transcription complete!",
-        description: "Your audio has been transcribed successfully"
-      });
-    } catch (error: any) {
-      console.error('Transcription error:', error);
-      toast({
-        title: "Transcription failed",
-        description: error.message || "Failed to transcribe audio. Please try again.",
+        title: "Recognition Error",
+        description: `Error: ${event.error}`,
         variant: "destructive"
       });
-    } finally {
-      setProcessing(false);
+    };
+
+    recognitionInstance.onend = () => {
+      setIsListening(false);
+    };
+
+    setRecognition(recognitionInstance);
+  }, [toast]);
+
+  const toggleListening = () => {
+    if (!recognition || !isSupported) return;
+
+    if (isListening) {
+      recognition.stop();
+      setIsListening(false);
+      toast({
+        title: "Stopped",
+        description: "Speech recognition stopped"
+      });
+    } else {
+      setTranscript("");
+      recognition.start();
+      setIsListening(true);
+      toast({
+        title: "Listening...",
+        description: "Start speaking now"
+      });
     }
   };
 
@@ -125,10 +134,10 @@ const SpeechToText = () => {
             <div className="flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-1">
-                <h3 className="font-semibold text-green-500">OpenAI Whisper AI - Fast & Accurate</h3>
+                <h3 className="font-semibold text-green-500">Free Web Speech API - Real-time</h3>
                 <p className="text-sm text-muted-foreground">
-                  Powered by OpenAI's Whisper model. Perfect for transcribing YouTube videos, 
-                  podcasts, or any audio content. Fast processing in 10-20 seconds!
+                  Uses your browser's built-in speech recognition. Completely free, instant transcription 
+                  as you speak. Works best in Chrome and Edge browsers.
                 </p>
               </div>
             </div>
@@ -136,78 +145,63 @@ const SpeechToText = () => {
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Upload Section */}
+          {/* Microphone Section */}
           <Card className="h-fit">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Upload className="h-5 w-5 text-green-500" />
-                Upload Audio/Video
+                <Mic className="h-5 w-5 text-green-500" />
+                Live Transcription
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="audio/*,video/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              
-              <Button
-                variant="outline"
-                className="w-full h-32 border-2 border-dashed hover:border-green-500/50 hover:bg-green-500/5 transition-all"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <div className="text-center">
-                  <Mic className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Click to upload audio or video
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    MP3, WAV, M4A, MP4, WebM
-                  </p>
-                </div>
-              </Button>
-
-              {audioFile && (
-                <>
-                  <div className="p-4 rounded-lg bg-muted border">
-                    <div className="flex items-center gap-3">
-                      <Mic className="h-5 w-5 text-green-500" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{audioFile.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {(audioFile.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
+              <div className="flex flex-col items-center justify-center py-8 space-y-6">
+                <div className="relative">
+                  <div className={`absolute inset-0 rounded-full blur-xl ${isListening ? 'bg-green-500/30 animate-pulse' : 'bg-muted/30'}`}></div>
                   <Button
-                    onClick={handleTranscribe}
-                    disabled={processing}
-                    className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:opacity-90"
+                    onClick={toggleListening}
+                    disabled={!isSupported}
                     size="lg"
+                    className={`relative w-24 h-24 rounded-full ${
+                      isListening 
+                        ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:opacity-90' 
+                        : 'bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:opacity-90'
+                    }`}
                   >
-                    {processing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Transcribing...
-                      </>
+                    {isListening ? (
+                      <MicOff className="h-10 w-10" />
                     ) : (
-                      <>
-                        <Mic className="mr-2 h-4 w-4" />
-                        Transcribe Audio
-                      </>
+                      <Mic className="h-10 w-10" />
                     )}
                   </Button>
+                </div>
 
-                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                    <Sparkles className="h-3 w-3" />
-                    <span>Powered by OpenAI Whisper API - Fast & Reliable</span>
+                <div className="text-center space-y-2">
+                  <p className="text-lg font-semibold">
+                    {isListening ? "Listening..." : "Click to Start"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {isListening 
+                      ? "Speak clearly into your microphone" 
+                      : isSupported 
+                        ? "Real-time speech transcription" 
+                        : "Not supported in this browser"
+                    }
+                  </p>
+                </div>
+
+                {!isSupported && (
+                  <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-center">
+                    <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                      Please use Chrome or Edge browser for speech recognition
+                    </p>
                   </div>
-                </>
-              )}
+                )}
+
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <Sparkles className="h-3 w-3" />
+                  <span>100% Free - Web Speech API</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -259,7 +253,7 @@ const SpeechToText = () => {
                   <div>
                     <h3 className="font-semibold text-lg mb-2">Ready to Transcribe</h3>
                     <p className="text-sm text-muted-foreground">
-                      Upload audio/video to get instant transcription
+                      Click the microphone to start real-time transcription
                     </p>
                   </div>
                 </div>
@@ -278,28 +272,28 @@ const SpeechToText = () => {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 font-bold">1</div>
-                  <h4 className="font-semibold">YouTube Videos</h4>
+                  <h4 className="font-semibold">Live Conversations</h4>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Transcribe your videos to create subtitles or blog posts
+                  Real-time transcription of meetings, interviews, or calls
                 </p>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold">2</div>
-                  <h4 className="font-semibold">Podcast Scripts</h4>
+                  <h4 className="font-semibold">Voice Notes</h4>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Convert podcast episodes into written content automatically
+                  Quickly dictate notes, ideas, or reminders
                 </p>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-teal-500/10 flex items-center justify-center text-teal-500 font-bold">3</div>
-                  <h4 className="font-semibold">Meeting Notes</h4>
+                  <h4 className="font-semibold">Content Creation</h4>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Record meetings and get instant text transcripts
+                  Draft scripts, articles, or social media posts by speaking
                 </p>
               </div>
             </div>
