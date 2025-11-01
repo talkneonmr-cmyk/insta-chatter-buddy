@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { HfInference } from "https://esm.sh/@huggingface/inference@2.3.2";
 
@@ -33,7 +34,7 @@ serve(async (req) => {
     try {
       const res = await hf.textToSpeech(
         { 
-          model: "microsoft/speecht5_tts", 
+          model: "espnet/kan-bayashi_ljspeech_vits", 
           inputs: text 
         },
         { wait_for_model: true }
@@ -42,7 +43,7 @@ serve(async (req) => {
     } catch (e) {
       console.error("HF library error:", e);
       // If the helper threw a generic blob error, try a manual call to surface the real message
-      const resp = await fetch("https://api-inference.huggingface.co/models/microsoft/speecht5_tts", {
+      const resp = await fetch("https://api-inference.huggingface.co/models/espnet/kan-bayashi_ljspeech_vits", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${HF_TOKEN}`,
