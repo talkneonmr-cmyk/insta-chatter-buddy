@@ -76,7 +76,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-3 animate-scale-in">
           {showText && (
             <div>
-              <h1 className="font-bold text-xl gradient-text tracking-tight">Fabulos Creators</h1>
+              <h1 className="font-bold text-xl gradient-text tracking-tight">Fabuos Creators</h1>
               <p className="text-xs text-muted-foreground font-medium">AI Content Studio</p>
             </div>
           )}
