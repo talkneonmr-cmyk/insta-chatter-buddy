@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -90,6 +91,61 @@ serve(async (req) => {
     if (!ttsResponse.ok) {
       const errorText = await ttsResponse.text();
       console.error("Eleven Labs TTS error:", errorText);
+
+      // Fallback to OpenAI TTS for pre-made voices if configured
+      if (usePreMadeVoice) {
+        const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+        if (OPENAI_API_KEY) {
+          console.log("Falling back to OpenAI TTS (premade voices)");
+          const oaResp = await fetch("https://api.openai.com/v1/audio/speech", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${OPENAI_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "tts-1",
+              input: text,
+              voice: "alloy",
+              response_format: "mp3",
+            }),
+          });
+
+          if (!oaResp.ok) {
+            const oaErr = await oaResp.text();
+            console.error("OpenAI TTS error:", oaErr);
+            return new Response(
+              JSON.stringify({
+                error:
+                  "Voice generation blocked on Eleven Labs and OpenAI fallback failed. Please try again later or configure a valid key.",
+              }),
+              { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+
+          const oaBuf = await oaResp.arrayBuffer();
+          const oaBytes = new Uint8Array(oaBuf);
+          let oaBinary = "";
+          for (let i = 0; i < oaBytes.length; i++) oaBinary += String.fromCharCode(oaBytes[i]);
+          const oaBase64 = btoa(oaBinary);
+
+          return new Response(
+            JSON.stringify({ audioUrl: `data:audio/mp3;base64,${oaBase64}`, success: true }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // No OpenAI key available
+        return new Response(
+          JSON.stringify({
+            error:
+              "Eleven Labs blocked free-tier usage. Add your OpenAI API key for fallback or upgrade your Eleven Labs plan.",
+          }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // For clone mode, surface the Eleven Labs error
       throw new Error(`Failed to generate speech: ${errorText}`);
     }
 
