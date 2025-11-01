@@ -1,6 +1,4 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { HfInference } from "https://esm.sh/@huggingface/inference@2.3.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,68 +17,99 @@ serve(async (req) => {
       throw new Error("Missing required fields: audioUrl and text");
     }
 
-    const HF_TOKEN = Deno.env.get("HUGGING_FACE_ACCESS_TOKEN");
-    if (!HF_TOKEN) {
-      throw new Error("HUGGING_FACE_ACCESS_TOKEN is not configured");
+    const ELEVEN_LABS_API_KEY = Deno.env.get("ELEVEN_LABS_API_KEY");
+    if (!ELEVEN_LABS_API_KEY) {
+      throw new Error("ELEVEN_LABS_API_KEY is not configured");
     }
 
-    // NOTE: We currently do not use the uploaded audioUrl because this is plain TTS.
-    // For true voice cloning, we will switch models and include the reference audio later.
-    console.log("Generating TTS for text:", text);
+    console.log("Cloning voice with Eleven Labs...");
 
-    const hf = new HfInference(HF_TOKEN);
-    let arrayBuffer: ArrayBuffer;
+    // Step 1: Download the audio sample
+    const audioResponse = await fetch(audioUrl);
+    if (!audioResponse.ok) {
+      throw new Error("Failed to fetch audio sample");
+    }
+    const audioBlob = await audioResponse.blob();
 
+    // Step 2: Create a voice with Eleven Labs
+    const formData = new FormData();
+    formData.append("name", `Voice_${Date.now()}`);
+    formData.append("files", audioBlob, "sample.mp3");
+    formData.append("description", "Cloned voice from user upload");
+
+    const addVoiceResponse = await fetch("https://api.elevenlabs.io/v1/voices/add", {
+      method: "POST",
+      headers: {
+        "xi-api-key": ELEVEN_LABS_API_KEY,
+      },
+      body: formData,
+    });
+
+    if (!addVoiceResponse.ok) {
+      const errorText = await addVoiceResponse.text();
+      console.error("Eleven Labs add voice error:", errorText);
+      throw new Error(`Failed to create voice: ${errorText}`);
+    }
+
+    const voiceData = await addVoiceResponse.json();
+    const voiceId = voiceData.voice_id;
+    console.log("Voice created with ID:", voiceId);
+
+    // Step 3: Generate speech using the cloned voice
+    const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: "POST",
+      headers: {
+        "xi-api-key": ELEVEN_LABS_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: text,
+        model_id: "eleven_multilingual_v2",
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+        },
+      }),
+    });
+
+    if (!ttsResponse.ok) {
+      const errorText = await ttsResponse.text();
+      console.error("Eleven Labs TTS error:", errorText);
+      throw new Error(`Failed to generate speech: ${errorText}`);
+    }
+
+    const audioArrayBuffer = await ttsResponse.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(audioArrayBuffer)));
+
+    // Step 4: Clean up - delete the voice (optional, to avoid cluttering account)
     try {
-      const res = await hf.textToSpeech(
-        { 
-          model: "facebook/mms-tts-eng", 
-          inputs: text 
-        },
-        { wait_for_model: true }
-      );
-      arrayBuffer = await res.arrayBuffer();
-    } catch (e) {
-      console.error("HF library error:", e);
-      // If the helper threw a generic blob error, try a manual call to surface the real message
-      const resp = await fetch("https://api-inference.huggingface.co/models/facebook/mms-tts-eng", {
-        method: "POST",
+      await fetch(`https://api.elevenlabs.io/v1/voices/${voiceId}`, {
+        method: "DELETE",
         headers: {
-          Authorization: `Bearer ${HF_TOKEN}`,
-          "Content-Type": "application/json",
+          "xi-api-key": ELEVEN_LABS_API_KEY,
         },
-        body: JSON.stringify({ 
-          inputs: text, 
-          options: { wait_for_model: true } 
-        }),
       });
-      
-      if (!resp.ok) {
-        const body = await resp.text();
-        throw new Error(`Hugging Face error ${resp.status}: ${body}`);
-      }
-      
-      arrayBuffer = await resp.arrayBuffer();
+      console.log("Voice cleaned up");
+    } catch (cleanupError) {
+      console.warn("Failed to clean up voice:", cleanupError);
     }
 
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-    
     return new Response(
       JSON.stringify({
-        audioUrl: `data:audio/wav;base64,${base64}`,
-        success: true
+        audioUrl: `data:audio/mpeg;base64,${base64}`,
+        success: true,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Error in clone-voice function:", error);
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : "Unknown error" 
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Unknown error",
       }),
-      { 
+      {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }

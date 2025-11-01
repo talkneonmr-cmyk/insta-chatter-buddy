@@ -84,7 +84,7 @@ const VoiceCloning = () => {
     
     const link = document.createElement("a");
     link.href = generatedAudio;
-    link.download = "cloned-voice.wav";
+    link.download = "cloned-voice.mp3";
     link.click();
   };
 
@@ -94,7 +94,7 @@ const VoiceCloning = () => {
         <div>
           <h1 className="text-3xl font-bold mb-2">AI Voice Cloning</h1>
           <p className="text-muted-foreground">
-            Clone any voice with just 30 seconds of audio - Normally $50/month!
+            Clone any voice using Eleven Labs - Professional quality voice synthesis
           </p>
         </div>
 
@@ -109,8 +109,11 @@ const VoiceCloning = () => {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Upload Voice Sample (30+ seconds)
+                  Upload Voice Sample
                 </label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Upload at least 30 seconds of clear audio for best results
+                </p>
                 <div 
                   className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
                   onClick={() => fileInputRef.current?.click()}
@@ -228,34 +231,34 @@ const VoiceCloning = () => {
 
         {/* Features */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-3">Why This is Worth $50/month:</h3>
+          <h3 className="text-lg font-semibold mb-3">Powered by Eleven Labs:</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <div className="text-2xl">🎤</div>
-              <h4 className="font-semibold">30-Second Training</h4>
+              <h4 className="font-semibold">Professional Quality</h4>
               <p className="text-sm text-muted-foreground">
-                Clone any voice with minimal audio
+                Industry-leading voice cloning technology
               </p>
             </div>
             <div className="space-y-2">
               <div className="text-2xl">🌍</div>
-              <h4 className="font-semibold">Any Language</h4>
+              <h4 className="font-semibold">29 Languages</h4>
               <p className="text-sm text-muted-foreground">
-                Works with multiple languages
+                Multilingual voice synthesis support
               </p>
             </div>
             <div className="space-y-2">
               <div className="text-2xl">🎯</div>
-              <h4 className="font-semibold">Natural Sound</h4>
+              <h4 className="font-semibold">Natural Emotion</h4>
               <p className="text-sm text-muted-foreground">
-                Realistic intonation and emotion
+                Realistic intonation and expression
               </p>
             </div>
             <div className="space-y-2">
               <div className="text-2xl">📹</div>
-              <h4 className="font-semibold">Content Creation</h4>
+              <h4 className="font-semibold">Content Ready</h4>
               <p className="text-sm text-muted-foreground">
-                Perfect for voiceovers and narration
+                Perfect for videos and podcasts
               </p>
             </div>
           </div>
