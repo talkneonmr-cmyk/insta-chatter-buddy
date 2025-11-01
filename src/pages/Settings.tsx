@@ -174,16 +174,6 @@ const Settings = () => {
                   Connect
                 </Button>
               </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Lovable AI</p>
-                  <p className="text-sm text-green-600 dark:text-green-400">Active</p>
-                </div>
-                <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
-                  Connected
-                </span>
-              </div>
             </CardContent>
           </Card>
 
