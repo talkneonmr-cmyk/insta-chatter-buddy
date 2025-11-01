@@ -59,97 +59,126 @@ serve(async (req) => {
         body: formData,
       });
 
-      if (!addVoiceResponse.ok) {
-        const errorText = await addVoiceResponse.text();
-        console.error("Eleven Labs add voice error:", errorText);
-        throw new Error(`Failed to create voice: ${errorText}`);
-      }
+       if (!addVoiceResponse.ok) {
+         const status = addVoiceResponse.status;
+         const errorText = await addVoiceResponse.text();
+         console.error("Eleven Labs add voice error:", status, errorText);
+         if (status === 402 || /free|upgrade|plan|payment/i.test(errorText)) {
+           return new Response(
+             JSON.stringify({
+               error: "Voice cloning requires an Eleven Labs paid plan.",
+               code: "ELEVENLABS_PAID_REQUIRED",
+             }),
+             { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+           );
+         }
+         throw new Error(`Failed to create voice: ${errorText}`);
+       }
 
-      const voiceData = await addVoiceResponse.json();
-      finalVoiceId = voiceData.voice_id;
-      shouldCleanup = true;
-      console.log("Voice created with ID:", finalVoiceId);
-    }
+       const voiceData = await addVoiceResponse.json();
+       finalVoiceId = voiceData.voice_id;
+       shouldCleanup = true;
+       console.log("Voice created with ID:", finalVoiceId);
+       // Wait briefly for voice to be ready
+       await new Promise((res) => setTimeout(res, 1500));
+     }
 
-    // Step 3: Generate speech using the voice
-    const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${finalVoiceId}`, {
-      method: "POST",
-      headers: {
-        "xi-api-key": ELEVEN_LABS_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        text: text,
-        model_id: "eleven_multilingual_v2",
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
-        },
-      }),
-    });
+     // Step 3: Generate speech using the voice (with simple retry for readiness)
+     let ttsResponse: Response | null = null;
+     let lastTtsErrorText = "";
+     for (let attempt = 1; attempt <= 3; attempt++) {
+       const resp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${finalVoiceId}`, {
+         method: "POST",
+         headers: {
+           "xi-api-key": ELEVEN_LABS_API_KEY,
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify({
+           text,
+           model_id: "eleven_multilingual_v2",
+           voice_settings: {
+             stability: 0.5,
+             similarity_boost: 0.75,
+           },
+         }),
+       });
+       if (resp.ok) {
+         ttsResponse = resp;
+         break;
+       }
+       const status = resp.status;
+       const err = await resp.text();
+       lastTtsErrorText = err;
+       console.error(`Eleven Labs TTS error (attempt ${attempt}):`, status, err);
+       // Retry on transient/voice-not-ready errors
+       if (status >= 500 || /not found|not ready|processing|timeout/i.test(err)) {
+         await new Promise((r) => setTimeout(r, attempt * 1000 + 500));
+         continue;
+       }
+       // Non-retryable error
+       ttsResponse = resp;
+       break;
+     }
 
-    if (!ttsResponse.ok) {
-      const errorText = await ttsResponse.text();
-      console.error("Eleven Labs TTS error:", errorText);
+     if (!ttsResponse || !ttsResponse.ok) {
+       // Fallback to OpenAI TTS for pre-made voices if configured
+       if (usePreMadeVoice) {
+         const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+         if (OPENAI_API_KEY) {
+           console.log("Falling back to OpenAI TTS (premade voices)");
+           const oaResp = await fetch("https://api.openai.com/v1/audio/speech", {
+             method: "POST",
+             headers: {
+               Authorization: `Bearer ${OPENAI_API_KEY}`,
+               "Content-Type": "application/json",
+             },
+             body: JSON.stringify({
+               model: "tts-1",
+               input: text,
+               voice: "alloy",
+               response_format: "mp3",
+             }),
+           });
 
-      // Fallback to OpenAI TTS for pre-made voices if configured
-      if (usePreMadeVoice) {
-        const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-        if (OPENAI_API_KEY) {
-          console.log("Falling back to OpenAI TTS (premade voices)");
-          const oaResp = await fetch("https://api.openai.com/v1/audio/speech", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${OPENAI_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model: "tts-1",
-              input: text,
-              voice: "alloy",
-              response_format: "mp3",
-            }),
-          });
+           if (!oaResp.ok) {
+             const oaErr = await oaResp.text();
+             console.error("OpenAI TTS error:", oaErr);
+             return new Response(
+               JSON.stringify({
+                 error:
+                   "Voice generation blocked on Eleven Labs and OpenAI fallback failed. Please try again later or configure a valid key.",
+               }),
+               { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+             );
+           }
 
-          if (!oaResp.ok) {
-            const oaErr = await oaResp.text();
-            console.error("OpenAI TTS error:", oaErr);
-            return new Response(
-              JSON.stringify({
-                error:
-                  "Voice generation blocked on Eleven Labs and OpenAI fallback failed. Please try again later or configure a valid key.",
-              }),
-              { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-          }
+           const oaBuf = await oaResp.arrayBuffer();
+           const oaBytes = new Uint8Array(oaBuf);
+           let oaBinary = "";
+           for (let i = 0; i < oaBytes.length; i++) oaBinary += String.fromCharCode(oaBytes[i]);
+           const oaBase64 = btoa(oaBinary);
 
-          const oaBuf = await oaResp.arrayBuffer();
-          const oaBytes = new Uint8Array(oaBuf);
-          let oaBinary = "";
-          for (let i = 0; i < oaBytes.length; i++) oaBinary += String.fromCharCode(oaBytes[i]);
-          const oaBase64 = btoa(oaBinary);
+           return new Response(
+             JSON.stringify({ audioUrl: `data:audio/mp3;base64,${oaBase64}`, success: true }),
+             { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+           );
+         }
 
-          return new Response(
-            JSON.stringify({ audioUrl: `data:audio/mp3;base64,${oaBase64}`, success: true }),
-            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
+         // No OpenAI key available
+         return new Response(
+           JSON.stringify({
+             error:
+               "Eleven Labs blocked free-tier usage. Add your OpenAI API key for fallback or upgrade your Eleven Labs plan.",
+           }),
+           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+         );
+       }
 
-        // No OpenAI key available
-        return new Response(
-          JSON.stringify({
-            error:
-              "Eleven Labs blocked free-tier usage. Add your OpenAI API key for fallback or upgrade your Eleven Labs plan.",
-          }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+       // For clone mode, surface the Eleven Labs error
+       throw new Error(`Failed to generate speech: ${lastTtsErrorText || "Unknown TTS error"}`);
+     }
 
-      // For clone mode, surface the Eleven Labs error
-      throw new Error(`Failed to generate speech: ${errorText}`);
-    }
-
-    const audioArrayBuffer = await ttsResponse.arrayBuffer();
+     const audioArrayBuffer = await ttsResponse.arrayBuffer();
     
     // Convert to base64 using smaller chunks to avoid stack overflow
     const uint8Array = new Uint8Array(audioArrayBuffer);

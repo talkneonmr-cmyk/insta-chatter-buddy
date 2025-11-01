@@ -39,6 +39,7 @@ const VoiceCloning = () => {
   const [text, setText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
+  const [cloneAvailable, setCloneAvailable] = useState<boolean>(() => localStorage.getItem("cloneAvailable") !== "false");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
@@ -131,13 +132,25 @@ const VoiceCloning = () => {
           title: "Success!",
           description: "Voice cloned successfully",
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
-        toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to clone voice. Please try again.",
-          variant: "destructive",
-        });
+        const msg = error?.message || "Failed to clone voice. Please try again.";
+        if (error?.status === 402 || /paid plan|ELEVENLABS_PAID_REQUIRED|blocked/i.test(msg)) {
+          setCloneAvailable(false);
+          localStorage.setItem("cloneAvailable", "false");
+          setMode("premade");
+          toast({
+            title: "Clone unavailable",
+            description: "Voice cloning requires an Eleven Labs paid plan. Feature disabled.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: msg,
+            variant: "destructive",
+          });
+        }
       } finally {
         setIsProcessing(false);
       }
@@ -173,7 +186,9 @@ const VoiceCloning = () => {
           <Tabs value={mode} onValueChange={(v) => setMode(v as "premade" | "clone")}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="premade">Pre-Made Voices (Free)</TabsTrigger>
-              <TabsTrigger value="clone">Clone Voice (Paid)</TabsTrigger>
+              <TabsTrigger value="clone" disabled={!cloneAvailable}>
+                {cloneAvailable ? "Clone Voice (Paid)" : "Clone Voice (Unavailable)"}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="premade" className="space-y-4 mt-4">
@@ -287,7 +302,7 @@ const VoiceCloning = () => {
                 className="w-full" 
                 size="lg"
                 onClick={handleGenerate}
-                disabled={!audioFile || !text || isProcessing}
+                disabled={!cloneAvailable || !audioFile || !text || isProcessing}
               >
                 {isProcessing ? (
                   <>
