@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "./ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const mainItems = [
   { title: "Dashboard", url: "/", icon: Home },
@@ -42,12 +43,16 @@ const aiTools = [
 ];
 
 export function AppSidebar() {
-  const { open } = useSidebar();
+  const { open, isMobile: sidebarMobile } = useSidebar();
+  const isMobile = useIsMobile();
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { plan } = useSubscription();
   const currentPath = location.pathname;
+  
+  // Show text if sidebar is open OR if we're on mobile (drawer is full width)
+  const showText = open || isMobile || sidebarMobile;
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = (path: string) =>
@@ -69,7 +74,7 @@ export function AppSidebar() {
       {/* Header */}
       <div className="p-4 border-b bg-card">
         <div className="flex items-center gap-3 animate-scale-in">
-          {open && (
+          {showText && (
             <div>
               <h1 className="font-bold text-xl gradient-text tracking-tight">Fabulous Creators</h1>
               <p className="text-xs text-muted-foreground font-medium">AI Content Studio</p>
@@ -91,7 +96,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild className="h-12">
                     <NavLink to={item.url} end className={getNavCls(item.url)}>
                       <item.icon className={`h-5 w-5 ${isActive(item.url) ? 'text-primary' : ''}`} />
-                      {open && <span className="ml-3">{item.title}</span>}
+                      {showText && <span className="ml-3">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -113,7 +118,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild className="h-12">
                     <NavLink to={item.url} className={getNavCls(item.url)}>
                       <item.icon className={`h-5 w-5 ${isActive(item.url) ? 'text-primary' : ''}`} />
-                      {open && <span className="ml-3">{item.title}</span>}
+                      {showText && <span className="ml-3">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -127,7 +132,7 @@ export function AppSidebar() {
       {/* Footer */}
       <SidebarFooter className="p-4 border-t bg-card">
         {/* Plan Badge */}
-        {open && (
+        {showText && (
           <div className="mb-3">
             {plan === "pro" ? (
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20">
@@ -153,13 +158,13 @@ export function AppSidebar() {
           <SidebarMenuButton asChild className="h-10">
             <button onClick={() => navigate("/settings")} className={getNavCls("/settings")}>
               <Settings className="h-5 w-5" />
-              {open && <span className="ml-3">Settings</span>}
+              {showText && <span className="ml-3">Settings</span>}
             </button>
           </SidebarMenuButton>
           <SidebarMenuButton asChild className="h-10">
             <button onClick={handleSignOut} className="hover:bg-destructive/10 hover:text-destructive transition-all">
               <LogOut className="h-5 w-5" />
-              {open && <span className="ml-3">Sign Out</span>}
+              {showText && <span className="ml-3">Sign Out</span>}
             </button>
           </SidebarMenuButton>
         </div>
