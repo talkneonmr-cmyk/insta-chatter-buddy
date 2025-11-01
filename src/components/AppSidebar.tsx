@@ -65,9 +65,9 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r bg-card/50 backdrop-blur-lg">
+    <Sidebar className="border-r bg-card backdrop-blur-lg">
       {/* Header */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b bg-card">
         <div className="flex items-center gap-3 animate-scale-in">
           {open && (
             <div>
@@ -78,10 +78,10 @@ export function AppSidebar() {
         </div>
       </div>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-2 bg-card">
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase text-muted-foreground px-4">
+          <SidebarGroupLabel className="text-xs uppercase text-muted-foreground font-semibold px-4">
             Main
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -102,7 +102,7 @@ export function AppSidebar() {
 
         {/* AI Tools */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase text-muted-foreground px-4">
+          <SidebarGroupLabel className="text-xs uppercase text-muted-foreground font-semibold px-4">
             <Sparkles className="h-3 w-3 inline mr-1" />
             AI Tools
           </SidebarGroupLabel>
@@ -125,7 +125,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="p-4 border-t">
+      <SidebarFooter className="p-4 border-t bg-card">
         {/* Plan Badge */}
         {open && (
           <div className="mb-3">
