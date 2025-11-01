@@ -4,17 +4,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, Download, Loader2, ImageIcon, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { enhanceImage } from "@/lib/imageEnhancement";
 import { Slider } from "@/components/ui/slider";
-import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
 
 const ImageEnhancement = () => {
   const [image, setImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [scale, setScale] = useState([2]);
-  const [progress, setProgress] = useState(0);
-  const [progressStage, setProgressStage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -34,30 +31,49 @@ const ImageEnhancement = () => {
     if (!image) return;
 
     setIsProcessing(true);
-    setProgress(0);
-    setProgressStage("");
+    toast({
+      title: "Enhancing image...",
+      description: `Upscaling ${scale[0]}x with AI`
+    });
     
     try {
-      const result = await enhanceImage(image, scale[0], (stage, prog) => {
-        setProgressStage(stage);
-        setProgress(prog);
+      const { data, error } = await supabase.functions.invoke('enhance-image', {
+        body: { 
+          imageData: image,
+          scale: scale[0]
+        }
       });
-      setEnhancedImage(result);
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data?.enhancedImage) {
+        throw new Error('No enhanced image returned');
+      }
+
+      setEnhancedImage(data.enhancedImage);
       toast({
         title: "Success!",
-        description: `Image enhanced ${scale[0]}x successfully`,
+        description: `Image enhanced ${scale[0]}x successfully`
       });
-    } catch (error) {
-      console.error("Enhancement error:", error);
+    } catch (error: any) {
+      console.error('Enhancement error:', error);
+      let errorMessage = "Failed to enhance image";
+      
+      if (error.message?.includes('Rate limit')) {
+        errorMessage = "Too many requests. Please wait a moment.";
+      } else if (error.message?.includes('credits')) {
+        errorMessage = "AI credits depleted. Please try again later.";
+      }
+      
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to enhance image. Please try again.",
-        variant: "destructive",
+        description: errorMessage,
+        variant: "destructive"
       });
     } finally {
       setIsProcessing(false);
-      setProgress(0);
-      setProgressStage("");
     }
   };
 
@@ -76,7 +92,7 @@ const ImageEnhancement = () => {
         <div>
           <h1 className="text-3xl font-bold mb-2">AI Image Enhancement</h1>
           <p className="text-muted-foreground">
-            Professional image upscaling & enhancement - Normally $30/month!
+            Professional AI-powered upscaling & enhancement in 10-15 seconds - Normally $30/month!
           </p>
         </div>
 
@@ -127,7 +143,7 @@ const ImageEnhancement = () => {
                   className="w-full"
                 />
                 <p className="text-xs text-muted-foreground mt-2">
-                  Higher values = better quality but slower processing
+                  Higher values = better quality (processing time: 10-15 seconds)
                 </p>
               </div>
 
@@ -150,14 +166,9 @@ const ImageEnhancement = () => {
                 )}
               </Button>
 
-              {isProcessing && (
-                <div className="space-y-2">
-                  <Progress value={progress} className="w-full" />
-                  <p className="text-sm text-muted-foreground text-center">
-                    {progressStage} {Math.round(progress)}%
-                  </p>
-                </div>
-              )}
+              <p className="text-xs text-muted-foreground text-center">
+                AI-powered enhancement - results in 10-15 seconds
+              </p>
             </div>
           </Card>
 
