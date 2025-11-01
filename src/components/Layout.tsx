@@ -1,8 +1,11 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Menu } from "lucide-react";
+import { Menu, Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,6 +13,62 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state changed:', event);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Redirect to auth if no session
+        if (!session) {
+          navigate('/auth');
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+      
+      // Redirect to auth if no session
+      if (!session) {
+        navigate('/auth');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background">
+        <div className="text-center space-y-4 animate-fade-in">
+          <div className="relative inline-block">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur-xl opacity-60 animate-glow"></div>
+            <div className="relative p-4 rounded-2xl bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 backdrop-blur-xl">
+              <Sparkles className="w-10 h-10 text-primary animate-pulse" />
+            </div>
+          </div>
+          <p className="text-muted-foreground font-medium">Loading your workspace...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Only render protected content if authenticated
+  if (!session || !user) {
+    return null;
+  }
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
