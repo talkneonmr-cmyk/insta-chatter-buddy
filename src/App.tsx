@@ -19,11 +19,11 @@ import ScriptWriter from "./pages/ScriptWriter";
 import TrendAnalyzer from "./pages/TrendAnalyzer";
 import SEOOptimizer from "./pages/SEOOptimizer";
 import HashtagGenerator from "./pages/HashtagGenerator";
-import BackgroundRemoval from "./pages/BackgroundRemoval";
 import SpeechToText from "./pages/SpeechToText";
 import ImageClassification from "./pages/ImageClassification";
 import TextSummarizer from "./pages/TextSummarizer";
 import ObjectDetection from "./pages/ObjectDetection";
+import BackgroundRemoval from "./pages/BackgroundRemoval";
 
 const queryClient = new QueryClient();
 
