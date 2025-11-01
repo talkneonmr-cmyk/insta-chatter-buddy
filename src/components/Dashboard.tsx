@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Youtube, Music, Video, TrendingUp, Zap, Crown, ArrowRight, Activity, Image, FileText } from "lucide-react";
+import { Sparkles, Youtube, Music, Video, TrendingUp, Zap, Crown, ArrowRight, Activity, Image, FileText, Hash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import UsageStats from "./UsageStats";
@@ -13,6 +13,8 @@ interface DashboardStats {
   totalUploads: number;
   totalCaptions: number;
   totalMusic: number;
+  totalTrends: number;
+  totalHashtags: number;
 }
 
 const Dashboard = () => {
@@ -24,6 +26,8 @@ const Dashboard = () => {
     totalUploads: 0,
     totalCaptions: 0,
     totalMusic: 0,
+    totalTrends: 0,
+    totalHashtags: 0,
   });
   const { plan, isLoading: subscriptionLoading } = useSubscription();
 
@@ -68,6 +72,8 @@ const Dashboard = () => {
           totalUploads: usage.video_uploads_count || 0,
           totalCaptions: usage.ai_captions_count || 0,
           totalMusic: usage.ai_music_count || 0,
+          totalTrends: usage.ai_trends_count || 0,
+          totalHashtags: usage.ai_hashtags_count || 0,
         });
       }
     } catch (error) {
@@ -297,6 +303,46 @@ const Dashboard = () => {
                 <CardContent className="relative z-10">
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>Write perfect scripts</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Trend Analyzer Card */}
+              <Card className="card-3d border-2 overflow-hidden group hover:border-orange-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/trend-analyzer")}>
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <CardHeader className="relative z-10 pb-2 sm:pb-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2.5 rounded-xl bg-orange-500/10 group-hover:bg-orange-500/20 transition-all">
+                      <TrendingUp className="w-5 h-5 text-orange-500" />
+                    </div>
+                    <CardTitle className="text-lg">AI Trend Analyzer</CardTitle>
+                  </div>
+                  <CardDescription>Discover trending topics and content ideas</CardDescription>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>{stats.totalTrends} analyses generated</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Hashtag Generator Card */}
+              <Card className="card-3d border-2 overflow-hidden group hover:border-indigo-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/hashtag-generator")}>
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <CardHeader className="relative z-10 pb-2 sm:pb-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2.5 rounded-xl bg-indigo-500/10 group-hover:bg-indigo-500/20 transition-all">
+                      <Hash className="w-5 h-5 text-indigo-500" />
+                    </div>
+                    <CardTitle className="text-lg">AI Hashtag Generator</CardTitle>
+                  </div>
+                  <CardDescription>Generate optimized hashtags for your content</CardDescription>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>{stats.totalHashtags} sets generated</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </CardContent>
