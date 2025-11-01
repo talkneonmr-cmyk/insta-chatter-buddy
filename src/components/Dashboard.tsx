@@ -110,7 +110,12 @@ const Dashboard = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-3 mb-2">
-                  <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur-md opacity-75 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="relative p-2.5 rounded-2xl bg-gradient-to-br from-primary/90 via-secondary/90 to-accent/90 backdrop-blur-xl shadow-lg border border-white/20">
+                      <Sparkles className="w-7 h-7 text-white drop-shadow-lg" />
+                    </div>
+                  </div>
                   {plan === "pro" && (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400">
                       <Crown className="w-3 h-3" />

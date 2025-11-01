@@ -61,13 +61,16 @@ export function AppSidebar() {
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center gap-3 animate-scale-in">
-          <div className="p-2 rounded-xl bg-gradient-to-r from-primary via-secondary to-accent shadow-lg animate-glow">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity animate-glow"></div>
+            <div className="relative p-3 rounded-2xl bg-gradient-to-br from-primary/90 via-secondary/90 to-accent/90 backdrop-blur-xl shadow-xl border border-white/20">
+              <Sparkles className="w-6 h-6 text-white drop-shadow-lg" />
+            </div>
           </div>
           {open && (
             <div>
-              <h1 className="font-bold text-lg gradient-text">Fabulous Creators</h1>
-              <p className="text-xs text-muted-foreground">Content Studio</p>
+              <h1 className="font-bold text-xl gradient-text tracking-tight">Fabulous Creators</h1>
+              <p className="text-xs text-muted-foreground font-medium">AI Content Studio</p>
             </div>
           )}
         </div>

@@ -81,13 +81,16 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background p-4">
       <Card className="w-full max-w-md border-2 shadow-xl scale-in">
         <CardHeader className="text-center">
-          <div className="inline-block p-3 rounded-2xl bg-gradient-to-r from-primary via-secondary to-accent mb-4 mx-auto float-animation">
-            <Sparkles className="w-8 h-8 text-primary-foreground" />
+          <div className="relative inline-block mb-6 mx-auto float-animation">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-3xl blur-2xl opacity-60 animate-glow"></div>
+            <div className="relative p-5 rounded-3xl bg-gradient-to-br from-primary/90 via-secondary/90 to-accent/90 backdrop-blur-xl shadow-2xl border-2 border-white/20">
+              <Sparkles className="w-12 h-12 text-white drop-shadow-2xl" />
+            </div>
           </div>
-          <CardTitle className="text-3xl gradient-text">
+          <CardTitle className="text-4xl gradient-text font-bold tracking-tight mb-2">
             Fabulous Creators
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-base">
             Sign in to your AI-powered content creation studio
           </CardDescription>
         </CardHeader>
