@@ -11,13 +11,13 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.generate-caption]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-video-metadata]
-verify_jwt = false
+verify_jwt = true
 
 [functions.youtube-upload]
-verify_jwt = false
+verify_jwt = true
 
 [functions.youtube-oauth]
 verify_jwt = false
@@ -26,73 +26,82 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.generate-channel-setup]
-verify_jwt = false
+verify_jwt = true
 
 [functions.check-usage-limit]
-verify_jwt = false
+verify_jwt = true
 
 [functions.increment-usage]
-verify_jwt = false
+verify_jwt = true
 
 [functions.create-razorpay-subscription]
-verify_jwt = false
+verify_jwt = true
 
 [functions.razorpay-webhook]
 verify_jwt = false
 
 [functions.verify-razorpay-payment]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-audio]
-verify_jwt = false
+verify_jwt = true
 
 [functions.check-audio-status]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-thumbnail]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-script]
-verify_jwt = false
+verify_jwt = true
 
 [functions.clone-voice]
-verify_jwt = false
+verify_jwt = true
 
 [functions.text-to-speech]
-verify_jwt = false
+verify_jwt = true
 
 [functions.speech-to-text]
-verify_jwt = false
+verify_jwt = true
 
 [functions.classify-image]
-verify_jwt = false
+verify_jwt = true
 
 [functions.summarize-text]
-verify_jwt = false
+verify_jwt = true
 
 [functions.detect-objects]
-verify_jwt = false
+verify_jwt = true
 
 [functions.enhance-image]
-verify_jwt = false
+verify_jwt = true
 
 [functions.isolate-voice]
-verify_jwt = false
+verify_jwt = true
 
 [functions.change-voice]
-verify_jwt = false
+verify_jwt = true
 
 [functions.dub-audio]
-verify_jwt = false
+verify_jwt = true
+
+[functions.analyze-trends]
+verify_jwt = true
+
+[functions.generate-hashtags]
+verify_jwt = true
+
+[functions.optimize-seo]
+verify_jwt = true
 
 [functions.send-otp-email]
 verify_jwt = false
 
 [functions.send-password-reset]
-verify_jwt = false
+verify_jwt = true
 
 [functions.toggle-account-status]
-verify_jwt = false
+verify_jwt = true
 
 [functions.force-password-reset]
-verify_jwt = false
+verify_jwt = true
