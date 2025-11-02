@@ -49,6 +49,13 @@ export default function Pricing() {
     "5 AI Scripts per day",
     "5 AI Music tracks per month",
     "1 YouTube Channel",
+    "10 minutes Text to Speech (Multilingual v2)",
+    "20 minutes Text to Speech (Flash v2.5)",
+    "Speech to Text API",
+    "Voice Isolator API",
+    "Voice Changer API",
+    "Dubbing API",
+    "15 minutes of AI Agents",
     "Basic Support"
   ];
 
