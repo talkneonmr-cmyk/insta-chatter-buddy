@@ -67,27 +67,40 @@ const handler = async (req: Request): Promise<Response> => {
     let updateData: any = {};
 
     if (action === 'disable') {
-      // Calculate ban duration
-      let banDuration = 'none';
-      if (duration !== 'permanent') {
-        banDuration = duration;
+      // Calculate ban until date
+      let bannedUntil: string;
+      if (duration === 'permanent') {
+        // Set to year 9999 for permanent ban
+        bannedUntil = '9999-12-31T23:59:59.999Z';
+      } else {
+        // Parse duration like '24h', '7d'
+        const now = new Date();
+        const match = duration.match(/^(\d+)([hd])$/);
+        if (match) {
+          const value = parseInt(match[1]);
+          const unit = match[2];
+          if (unit === 'h') {
+            now.setHours(now.getHours() + value);
+          } else if (unit === 'd') {
+            now.setDate(now.getDate() + value);
+          }
+        }
+        bannedUntil = now.toISOString();
       }
 
-      // Update user to disable account
+      // Update user to disable account with ban
       updateData = {
+        ban_duration: bannedUntil,
         user_metadata: {
           account_disabled: true,
           disabled_at: new Date().toISOString(),
           disabled_by: requestingUser.id,
         },
       };
-
-      if (banDuration !== 'none') {
-        updateData.ban_duration = banDuration;
-      }
     } else {
-      // Enable account
+      // Enable account by removing ban
       updateData = {
+        ban_duration: 'none',
         user_metadata: {
           account_disabled: false,
           enabled_at: new Date().toISOString(),
