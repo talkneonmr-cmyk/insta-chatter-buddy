@@ -18,6 +18,9 @@ interface UserData {
   created_at: string;
   last_sign_in_at: string | null;
   email_confirmed_at: string | null;
+  confirmed_at: string | null;
+  banned_until: string | null;
+  raw_user_meta_data: any;
   plan: string;
   status: string;
   role: string | null;
@@ -56,61 +59,75 @@ export default function Admin() {
     try {
       setLoading(true);
       
-      // Get all users from auth.users using admin function
-      const { data: authUsers, error: authError } = await supabase
-        .rpc("get_all_users_admin");
+      // Fetch users using the admin function
+      const { data: authUsers, error: usersError } = await supabase.rpc('get_all_users_admin');
+      
+      if (usersError) {
+        console.error("Error fetching users:", usersError);
+        throw usersError;
+      }
 
-      if (authError) throw authError;
-
-      // Get subscriptions
+      // Fetch subscriptions
       const { data: subscriptions, error: subsError } = await supabase
-        .from("user_subscriptions")
-        .select("user_id, plan, status");
+        .from('user_subscriptions')
+        .select('*');
 
-      if (subsError) throw subsError;
+      if (subsError) {
+        console.error("Error fetching subscriptions:", subsError);
+        throw subsError;
+      }
 
-      // Get roles
+      // Fetch user roles
       const { data: roles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("user_id, role");
+        .from('user_roles')
+        .select('*');
 
-      if (rolesError) throw rolesError;
+      if (rolesError) {
+        console.error("Error fetching roles:", rolesError);
+        throw rolesError;
+      }
 
-      // Get usage tracking
+      // Fetch usage tracking
       const { data: usage, error: usageError } = await supabase
-        .from("usage_tracking")
-        .select("user_id, video_uploads_count, ai_captions_count, youtube_channels_count, ai_music_count");
+        .from('usage_tracking')
+        .select('*');
 
-      if (usageError) throw usageError;
+      if (usageError) {
+        console.error("Error fetching usage:", usageError);
+        throw usageError;
+      }
 
-      // Combine data with all auth users
-      const usersData: UserData[] = authUsers?.map((authUser: any) => {
-        const subscription = subscriptions?.find((s) => s.user_id === authUser.id);
-        const userRole = roles?.find((r) => r.user_id === authUser.id);
-        const userUsage = usage?.find((u) => u.user_id === authUser.id);
+      // Combine all data
+      const combinedUsers: UserData[] = authUsers.map((user: any) => {
+        const userSub = subscriptions?.find(s => s.user_id === user.id);
+        const userRole = roles?.find(r => r.user_id === user.id);
+        const userUsage = usage?.find(u => u.user_id === user.id);
 
         return {
-          id: authUser.id,
-          email: authUser.email || "No email",
-          created_at: authUser.created_at,
-          last_sign_in_at: authUser.last_sign_in_at,
-          email_confirmed_at: authUser.email_confirmed_at,
-          plan: subscription?.plan || "free",
-          status: subscription?.status || "active",
-          role: userRole?.role || null,
+          id: user.id,
+          email: user.email || 'N/A',
+          created_at: user.created_at,
+          plan: userSub?.plan || 'free',
+          status: userSub?.status || 'active',
+          role: userRole?.role || 'user',
           video_uploads: userUsage?.video_uploads_count || 0,
           ai_captions: userUsage?.ai_captions_count || 0,
           youtube_channels: userUsage?.youtube_channels_count || 0,
           ai_music: userUsage?.ai_music_count || 0,
+          email_confirmed_at: user.email_confirmed_at,
+          last_sign_in_at: user.last_sign_in_at,
+          confirmed_at: user.confirmed_at,
+          banned_until: user.banned_until,
+          raw_user_meta_data: user.raw_user_meta_data,
         };
-      }) || [];
+      });
 
-      setUsers(usersData);
-    } catch (error) {
-      console.error("Error fetching users:", error);
+      setUsers(combinedUsers);
+    } catch (error: any) {
+      console.error("Error in fetchUsers:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch users",
+        description: "Failed to load users",
         variant: "destructive",
       });
     } finally {
@@ -261,6 +278,62 @@ export default function Admin() {
     }
   };
 
+  const toggleAccountStatus = async (userId: string, action: 'disable' | 'enable') => {
+    try {
+      setUpdating(userId);
+
+      const { error } = await supabase.functions.invoke('toggle-account-status', {
+        body: { userId, action },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Account ${action}d successfully`,
+      });
+
+      fetchUsers();
+    } catch (error: any) {
+      console.error(`Error ${action}ing account:`, error);
+      toast({
+        title: "Error",
+        description: error.message || `Failed to ${action} account`,
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const forcePasswordReset = async (userId: string, email: string) => {
+    try {
+      setUpdating(userId);
+
+      const { error } = await supabase.functions.invoke('force-password-reset', {
+        body: { userId, userEmail: email },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "User will be required to reset password on next login",
+      });
+
+      fetchUsers();
+    } catch (error: any) {
+      console.error("Error forcing password reset:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to force password reset",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   if (adminCheckLoading || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -356,6 +429,8 @@ export default function Admin() {
                           <TableHead>Email</TableHead>
                           <TableHead>Email Status</TableHead>
                           <TableHead>Last Sign In</TableHead>
+                          <TableHead>Last Password Change</TableHead>
+                          <TableHead>Account Status</TableHead>
                           <TableHead>Plan</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Usage</TableHead>
@@ -387,6 +462,28 @@ export default function Admin() {
                                   " " +
                                   new Date(user.last_sign_in_at).toLocaleTimeString()
                                 : "Never"}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {user.confirmed_at 
+                                ? new Date(user.confirmed_at).toLocaleDateString()
+                                : 'Never changed'}
+                            </TableCell>
+                            <TableCell>
+                              {user.raw_user_meta_data?.account_disabled ? (
+                                <Badge variant="destructive">Disabled</Badge>
+                              ) : user.raw_user_meta_data?.force_password_change ? (
+                                <Badge variant="outline" className="border-orange-500 text-orange-500">
+                                  Reset Required
+                                </Badge>
+                              ) : user.banned_until ? (
+                                <Badge variant="destructive">
+                                  Banned
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="border-green-500 text-green-500">
+                                  Active
+                                </Badge>
+                              )}
                             </TableCell>
                             <TableCell>
                               <Select
@@ -471,6 +568,38 @@ export default function Admin() {
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
                                     <Mail className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant={user.raw_user_meta_data?.account_disabled ? "default" : "destructive"}
+                                  onClick={() => toggleAccountStatus(
+                                    user.id, 
+                                    user.raw_user_meta_data?.account_disabled ? 'enable' : 'disable'
+                                  )}
+                                  disabled={updating === user.id}
+                                  title={user.raw_user_meta_data?.account_disabled ? 'Enable account' : 'Disable account'}
+                                >
+                                  {updating === user.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : user.raw_user_meta_data?.account_disabled ? (
+                                    "Enable"
+                                  ) : (
+                                    "Disable"
+                                  )}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-orange-500 text-orange-500 hover:bg-orange-50"
+                                  onClick={() => forcePasswordReset(user.id, user.email)}
+                                  disabled={updating === user.id}
+                                  title="Force password reset on next login"
+                                >
+                                  {updating === user.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    "Force Reset"
                                   )}
                                 </Button>
                               </div>

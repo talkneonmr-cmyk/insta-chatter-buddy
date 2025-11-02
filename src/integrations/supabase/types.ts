@@ -947,11 +947,14 @@ export type Database = {
       get_all_users_admin: {
         Args: never
         Returns: {
+          banned_until: string
+          confirmed_at: string
           created_at: string
           email: string
           email_confirmed_at: string
           id: string
           last_sign_in_at: string
+          raw_user_meta_data: Json
         }[]
       }
       is_admin: { Args: { user_id: string }; Returns: boolean }
