@@ -53,7 +53,17 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Admin privileges required');
     }
 
-    const { userId, action, duration = 'permanent' }: ToggleAccountRequest = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { userId, action, duration = 'permanent' }: ToggleAccountRequest = requestBody;
 
     if (!userId || !action) {
       throw new Error('Missing required fields: userId and action');

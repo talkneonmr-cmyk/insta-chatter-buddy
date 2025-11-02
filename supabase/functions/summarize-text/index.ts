@@ -11,7 +11,17 @@ serve(async (req) => {
   }
 
   try {
-    const { text, maxLength } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { text, maxLength } = requestBody;
 
     if (!text || !text.trim()) {
       return new Response(

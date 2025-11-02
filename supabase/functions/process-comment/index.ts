@@ -31,6 +31,16 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const {
       comment_text,
       first_name,
@@ -41,7 +51,7 @@ serve(async (req) => {
       tone,
       goal,
       rule_keywords,
-    }: CommentProcessingRequest = await req.json();
+    }: CommentProcessingRequest = requestBody;
 
     console.log("Processing comment:", { comment_text, username, goal });
 

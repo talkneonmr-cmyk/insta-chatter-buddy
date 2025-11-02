@@ -29,6 +29,16 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const {
       reelIdea,
       contentType = 'reel',
@@ -38,7 +48,7 @@ serve(async (req) => {
       includeEmojis = true,
       captionLength = 'medium',
       model = 'google/gemini-2.5-flash'
-    }: CaptionRequest = await req.json();
+    }: CaptionRequest = requestBody;
 
     if (!reelIdea || reelIdea.trim().length === 0) {
       return new Response(

@@ -20,7 +20,17 @@ serve(async (req) => {
   }
 
   try {
-    const { videoTitle, videoDescription, videoContent, tags, model = 'google/gemini-2.5-flash' }: MetadataRequest = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { videoTitle, videoDescription, videoContent, tags, model = 'google/gemini-2.5-flash' }: MetadataRequest = requestBody;
 
     if (!videoTitle && !videoDescription && !videoContent) {
       return new Response(

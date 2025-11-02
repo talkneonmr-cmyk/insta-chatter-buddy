@@ -26,7 +26,17 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { title, description, niche } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { title, description, niche } = requestBody;
     console.log('Optimizing SEO for:', title);
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');

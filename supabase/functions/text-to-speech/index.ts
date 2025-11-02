@@ -12,7 +12,17 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voiceId, stability, similarityBoost } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { text, voiceId, stability, similarityBoost } = requestBody;
 
     if (!text) {
       throw new Error("Missing required field: text");

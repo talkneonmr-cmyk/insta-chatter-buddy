@@ -19,7 +19,17 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email }: PasswordResetRequest = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { email }: PasswordResetRequest = requestBody;
 
     console.log("Password reset requested for:", email);
 

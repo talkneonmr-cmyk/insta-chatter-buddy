@@ -55,7 +55,17 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Admin privileges required');
     }
 
-    const { userId, userEmail }: ForcePasswordResetRequest = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { userId, userEmail }: ForcePasswordResetRequest = requestBody;
 
     if (!userId || !userEmail) {
       throw new Error('Missing required fields: userId and userEmail');

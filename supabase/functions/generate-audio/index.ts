@@ -12,6 +12,16 @@ serve(async (req) => {
   }
 
   try {
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { 
       title,
       prompt, 
@@ -22,7 +32,7 @@ serve(async (req) => {
       output_format = 'mp3',
       bpm = null,
       vocalist_gender = 'female'
-    } = await req.json();
+    } = requestBody;
 
     // At least one of prompt, tags, or lyrics must be provided
     if (!prompt && !tags && !lyrics) {

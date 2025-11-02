@@ -26,7 +26,17 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { prompt, style, title } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { prompt, style, title } = requestBody;
     console.log('Generating thumbnail with prompt:', prompt, 'style:', style);
 
     const startTime = Date.now();

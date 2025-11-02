@@ -12,7 +12,17 @@ serve(async (req) => {
   }
 
   try {
-    const { task_id } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { task_id } = requestBody;
 
     if (!task_id) {
       throw new Error('task_id is required');

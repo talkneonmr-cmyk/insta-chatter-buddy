@@ -26,7 +26,17 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { videoTopic, videoLength, tone, targetAudience, title } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { videoTopic, videoLength, tone, targetAudience, title } = requestBody;
     console.log('Generating script for topic:', videoTopic);
 
     const startTime = Date.now();

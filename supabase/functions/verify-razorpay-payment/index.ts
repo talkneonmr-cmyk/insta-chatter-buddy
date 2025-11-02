@@ -29,7 +29,17 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { paymentLinkId } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { paymentLinkId } = requestBody;
 
     if (!paymentLinkId) {
       throw new Error('Payment link ID required');
