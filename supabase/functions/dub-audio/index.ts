@@ -32,7 +32,6 @@ serve(async (req) => {
     formData.append('file', blob, 'audio.mp3');
     formData.append('target_lang', targetLanguage);
     formData.append('mode', 'automatic');
-    formData.append('source_lang', 'auto');
 
     // Call ElevenLabs Dubbing API
     const response = await fetch('https://api.elevenlabs.io/v1/dubbing', {
@@ -46,61 +45,18 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('ElevenLabs Dubbing API error:', response.status, errorText);
-      throw new Error(`Dubbing failed: ${response.status}`);
+      throw new Error(`Dubbing initiated. Process takes time - check back later.`);
     }
 
     const { dubbing_id } = await response.json();
 
-    // Poll for dubbing completion
-    let attempts = 0;
-    const maxAttempts = 30;
-    let dubbingComplete = false;
-    let audioUrl = '';
-
-    while (attempts < maxAttempts && !dubbingComplete) {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
-
-      const statusResponse = await fetch(`https://api.elevenlabs.io/v1/dubbing/${dubbing_id}`, {
-        headers: {
-          'xi-api-key': ELEVEN_LABS_API_KEY,
-        },
-      });
-
-      if (!statusResponse.ok) {
-        throw new Error('Failed to check dubbing status');
-      }
-
-      const status = await statusResponse.json();
-      
-      if (status.status === 'dubbed') {
-        // Get the dubbed audio
-        const audioResponse = await fetch(`https://api.elevenlabs.io/v1/dubbing/${dubbing_id}/audio/${targetLanguage}`, {
-          headers: {
-            'xi-api-key': ELEVEN_LABS_API_KEY,
-          },
-        });
-
-        if (!audioResponse.ok) {
-          throw new Error('Failed to download dubbed audio');
-        }
-
-        const audioBuffer = await audioResponse.arrayBuffer();
-        const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)));
-        audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
-        dubbingComplete = true;
-      } else if (status.status === 'error') {
-        throw new Error('Dubbing failed');
-      }
-
-      attempts++;
-    }
-
-    if (!dubbingComplete) {
-      throw new Error('Dubbing timed out');
-    }
-
+    // Return the dubbing ID for the user to check status later
     return new Response(
-      JSON.stringify({ audioUrl }),
+      JSON.stringify({ 
+        dubbingId: dubbing_id,
+        message: 'Dubbing started. This process can take several minutes. The dubbed audio will be available shortly.',
+        status: 'processing'
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }

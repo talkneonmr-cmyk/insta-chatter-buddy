@@ -44,11 +44,18 @@ export default function Dubbing() {
 
         if (error) throw error;
 
-        setDubbedAudio(data.audioUrl);
-        toast({
-          title: "Dubbing Complete!",
-          description: "Audio dubbed to target language successfully",
-        });
+        if (data.status === 'processing') {
+          toast({
+            title: "Dubbing Started",
+            description: data.message,
+          });
+        } else if (data.audioUrl) {
+          setDubbedAudio(data.audioUrl);
+          toast({
+            title: "Dubbing Complete!",
+            description: "Audio dubbed to target language successfully",
+          });
+        }
       };
     } catch (error: any) {
       console.error('Error dubbing audio:', error);
