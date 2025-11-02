@@ -12,7 +12,9 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
@@ -46,7 +48,37 @@ const Auth = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
   };
 
-  const handleSendOTP = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "You're now signed in",
+      });
+
+      navigate("/");
+    } catch (error: any) {
+      console.error('Error signing in:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to sign in",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -54,8 +86,9 @@ const Auth = () => {
       // Generate OTP
       const generatedOTP = generateOTP();
       
-      // Store OTP in session storage (in production, store in database)
+      // Store OTP and password in session storage
       sessionStorage.setItem('otp_email', email);
+      sessionStorage.setItem('otp_password', password);
       sessionStorage.setItem('otp_code', generatedOTP);
       sessionStorage.setItem('otp_timestamp', Date.now().toString());
 
@@ -91,6 +124,7 @@ const Auth = () => {
 
     try {
       const storedEmail = sessionStorage.getItem('otp_email');
+      const storedPassword = sessionStorage.getItem('otp_password');
       const storedOTP = sessionStorage.getItem('otp_code');
       const timestamp = sessionStorage.getItem('otp_timestamp');
 
@@ -109,11 +143,12 @@ const Auth = () => {
         throw new Error("Invalid verification code");
       }
 
-      // Sign up or sign in with Supabase
-      const { data, error } = await supabase.auth.signInWithOtp({
+      // Sign up with Supabase
+      const { error } = await supabase.auth.signUp({
         email: email,
+        password: storedPassword || password,
         options: {
-          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}/`,
         }
       });
 
@@ -121,12 +156,13 @@ const Auth = () => {
 
       // Clear OTP data
       sessionStorage.removeItem('otp_email');
+      sessionStorage.removeItem('otp_password');
       sessionStorage.removeItem('otp_code');
       sessionStorage.removeItem('otp_timestamp');
 
       toast({
         title: "Success!",
-        description: "You're now signed in",
+        description: "Account created successfully",
       });
 
       navigate("/");
@@ -146,7 +182,7 @@ const Auth = () => {
     if (resendTimer > 0) return;
     
     setOtp("");
-    await handleSendOTP(new Event('submit') as any);
+    await handleSignUp(new Event('submit') as any);
   };
 
   return (
@@ -159,19 +195,19 @@ const Auth = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">
-            {showOtpInput ? "Verify Your Email" : "Welcome"}
+            {showOtpInput ? "Verify Your Email" : (isSignUp ? "Create Account" : "Welcome Back")}
           </CardTitle>
           <CardDescription>
             {showOtpInput 
               ? "Enter the 6-digit code sent to your email"
-              : "Enter your email to receive a verification code"
+              : (isSignUp ? "Sign up to get started" : "Sign in to your account")
             }
           </CardDescription>
         </CardHeader>
         
         <CardContent>
           {!showOtpInput ? (
-            <form onSubmit={handleSendOTP} className="space-y-4">
+            <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
                 <Input
@@ -184,6 +220,19 @@ const Auth = () => {
                   disabled={isLoading}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  minLength={6}
+                />
+              </div>
               <Button
                 type="submit"
                 className="w-full"
@@ -192,12 +241,24 @@ const Auth = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending code...
+                    {isSignUp ? "Creating account..." : "Signing in..."}
                   </>
                 ) : (
-                  "Send Verification Code"
+                  isSignUp ? "Sign Up" : "Sign In"
                 )}
               </Button>
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  disabled={isLoading}
+                  className="text-sm"
+                >
+                  {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+                </Button>
+              </div>
             </form>
           ) : (
             <form onSubmit={handleVerifyOTP} className="space-y-4">
