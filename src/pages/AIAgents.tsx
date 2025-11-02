@@ -13,6 +13,7 @@ export default function AIAgents() {
   const { toast } = useToast();
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const [serviceError, setServiceError] = useState<string | null>(null);
 
   useEffect(() => {
     // Initialize Speech Recognition
@@ -57,6 +58,15 @@ export default function AIAgents() {
 
       recognitionRef.current.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
+        if (event.error === 'service-not-allowed') {
+          setServiceError('Your browser blocked speech recognition in this embedded preview. Open the app in a new tab and allow microphone access.');
+          toast({
+            title: "Permission Required",
+            description: "Open in a new tab and allow microphone access to enable voice chat.",
+            variant: "destructive",
+          });
+          return;
+        }
         if (event.error !== 'no-speech') {
           toast({
             title: "Recognition Error",
@@ -137,6 +147,7 @@ export default function AIAgents() {
       // Stop the stream - we just needed permission
       stream.getTracks().forEach(track => track.stop());
       
+      setServiceError(null);
       setIsConnected(true);
       setIsListening(true);
       
@@ -147,7 +158,10 @@ export default function AIAgents() {
       
       // Start recognition after permission is granted
       console.log('Starting speech recognition...');
-      recognitionRef.current?.start();
+      setTimeout(() => {
+        try { recognitionRef.current?.start(); } catch (e) { console.warn('Start error:', e); }
+      }, 250);
+
       
     } catch (error: any) {
       console.error('Error starting agent:', error);
@@ -214,13 +228,27 @@ export default function AIAgents() {
         <CardContent className="space-y-6">
           <div className="flex justify-center items-center min-h-[200px]">
             {!isConnected ? (
-              <Button
-                onClick={handleStartAgent}
-                size="lg"
-                className="h-24 w-24 rounded-full"
-              >
-                <Mic className="h-8 w-8" />
-              </Button>
+              <div className="flex flex-col items-center gap-3">
+                <Button
+                  onClick={handleStartAgent}
+                  size="lg"
+                  className="h-24 w-24 rounded-full"
+                >
+                  <Mic className="h-8 w-8" />
+                </Button>
+                {serviceError && (
+                  <div className="text-center space-y-2">
+                    <p className="text-sm text-muted-foreground">{serviceError}</p>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => window.open(window.location.href, '_blank', 'noopener')}
+                    >
+                      Open in new tab
+                    </Button>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="text-center space-y-4">
                 <div className={`relative h-24 w-24 mx-auto rounded-full bg-primary/20 flex items-center justify-center ${isListening ? 'animate-pulse' : ''}`}>
