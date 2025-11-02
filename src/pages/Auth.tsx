@@ -95,37 +95,22 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-muted/10 to-background">
-      {/* Subtle background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/5 rounded-full blur-3xl"></div>
-      </div>
-
-      {/* Main Card */}
-      <Card className="w-full max-w-md shadow-xl border bg-card/95 backdrop-blur-sm relative z-10">
-        {/* Header */}
-        <CardHeader className="space-y-6 pb-8">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20">
-              <Sparkles className="w-8 h-8 text-primary" />
-            </div>
-            <div className="text-center space-y-2">
-              <CardTitle className="text-3xl font-bold gradient-text">
-                Fabuos Creators
-              </CardTitle>
-              <CardDescription className="text-sm">
-                AI-Powered Content Creation Studio
-              </CardDescription>
-            </div>
-          </div>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <Card className="w-full max-w-md border shadow-lg">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl font-bold">
+            Fabuos Creators
+          </CardTitle>
+          <CardDescription>
+            Enter your credentials to continue
+          </CardDescription>
         </CardHeader>
         
-        <CardContent className="pb-6">
+        <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted">
-              <TabsTrigger value="signin" className="text-sm">Sign In</TabsTrigger>
-              <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4 mt-0">
@@ -139,7 +124,6 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-11"
                   />
                 </div>
                 <div className="space-y-2">
@@ -151,13 +135,11 @@ const Auth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-11"
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full h-11 mt-2"
-                  variant="gradient"
+                  className="w-full"
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign In"}
@@ -176,7 +158,6 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-11"
                   />
                 </div>
                 <div className="space-y-2">
@@ -189,16 +170,14 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="h-11"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Minimum 6 characters required
+                    Minimum 6 characters
                   </p>
                 </div>
                 <Button
                   type="submit"
-                  className="w-full h-11 mt-2"
-                  variant="gradient"
+                  className="w-full"
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating account..." : "Create Account"}
