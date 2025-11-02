@@ -22,13 +22,29 @@ const TextToSpeech = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const mountedRef = useRef(true);
+  const timeoutRef = useRef<number>();
   const { toast } = useToast();
+
+  // Cleanup on unmount
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (generatedAudio) {
+        URL.revokeObjectURL(generatedAudio);
+      }
+    };
+  }, [generatedAudio]);
 
   useEffect(() => {
     let mounted = true;
-    (async () => {
+    const loadVoices = async () => {
       try {
         const v: any = (BrowserTTS as any).voices ? await (BrowserTTS as any).voices() : null;
+        if (!mounted) return;
+
         let list: { id: string; name: string }[] = [];
 
         if (Array.isArray(v)) {
@@ -64,18 +80,24 @@ const TextToSpeech = () => {
 
         if (mounted && unique.length) {
           setVoices(unique);
-          if (!unique.find((x) => x.id === selectedVoice)) {
+          const currentVoice = unique.find((x) => x.id === selectedVoice);
+          if (!currentVoice) {
             setSelectedVoice(unique[0].id);
           }
         }
       } catch (e) {
-        console.warn("Failed to load voices", e);
+        if (mounted) {
+          console.warn("Failed to load voices", e);
+        }
       }
-    })();
+    };
+
+    loadVoices();
+    
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [selectedVoice]);
 
   const handleGenerate = async () => {
     if (!text.trim()) {
@@ -87,12 +109,21 @@ const TextToSpeech = () => {
       return;
     }
 
+    if (!mountedRef.current) return;
+
     setIsProcessing(true);
     try {
+      // Clean up previous audio
       if (generatedAudio) {
-        URL.revokeObjectURL(generatedAudio);
+        try {
+          URL.revokeObjectURL(generatedAudio);
+        } catch (e) {
+          console.warn("Failed to revoke URL", e);
+        }
         setGeneratedAudio(null);
       }
+
+      if (!mountedRef.current) return;
 
       toast({
         title: "Generating speech",
@@ -104,45 +135,81 @@ const TextToSpeech = () => {
         voiceId: selectedVoice || DEFAULT_VOICE_ID,
       });
 
+      if (!mountedRef.current) return;
+
       const url = URL.createObjectURL(wavBlob);
       setGeneratedAudio(url);
-      setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.src = url;
-          audioRef.current.load();
+      
+      // Use ref to clear timeout on unmount
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = window.setTimeout(() => {
+        if (mountedRef.current && audioRef.current && url) {
+          try {
+            audioRef.current.src = url;
+            audioRef.current.load();
+          } catch (e) {
+            console.warn("Failed to load audio", e);
+          }
         }
       }, 0);
 
-      toast({
-        title: "Success!",
-        description: "Speech generated. You can play or download it below.",
-      });
+      if (mountedRef.current) {
+        toast({
+          title: "Success!",
+          description: "Speech generated. You can play or download it below.",
+        });
+      }
     } catch (error) {
       console.error(error);
-      toast({
-        title: "Error",
-        description: "Failed to generate speech. Please try again.",
-        variant: "destructive",
-      });
+      if (mountedRef.current) {
+        toast({
+          title: "Error",
+          description: "Failed to generate speech. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
-      setIsProcessing(false);
+      if (mountedRef.current) {
+        setIsProcessing(false);
+      }
     }
   };
 
   const handlePlay = () => {
+    if (!mountedRef.current) return;
     if (audioRef.current && generatedAudio) {
-      audioRef.current.play();
+      try {
+        audioRef.current.play().catch((e) => {
+          console.warn("Failed to play audio", e);
+          toast({
+            title: "Playback error",
+            description: "Could not play audio. Try regenerating.",
+            variant: "destructive",
+          });
+        });
+      } catch (e) {
+        console.warn("Play error", e);
+      }
     }
   };
 
   const handleDownload = () => {
-    if (!generatedAudio) return;
-    const a = document.createElement("a");
-    a.href = generatedAudio;
-    a.download = "speech.wav";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    if (!generatedAudio || !mountedRef.current) return;
+    try {
+      const a = document.createElement("a");
+      a.href = generatedAudio;
+      a.download = "speech.wav";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e) {
+      console.error("Download failed", e);
+      toast({
+        title: "Download error",
+        description: "Failed to download audio file.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
