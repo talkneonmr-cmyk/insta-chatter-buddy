@@ -221,36 +221,38 @@ const VideoUploadForm = () => {
   };
 
   return (
-    <div className="space-y-6 slide-in">
+    <div className="space-y-4 md:space-y-6 slide-in">
       <div>
-        <h3 className="text-lg font-semibold mb-2 gradient-text">Upload New Video</h3>
-        <p className="text-sm text-muted-foreground">Schedule videos for automatic upload to YouTube</p>
+        <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2 gradient-text">Upload New Video</h3>
+        <p className="text-xs md:text-sm text-muted-foreground">Schedule videos for automatic upload to YouTube</p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
           {/* Video File Upload */}
           <div className="space-y-2">
-            <Label htmlFor="video-file">Video File *</Label>
-            <div className="flex items-center gap-2">
+            <Label htmlFor="video-file" className="text-sm">Video File *</Label>
+            <div className="space-y-2">
               <Input
                 id="video-file"
                 type="file"
                 accept="video/*"
                 onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+                className="text-sm"
               />
-              {videoFile && <span className="text-sm text-muted-foreground">{videoFile.name}</span>}
+              {videoFile && <span className="text-xs md:text-sm text-muted-foreground block">{videoFile.name}</span>}
             </div>
           </div>
 
           {/* Thumbnail Upload */}
           <div className="space-y-2">
-            <Label htmlFor="thumbnail-file">Thumbnail (Optional)</Label>
+            <Label htmlFor="thumbnail-file" className="text-sm">Thumbnail (Optional)</Label>
             <Input
               id="thumbnail-file"
               type="file"
               accept="image/*"
               onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)}
+              className="text-sm"
             />
           </div>
 
@@ -259,13 +261,13 @@ const VideoUploadForm = () => {
             control={form.control}
             name="useAI"
             render={({ field }) => (
-              <FormItem className="flex items-center justify-between rounded-lg border p-4">
+              <FormItem className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border p-3 md:p-4 gap-3">
                 <div className="space-y-0.5">
-                  <FormLabel className="flex items-center gap-2">
+                  <FormLabel className="flex items-center gap-2 text-sm">
                     <Sparkles className="h-4 w-4 text-primary" />
                     Use AI for Metadata
                   </FormLabel>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     Let AI generate optimized title, description, and tags
                   </p>
                 </div>
@@ -317,7 +319,7 @@ const VideoUploadForm = () => {
               variant="outline"
               onClick={handleGenerateMetadata}
               disabled={generatingAI}
-              className="w-full"
+              className="w-full text-sm"
             >
               <Sparkles className="h-4 w-4 mr-2" />
               {generatingAI ? "Generating..." : "Generate AI Metadata"}
@@ -379,7 +381,7 @@ const VideoUploadForm = () => {
           />
 
           {/* Submit Button */}
-          <Button type="submit" disabled={uploading} variant="gradient" className="w-full">
+          <Button type="submit" disabled={uploading} variant="gradient" className="w-full text-sm md:text-base">
             <Calendar className="h-4 w-4 mr-2" />
             {uploading ? "Scheduling..." : "Schedule Video"}
           </Button>
