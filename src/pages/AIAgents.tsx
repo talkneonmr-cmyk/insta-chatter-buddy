@@ -212,106 +212,72 @@ export default function AIAgents() {
   }, []);
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-8 slide-in">
-        <h1 className="text-4xl font-bold mb-2 gradient-text">AI Voice Agents</h1>
-        <p className="text-muted-foreground">Conversational AI with voice interaction</p>
+    <div className="relative min-h-[calc(100vh-4rem)] container mx-auto p-6 max-w-4xl">
+      {/* Background Content - Blurred */}
+      <div className="blur-md pointer-events-none select-none">
+        <div className="mb-8 slide-in">
+          <h1 className="text-4xl font-bold mb-2 gradient-text">AI Voice Agents</h1>
+          <p className="text-muted-foreground">Conversational AI with voice interaction</p>
+        </div>
+
+        <Card className="scale-in">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5" />
+              Voice Agent
+            </CardTitle>
+            <CardDescription>
+              Start a voice conversation with an AI agent
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex justify-center items-center min-h-[200px]">
+              <Button size="lg" className="h-24 w-24 rounded-full" disabled>
+                <Mic className="h-8 w-8" />
+              </Button>
+            </div>
+
+            <div className="p-4 bg-muted/20 rounded-lg">
+              <h4 className="font-semibold mb-2">✨ Features</h4>
+              <ul className="text-sm space-y-1 text-muted-foreground">
+                <li>• 🎙️ Browser-based voice recognition</li>
+                <li>• 🔊 Natural text-to-speech</li>
+                <li>• 🤖 AI-powered responses</li>
+                <li>• 💬 Real-time conversation flow</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <Card className="scale-in">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-5 w-5" />
-            Voice Agent
-          </CardTitle>
-          <CardDescription>
-            Start a voice conversation with an AI agent
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex justify-center items-center min-h-[200px]">
-            {!isConnected ? (
-              <div className="flex flex-col items-center gap-3">
-                <Button
-                  onClick={handleStartAgent}
-                  size="lg"
-                  className="h-24 w-24 rounded-full"
-                >
-                  <Mic className="h-8 w-8" />
-                </Button>
-                {serviceError && (
-                  <div className="text-center space-y-2">
-                    <p className="text-sm text-muted-foreground">{serviceError}</p>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => window.open(window.location.href, '_blank', 'noopener')}
-                    >
-                      Open in new tab
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center space-y-4">
-                <div className={`relative h-24 w-24 mx-auto rounded-full bg-primary/20 flex items-center justify-center ${isListening ? 'animate-pulse' : ''}`}>
-                  {isSpeaking ? (
-                    <Bot className="h-8 w-8 text-primary animate-pulse" />
-                  ) : isListening ? (
-                    <Mic className="h-8 w-8 text-primary" />
-                  ) : (
-                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {isSpeaking ? "AI is speaking..." : isListening ? "Listening..." : "Processing..."}
-                </p>
-                <Button
-                  onClick={handleStopAgent}
-                  variant="destructive"
-                  size="lg"
-                >
-                  <MicOff className="h-4 w-4 mr-2" />
-                  End Conversation
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {transcript.length > 0 && (
-            <div className="space-y-2 fade-in">
-              <h3 className="text-lg font-semibold">Conversation</h3>
-              <div className="max-h-[300px] overflow-y-auto space-y-3 p-4 bg-muted/20 rounded-lg">
-                {transcript.map((msg, index) => (
-                  <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] p-3 rounded-lg ${
-                      msg.role === 'user' 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-muted'
-                    }`}>
-                      <p className="text-sm font-medium mb-1">
-                        {msg.role === 'user' ? 'You' : 'AI'}
-                      </p>
-                      <p className="text-sm">{msg.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      {/* Development Notice Overlay */}
+      <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+        <Card className="p-6 sm:p-8 w-full max-w-md sm:max-w-lg border-2 border-orange-500/50 shadow-2xl">
+          <div className="text-center space-y-3 sm:space-y-4">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-orange-500/20 flex items-center justify-center">
+              <Bot className="w-8 h-8 sm:w-10 sm:h-10 text-orange-500" />
             </div>
-          )}
-
-          <div className="p-4 bg-muted/20 rounded-lg">
-            <h4 className="font-semibold mb-2">✨ Completely Free Features</h4>
-            <ul className="text-sm space-y-1 text-muted-foreground">
-              <li>• 🎙️ Browser-based voice recognition (Web Speech API)</li>
-              <li>• 🔊 Natural text-to-speech (Web Speech API)</li>
-              <li>• 🤖 AI-powered responses (Lovable AI)</li>
-              <li>• 💬 Real-time conversation flow</li>
-              <li>• 🌐 Works in Chrome, Edge, and Safari</li>
-            </ul>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">Feature Under Development</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
+                AI Voice Agents are currently in active development and testing phase.
+              </p>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3 sm:p-4 space-y-2 text-left">
+              <p className="text-xs sm:text-sm font-semibold">What's Coming:</p>
+              <ul className="text-xs sm:text-sm text-muted-foreground space-y-1">
+                <li>• Real-time voice conversations with AI</li>
+                <li>• Natural language understanding</li>
+                <li>• Multi-turn dialogue support</li>
+                <li>• Custom voice personalities</li>
+              </ul>
+            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              This feature will be available soon. Thank you for your patience!
+            </p>
           </div>
-        </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }
