@@ -30,29 +30,42 @@ const TextToSpeech = () => {
       try {
         const v: any = (BrowserTTS as any).voices ? await (BrowserTTS as any).voices() : null;
         let list: { id: string; name: string }[] = [];
+
         if (Array.isArray(v)) {
-          list = v.map((voiceId: string) => ({ id: voiceId, name: voiceId }));
+          list = v.map((item: any, idx: number) => {
+            if (typeof item === 'string') {
+              return { id: item, name: item };
+            }
+            if (item && typeof item === 'object') {
+              const id = String(item.key || item.name || `voice-${idx}`);
+              const name = String(item.name || item.key || `Voice ${idx + 1}`);
+              return { id, name };
+            }
+            return { id: `voice-${idx}`, name: `Voice ${idx + 1}` };
+          });
         } else if (v && typeof v === "object") {
           list = Object.entries(v).map(([id, voiceData]: [string, any]) => {
-            // Voice data is an object with properties like {key, name, language, quality, ...}
-            // Extract just the name property
             let displayName = id;
             if (voiceData && typeof voiceData === 'object') {
-              if ('name' in voiceData && typeof voiceData.name === 'string') {
-                displayName = voiceData.name;
-              } else if ('key' in voiceData && typeof voiceData.key === 'string') {
-                displayName = voiceData.key;
+              if ('name' in voiceData && typeof (voiceData as any).name === 'string') {
+                displayName = (voiceData as any).name as string;
+              } else if ('key' in voiceData && typeof (voiceData as any).key === 'string') {
+                displayName = (voiceData as any).key as string;
               }
             } else if (typeof voiceData === 'string') {
               displayName = voiceData;
             }
-            return { id, name: displayName };
+            return { id: String(id), name: String(displayName) };
           });
         }
-        if (mounted && list.length) {
-          setVoices(list);
-          if (!list.find((x) => x.id === selectedVoice)) {
-            setSelectedVoice(list[0].id);
+
+        // Dedupe by id
+        const unique = Array.from(new Map(list.map((v) => [v.id, v])).values());
+
+        if (mounted && unique.length) {
+          setVoices(unique);
+          if (!unique.find((x) => x.id === selectedVoice)) {
+            setSelectedVoice(unique[0].id);
           }
         }
       } catch (e) {
@@ -159,13 +172,13 @@ const TextToSpeech = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {voices.length ? (
-                      voices.map((voice) => (
-                        <SelectItem key={voice.id} value={voice.id}>
-                          {voice.name}
+                      voices.map((voice, idx) => (
+                        <SelectItem key={`${voice.id}-${idx}`} value={String(voice.id)}>
+                          {String(voice.name)}
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value={selectedVoice} disabled>
+                      <SelectItem value={String(selectedVoice)} disabled>
                         Loading voices...
                       </SelectItem>
                     )}
