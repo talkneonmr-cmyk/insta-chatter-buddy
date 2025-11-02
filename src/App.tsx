@@ -27,6 +27,10 @@ import BackgroundRemoval from "./pages/BackgroundRemoval";
 import ImageEnhancement from "./pages/ImageEnhancement";
 import VoiceCloning from "./pages/VoiceCloning";
 import TextToSpeech from "./pages/TextToSpeech";
+import VoiceIsolator from "./pages/VoiceIsolator";
+import VoiceChanger from "./pages/VoiceChanger";
+import Dubbing from "./pages/Dubbing";
+import AIAgents from "./pages/AIAgents";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +63,10 @@ const App = () => (
           <Route path="/image-enhancement" element={<Layout><ImageEnhancement /></Layout>} />
           <Route path="/voice-cloning" element={<Layout><VoiceCloning /></Layout>} />
           <Route path="/text-to-speech" element={<Layout><TextToSpeech /></Layout>} />
+          <Route path="/voice-isolator" element={<Layout><VoiceIsolator /></Layout>} />
+          <Route path="/voice-changer" element={<Layout><VoiceChanger /></Layout>} />
+          <Route path="/dubbing" element={<Layout><Dubbing /></Layout>} />
+          <Route path="/ai-agents" element={<Layout><AIAgents /></Layout>} />
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/payment-success" element={<Layout><PaymentSuccess /></Layout>} />
           <Route path="/admin" element={<Layout><Admin /></Layout>} />
