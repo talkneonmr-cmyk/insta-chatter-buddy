@@ -95,50 +95,43 @@ const Auth = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-4">
-      {/* Animated Gradient Mesh Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-muted/30 to-background">
-        <div className="absolute inset-0 bg-mesh opacity-40"></div>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-muted/10 to-background">
+      {/* Subtle background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/5 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Floating Orbs */}
-      <div className="absolute top-20 left-20 w-72 h-72 bg-primary/30 rounded-full blur-3xl animate-float"></div>
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-
-      {/* Glassmorphism Card */}
-      <Card className="relative w-full max-w-md card-glass border-2 shadow-2xl animate-scale-in z-10">
-        <CardHeader className="text-center space-y-4 pb-6">
-          {/* Logo */}
-          <div className="relative inline-block mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-3xl blur-2xl opacity-50 animate-glow"></div>
-            <div className="relative p-4 rounded-3xl bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 backdrop-blur-xl border border-white/20 shadow-xl">
-              <Sparkles className="w-10 h-10 text-primary animate-pulse" />
+      {/* Main Card */}
+      <Card className="w-full max-w-md shadow-xl border bg-card/95 backdrop-blur-sm relative z-10">
+        {/* Header */}
+        <CardHeader className="space-y-6 pb-8">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20">
+              <Sparkles className="w-8 h-8 text-primary" />
             </div>
-          </div>
-          
-          {/* Title */}
-          <div className="space-y-2">
-            <CardTitle className="text-4xl gradient-text font-bold tracking-tight">
-              Fabulous Creators
-            </CardTitle>
-            <CardDescription className="text-base text-muted-foreground">
-              Sign in to your AI-powered content creation studio
-            </CardDescription>
+            <div className="text-center space-y-2">
+              <CardTitle className="text-3xl font-bold gradient-text">
+                Fabuos Creators
+              </CardTitle>
+              <CardDescription className="text-sm">
+                AI-Powered Content Creation Studio
+              </CardDescription>
+            </div>
           </div>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="pb-6">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-muted/50 backdrop-blur-sm">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted">
+              <TabsTrigger value="signin" className="text-sm">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="signin" className="mt-6">
+            <TabsContent value="signin" className="space-y-4 mt-0">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email" className="text-sm font-medium">Email</Label>
+                  <Label htmlFor="signin-email">Email</Label>
                   <Input
                     id="signin-email"
                     type="email"
@@ -146,24 +139,25 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary transition-all"
+                    className="h-11"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password" className="text-sm font-medium">Password</Label>
+                  <Label htmlFor="signin-password">Password</Label>
                   <Input
                     id="signin-password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary transition-all"
+                    className="h-11"
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-opacity shadow-lg text-white font-semibold"
+                  className="w-full h-11 mt-2"
+                  variant="gradient"
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign In"}
@@ -171,10 +165,10 @@ const Auth = () => {
               </form>
             </TabsContent>
 
-            <TabsContent value="signup" className="mt-6">
+            <TabsContent value="signup" className="space-y-4 mt-0">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
+                  <Label htmlFor="signup-email">Email</Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -182,31 +176,32 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary transition-all"
+                    className="h-11"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
+                  <Label htmlFor="signup-password">Password</Label>
                   <Input
                     id="signup-password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="Create a password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary transition-all"
+                    className="h-11"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Password must be at least 6 characters
+                    Minimum 6 characters required
                   </p>
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-opacity shadow-lg text-white font-semibold"
+                  className="w-full h-11 mt-2"
+                  variant="gradient"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Creating account..." : "Sign Up"}
+                  {isLoading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>
             </TabsContent>
