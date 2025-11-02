@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw, Users, Activity } from "lucide-react";
+import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw, Users, Activity, Mail, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ActivityLogs from "@/components/ActivityLogs";
@@ -16,6 +16,8 @@ interface UserData {
   id: string;
   email: string;
   created_at: string;
+  last_sign_in_at: string | null;
+  email_confirmed_at: string | null;
   plan: string;
   status: string;
   role: string | null;
@@ -91,6 +93,8 @@ export default function Admin() {
           id: authUser.id,
           email: authUser.email || "No email",
           created_at: authUser.created_at,
+          last_sign_in_at: authUser.last_sign_in_at,
+          email_confirmed_at: authUser.email_confirmed_at,
           plan: subscription?.plan || "free",
           status: subscription?.status || "active",
           role: userRole?.role || null,
@@ -231,6 +235,32 @@ export default function Admin() {
     }
   };
 
+  const sendPasswordReset = async (email: string, userId: string) => {
+    try {
+      setUpdating(userId);
+
+      const { error } = await supabase.functions.invoke("send-password-reset", {
+        body: { email },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Password reset email sent to ${email}`,
+      });
+    } catch (error) {
+      console.error("Error sending password reset:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send password reset email",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   if (adminCheckLoading || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -324,6 +354,8 @@ export default function Admin() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Email</TableHead>
+                          <TableHead>Email Status</TableHead>
+                          <TableHead>Last Sign In</TableHead>
                           <TableHead>Plan</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Usage</TableHead>
@@ -336,6 +368,26 @@ export default function Admin() {
                         {users.map((user) => (
                           <TableRow key={user.id}>
                             <TableCell className="font-medium">{user.email}</TableCell>
+                            <TableCell>
+                              {user.email_confirmed_at ? (
+                                <Badge variant="default" className="gap-1">
+                                  <CheckCircle className="h-3 w-3" />
+                                  Verified
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary" className="gap-1">
+                                  <XCircle className="h-3 w-3" />
+                                  Unverified
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {user.last_sign_in_at
+                                ? new Date(user.last_sign_in_at).toLocaleDateString() +
+                                  " " +
+                                  new Date(user.last_sign_in_at).toLocaleTimeString()
+                                : "Never"}
+                            </TableCell>
                             <TableCell>
                               <Select
                                 value={user.plan}
@@ -380,7 +432,7 @@ export default function Admin() {
                               {new Date(user.created_at).toLocaleDateString()}
                             </TableCell>
                             <TableCell>
-                              <div className="flex gap-2">
+                              <div className="flex gap-2 flex-wrap">
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -406,6 +458,19 @@ export default function Admin() {
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
                                     <RotateCcw className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => sendPasswordReset(user.email, user.id)}
+                                  disabled={updating === user.id}
+                                  title="Send password reset email"
+                                >
+                                  {updating === user.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Mail className="h-4 w-4" />
                                   )}
                                 </Button>
                               </div>
