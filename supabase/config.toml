@@ -105,3 +105,6 @@ verify_jwt = true
 
 [functions.force-password-reset]
 verify_jwt = true
+
+[functions.ai-voice-chat]
+verify_jwt = true
