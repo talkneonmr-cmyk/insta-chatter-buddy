@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw, Users, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import ActivityLogs from "@/components/ActivityLogs";
 
 interface UserData {
   id: string;
@@ -293,117 +295,136 @@ export default function Admin() {
           </Card>
         </div>
 
-        {/* Users Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>All Users</CardTitle>
-            <CardDescription>Manage user subscriptions and permissions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex justify-center p-8">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Usage</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.email}</TableCell>
-                        <TableCell>
-                          <Select
-                            value={user.plan}
-                            onValueChange={(value) =>
-                              updateUserPlan(user.id, value as "free" | "pro")
-                            }
-                            disabled={updating === user.id}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="free">Free</SelectItem>
-                              <SelectItem value="pro">Pro</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={user.status === "active" ? "default" : "secondary"}>
-                            {user.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-xs space-y-1">
-                            <div>Videos: {user.video_uploads}</div>
-                            <div>Captions: {user.ai_captions}</div>
-                            <div>Channels: {user.youtube_channels}</div>
-                            <div>Music: {user.ai_music}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {user.role === "admin" ? (
-                            <Badge variant="destructive" className="gap-1">
-                              <Crown className="h-3 w-3" />
-                              Admin
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline">User</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {new Date(user.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => toggleAdminRole(user.id, user.role)}
-                              disabled={updating === user.id}
-                            >
-                              {updating === user.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : user.role === "admin" ? (
-                                "Remove Admin"
+        {/* Tabs for Users and Activity Logs */}
+        <Tabs defaultValue="users" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="h-4 w-4" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="logs" className="gap-2">
+              <Activity className="h-4 w-4" />
+              Activity Logs
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="users" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>All Users</CardTitle>
+                <CardDescription>Manage user subscriptions and permissions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex justify-center p-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Plan</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Usage</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Joined</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">{user.email}</TableCell>
+                            <TableCell>
+                              <Select
+                                value={user.plan}
+                                onValueChange={(value) =>
+                                  updateUserPlan(user.id, value as "free" | "pro")
+                                }
+                                disabled={updating === user.id}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="free">Free</SelectItem>
+                                  <SelectItem value="pro">Pro</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={user.status === "active" ? "default" : "secondary"}>
+                                {user.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-xs space-y-1">
+                                <div>Videos: {user.video_uploads}</div>
+                                <div>Captions: {user.ai_captions}</div>
+                                <div>Channels: {user.youtube_channels}</div>
+                                <div>Music: {user.ai_music}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {user.role === "admin" ? (
+                                <Badge variant="destructive" className="gap-1">
+                                  <Crown className="h-3 w-3" />
+                                  Admin
+                                </Badge>
                               ) : (
-                                "Make Admin"
+                                <Badge variant="outline">User</Badge>
                               )}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => resetUsage(user.id)}
-                              disabled={updating === user.id}
-                              title="Reset usage limits"
-                            >
-                              {updating === user.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <RotateCcw className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => toggleAdminRole(user.id, user.role)}
+                                  disabled={updating === user.id}
+                                >
+                                  {updating === user.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : user.role === "admin" ? (
+                                    "Remove Admin"
+                                  ) : (
+                                    "Make Admin"
+                                  )}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => resetUsage(user.id)}
+                                  disabled={updating === user.id}
+                                  title="Reset usage limits"
+                                >
+                                  {updating === user.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <RotateCcw className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="logs" className="mt-6">
+            <ActivityLogs />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
