@@ -25,7 +25,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Email and OTP are required");
     }
 
-    const emailResponse = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: "Fabuos Creators <onboarding@resend.dev>",
       to: [email],
       subject: "Your Verification Code",
@@ -90,9 +90,14 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("OTP email sent successfully:", emailResponse);
+    if (error) {
+      console.error("Resend error while sending OTP:", error);
+      throw new Error(error.message || "Failed to send verification email");
+    }
 
-    return new Response(JSON.stringify({ success: true }), {
+    console.log("OTP email sent successfully:", data);
+
+    return new Response(JSON.stringify({ success: true, id: data?.id }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
