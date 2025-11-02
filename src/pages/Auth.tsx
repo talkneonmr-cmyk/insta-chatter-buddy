@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2, Mail, AlertCircle } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const Auth = () => {
   const [otp, setOtp] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const [showDisabledAlert, setShowDisabledAlert] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -51,6 +53,7 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setShowDisabledAlert(false);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -58,7 +61,14 @@ const Auth = () => {
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.toLowerCase().includes('banned') || 
+            error.message.toLowerCase().includes('user is banned')) {
+          setShowDisabledAlert(true);
+          throw new Error('disabled');
+        }
+        throw error;
+      }
 
       toast({
         title: "Success!",
@@ -68,11 +78,14 @@ const Auth = () => {
       navigate("/");
     } catch (error: any) {
       console.error('Error signing in:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to sign in",
-        variant: "destructive",
-      });
+      
+      if (error.message !== 'disabled') {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to sign in",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -206,6 +219,15 @@ const Auth = () => {
         </CardHeader>
         
         <CardContent>
+          {showDisabledAlert && (
+            <Alert variant="info" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Acc disabled please appeal
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {!showOtpInput ? (
             <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
               <div className="space-y-2">
