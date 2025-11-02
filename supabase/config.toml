@@ -84,3 +84,6 @@ verify_jwt = false
 
 [functions.dub-audio]
 verify_jwt = false
+
+[functions.send-otp-email]
+verify_jwt = false
