@@ -31,12 +31,23 @@ const TextToSpeech = () => {
         const v: any = (BrowserTTS as any).voices ? await (BrowserTTS as any).voices() : null;
         let list: { id: string; name: string }[] = [];
         if (Array.isArray(v)) {
-          list = v.map((id: string) => ({ id, name: id }));
+          list = v.map((voiceId: string) => ({ id: voiceId, name: voiceId }));
         } else if (v && typeof v === "object") {
-          list = Object.entries(v).map(([id, name]) => ({
-            id,
-            name: String(name || id),
-          }));
+          list = Object.entries(v).map(([id, voiceData]: [string, any]) => {
+            // Voice data is an object with properties like {key, name, language, quality, ...}
+            // Extract just the name property
+            let displayName = id;
+            if (voiceData && typeof voiceData === 'object') {
+              if ('name' in voiceData && typeof voiceData.name === 'string') {
+                displayName = voiceData.name;
+              } else if ('key' in voiceData && typeof voiceData.key === 'string') {
+                displayName = voiceData.key;
+              }
+            } else if (typeof voiceData === 'string') {
+              displayName = voiceData;
+            }
+            return { id, name: displayName };
+          });
         }
         if (mounted && list.length) {
           setVoices(list);
