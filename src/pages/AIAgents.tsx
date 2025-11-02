@@ -128,24 +128,46 @@ export default function AIAgents() {
     }
 
     try {
-      // Request microphone permission
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('Requesting microphone permission...');
+      
+      // Request microphone permission explicitly
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('Microphone permission granted');
+      
+      // Stop the stream - we just needed permission
+      stream.getTracks().forEach(track => track.stop());
       
       setIsConnected(true);
       setIsListening(true);
       
       toast({
-        title: "Agent Connected",
-        description: "AI voice agent is now listening (completely free!)",
+        title: "🎙️ Agent Active",
+        description: "Listening... Start speaking now! (Completely free & real-time)",
       });
       
+      // Start recognition after permission is granted
+      console.log('Starting speech recognition...');
       recognitionRef.current?.start();
       
     } catch (error: any) {
       console.error('Error starting agent:', error);
+      
+      let errorTitle = "Microphone Access Required";
+      let errorMessage = "Please allow microphone access to use voice chat.";
+      
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorMessage = "Click the 🔒 icon in your browser's address bar and allow microphone access, then try again.";
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = "No microphone detected. Please connect a microphone and try again.";
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = "Microphone is being used by another app. Please close other apps and try again.";
+      } else if (error.name === 'SecurityError') {
+        errorMessage = "Microphone access blocked due to security settings. Please check your browser settings.";
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to access microphone",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     }
