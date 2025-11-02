@@ -3,10 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Filter, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader2, Search, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Pagination,
@@ -32,30 +32,38 @@ export default function ActivityLogs() {
   const { toast } = useToast();
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchEmail, setSearchEmail] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const logsPerPage = 20;
+  const [totalPages, setTotalPages] = useState(1);
+  const logsPerPage = 50;
 
   useEffect(() => {
     fetchLogs();
-  }, []);
+  }, [currentPage, actionFilter]);
 
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      
-      const { data, error } = await supabase
+
+      let query = supabase
         .from("user_activity_logs")
-        .select("*")
+        .select("*", { count: "exact" })
         .order("created_at", { ascending: false })
-        .limit(500); // Limit to last 500 logs
+        .range((currentPage - 1) * logsPerPage, currentPage * logsPerPage - 1);
+
+      if (actionFilter !== "all") {
+        query = query.eq("action", actionFilter);
+      }
+
+      const { data, error, count } = await query;
 
       if (error) throw error;
 
       setLogs(data || []);
+      setTotalPages(Math.ceil((count || 0) / logsPerPage));
     } catch (error) {
-      console.error("Error fetching logs:", error);
+      console.error("Error fetching activity logs:", error);
       toast({
         title: "Error",
         description: "Failed to fetch activity logs",
@@ -66,101 +74,82 @@ export default function ActivityLogs() {
     }
   };
 
-  // Get unique actions for filter
-  const uniqueActions = Array.from(new Set(logs.map(log => log.action)));
-
-  // Filter logs
-  const filteredLogs = logs.filter(log => {
-    const matchesEmail = searchEmail === "" || 
-      log.user_email.toLowerCase().includes(searchEmail.toLowerCase());
-    const matchesAction = actionFilter === "all" || log.action === actionFilter;
-    return matchesEmail && matchesAction;
-  });
-
-  // Paginate logs
-  const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
-  const startIndex = (currentPage - 1) * logsPerPage;
-  const paginatedLogs = filteredLogs.slice(startIndex, startIndex + logsPerPage);
-
-  const getActionBadgeVariant = (action: string) => {
+  const getActionBadgeVariant = (action: string): "default" | "secondary" | "destructive" | "outline" => {
     if (action.includes("login") || action.includes("signup")) return "default";
-    if (action.includes("delete") || action.includes("remove")) return "destructive";
-    if (action.includes("update") || action.includes("edit")) return "secondary";
-    if (action.includes("create") || action.includes("add")) return "outline";
+    if (action.includes("create") || action.includes("upload")) return "secondary";
+    if (action.includes("delete") || action.includes("error")) return "destructive";
     return "outline";
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center p-8">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const filteredLogs = logs.filter(
+    (log) =>
+      log.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.action.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const uniqueActions = Array.from(new Set(logs.map((log) => log.action)));
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Activity Logs</CardTitle>
-        <CardDescription>Monitor all user activities across the platform</CardDescription>
-        
+        <CardDescription>Track user actions and system events</CardDescription>
+      </CardHeader>
+      <CardContent>
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by email..."
-              value={searchEmail}
-              onChange={(e) => {
-                setSearchEmail(e.target.value);
-                setCurrentPage(1);
-              }}
+              placeholder="Search by email or action..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
-          <Select value={actionFilter} onValueChange={(value) => {
-            setActionFilter(value);
-            setCurrentPage(1);
-          }}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Filter by action" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Actions</SelectItem>
-              {uniqueActions.map((action) => (
-                <SelectItem key={action} value={action}>
-                  {action}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Select value={actionFilter} onValueChange={setActionFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by action" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Actions</SelectItem>
+                {uniqueActions.map((action) => (
+                  <SelectItem key={action} value={action}>
+                    {action}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[600px]">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>User Email</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Details</TableHead>
-                  <TableHead>IP Address</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedLogs.length === 0 ? (
+
+        {loading ? (
+          <div className="flex justify-center p-8">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : filteredLogs.length === 0 ? (
+          <div className="text-center p-8 text-muted-foreground">
+            No activity logs found
+          </div>
+        ) : (
+          <>
+            <ScrollArea className="h-[600px] rounded-md border">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                      No activity logs found
-                    </TableCell>
+                    <TableHead>Timestamp</TableHead>
+                    <TableHead>User Email</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Details</TableHead>
+                    <TableHead>IP Address</TableHead>
                   </TableRow>
-                ) : (
-                  paginatedLogs.map((log) => (
+                </TableHeader>
+                <TableBody>
+                  {filteredLogs.map((log) => (
                     <TableRow key={log.id}>
-                      <TableCell className="text-sm whitespace-nowrap">
+                      <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                         {new Date(log.created_at).toLocaleString()}
                       </TableCell>
                       <TableCell className="font-medium">{log.user_email}</TableCell>
@@ -171,7 +160,7 @@ export default function ActivityLogs() {
                       </TableCell>
                       <TableCell className="max-w-md">
                         {log.details ? (
-                          <pre className="text-xs overflow-auto max-h-20 bg-muted p-2 rounded">
+                          <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
                             {JSON.stringify(log.details, null, 2)}
                           </pre>
                         ) : (
@@ -182,60 +171,49 @@ export default function ActivityLogs() {
                         {log.ip_address || "-"}
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </ScrollArea>
-        
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="mt-4">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  
-                  return (
-                    <PaginationItem key={pageNum}>
-                      <PaginationLink
-                        onClick={() => setCurrentPage(pageNum)}
-                        isActive={currentPage === pageNum}
-                        className="cursor-pointer"
-                      >
-                        {pageNum}
-                      </PaginationLink>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-4">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
                     </PaginationItem>
-                  );
-                })}
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-            <p className="text-center text-sm text-muted-foreground mt-2">
-              Showing {startIndex + 1} to {Math.min(startIndex + logsPerPage, filteredLogs.length)} of {filteredLogs.length} logs
-            </p>
-          </div>
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const pageNum = i + 1;
+                      return (
+                        <PaginationItem key={pageNum}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(pageNum)}
+                            isActive={currentPage === pageNum}
+                            className="cursor-pointer"
+                          >
+                            {pageNum}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                        className={
+                          currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>
