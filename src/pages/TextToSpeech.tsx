@@ -220,13 +220,13 @@ const TextToSpeech = () => {
             </h2>
 
             <div className="border-2 rounded-lg p-12 text-center bg-muted/30">
-              {generatedAudio ? (
+              {generatedAudio === "browser-tts" ? (
                 <div className="space-y-4">
                   <div className="w-20 h-20 mx-auto rounded-full bg-primary/20 flex items-center justify-center">
                     <Volume2 className="w-10 h-10 text-primary" />
                   </div>
-                  <p className="font-medium">Audio Generated!</p>
-                  <audio ref={audioRef} src={generatedAudio} className="w-full" controls />
+                  <p className="font-medium">Speech Ready!</p>
+                  <p className="text-sm text-muted-foreground">Click "Play" to hear the speech</p>
                 </div>
               ) : (
                 <div className="space-y-4 py-16">
