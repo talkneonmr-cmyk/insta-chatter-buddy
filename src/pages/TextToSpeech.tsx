@@ -43,49 +43,74 @@ const TextToSpeech = () => {
       return;
     }
 
-    setIsProcessing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: {
-          text,
-          voiceId: selectedVoice,
-          stability: stability[0],
-          similarityBoost: similarityBoost[0],
-        }
-      });
-
-      if (error) throw error;
-
-      setGeneratedAudio(data.audioUrl);
+    if (!('speechSynthesis' in window)) {
       toast({
-        title: "Success!",
-        description: "Speech generated successfully",
+        title: "Not supported",
+        description: "Your browser doesn't support text-to-speech",
+        variant: "destructive",
       });
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+      
+      const voiceName = VOICES.find(v => v.id === selectedVoice)?.name || "Aria";
+      const voice = voices.find(v => v.name.toLowerCase().includes(voiceName.toLowerCase())) || voices[0];
+      if (voice) utterance.voice = voice;
+      
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
+      utterance.onend = () => {
+        setIsProcessing(false);
+        toast({
+          title: "Success!",
+          description: "Speech generated successfully",
+        });
+      };
+
+      utterance.onerror = () => {
+        setIsProcessing(false);
+        toast({
+          title: "Error",
+          description: "Failed to generate speech",
+          variant: "destructive",
+        });
+      };
+
+      window.speechSynthesis.speak(utterance);
+      setGeneratedAudio("browser-tts");
     } catch (error) {
       console.error(error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to generate speech. Please try again.",
+        description: "Failed to generate speech. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsProcessing(false);
     }
   };
 
   const handlePlay = () => {
-    if (audioRef.current) {
+    if (generatedAudio === "browser-tts") {
+      handleGenerate();
+    } else if (audioRef.current) {
       audioRef.current.play();
     }
   };
 
   const handleDownload = () => {
-    if (!generatedAudio) return;
-    
-    const link = document.createElement("a");
-    link.href = generatedAudio;
-    link.download = "speech.mp3";
-    link.click();
+    toast({
+      title: "Not available",
+      description: "Browser text-to-speech doesn't support downloads",
+    });
   };
 
   return (
@@ -94,7 +119,7 @@ const TextToSpeech = () => {
         <div>
           <h1 className="text-3xl font-bold mb-2">Text to Speech</h1>
           <p className="text-muted-foreground">
-            Convert text to natural-sounding speech with Eleven Labs
+            Convert text to speech using your browser - completely free and instant!
           </p>
         </div>
 
@@ -238,10 +263,10 @@ const TextToSpeech = () => {
 
         {/* Info */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-3">Testing Eleven Labs API</h3>
+          <h3 className="text-lg font-semibold mb-3">Browser Text-to-Speech</h3>
           <p className="text-sm text-muted-foreground">
-            This page directly tests your Eleven Labs API key. If this works, your API key is correctly configured.
-            Try different voices, stability, and similarity settings to hear the differences.
+            Using your browser's built-in text-to-speech engine. Completely free and instant!
+            Note: Voice selection uses your browser's available voices, which may differ from the names shown.
           </p>
         </Card>
       </div>
