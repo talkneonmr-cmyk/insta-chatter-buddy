@@ -3,6 +3,9 @@ import { Resend } from "https://esm.sh/resend@4.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
+const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL");
+const FROM_NAME = Deno.env.get("RESEND_FROM_NAME") || "Fabuos Creators";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -26,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const { data, error } = await resend.emails.send({
-      from: "Fabuos Creators <onboarding@resend.dev>",
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: [email],
       subject: "Your Verification Code",
       html: `
