@@ -54,12 +54,11 @@ export default function Admin() {
     try {
       setLoading(true);
       
-      // Get all users with their profiles, subscriptions, and roles
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, email, created_at");
+      // Get all users from auth.users using admin function
+      const { data: authUsers, error: authError } = await supabase
+        .rpc("get_all_users_admin");
 
-      if (profilesError) throw profilesError;
+      if (authError) throw authError;
 
       // Get subscriptions
       const { data: subscriptions, error: subsError } = await supabase
@@ -82,16 +81,16 @@ export default function Admin() {
 
       if (usageError) throw usageError;
 
-      // Combine data
-      const usersData: UserData[] = profiles?.map((profile) => {
-        const subscription = subscriptions?.find((s) => s.user_id === profile.id);
-        const userRole = roles?.find((r) => r.user_id === profile.id);
-        const userUsage = usage?.find((u) => u.user_id === profile.id);
+      // Combine data with all auth users
+      const usersData: UserData[] = authUsers?.map((authUser: any) => {
+        const subscription = subscriptions?.find((s) => s.user_id === authUser.id);
+        const userRole = roles?.find((r) => r.user_id === authUser.id);
+        const userUsage = usage?.find((u) => u.user_id === authUser.id);
 
         return {
-          id: profile.id,
-          email: profile.email || "No email",
-          created_at: profile.created_at,
+          id: authUser.id,
+          email: authUser.email || "No email",
+          created_at: authUser.created_at,
           plan: subscription?.plan || "free",
           status: subscription?.status || "active",
           role: userRole?.role || null,

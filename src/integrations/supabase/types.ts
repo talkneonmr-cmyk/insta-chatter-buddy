@@ -944,6 +944,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_all_users_admin: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          email_confirmed_at: string
+          id: string
+          last_sign_in_at: string
+        }[]
+      }
       is_admin: { Args: { user_id: string }; Returns: boolean }
       log_user_activity: {
         Args: { p_action: string; p_details?: Json }
