@@ -140,6 +140,9 @@ export default function AIAgents() {
     try {
       console.log('Requesting microphone permission...');
       
+      // Start recognition immediately in the user gesture to avoid service-not-allowed
+      try { recognitionRef.current?.start(); } catch (e) { console.warn('Immediate start error:', e); }
+      
       // Request microphone permission explicitly
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log('Microphone permission granted');
