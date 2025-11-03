@@ -13,6 +13,14 @@ export default function MusicGenerator() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    const testerSession = localStorage.getItem('tester_session_token');
+    const isTester = localStorage.getItem('is_tester') === 'true';
+
+    if (testerSession && isTester) {
+      setIsAuthenticated(true);
+      return;
+    }
+
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -24,7 +32,7 @@ export default function MusicGenerator() {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) navigate("/auth");
+      if (!session && !(localStorage.getItem('tester_session_token') && localStorage.getItem('is_tester') === 'true')) navigate("/auth");
     });
 
     return () => subscription.unsubscribe();
