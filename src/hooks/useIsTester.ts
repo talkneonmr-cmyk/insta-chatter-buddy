@@ -8,25 +8,47 @@ export function useIsTester() {
   useEffect(() => {
     const checkTester = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setIsTester(false);
-          setIsLoading(false);
-          return;
-        }
+        // Check if there's a tester session token in localStorage
+        const testerSessionToken = localStorage.getItem('tester_session_token');
+        
+        if (testerSessionToken) {
+          // Verify the tester session token
+          const { data, error } = await supabase
+            .from("tester_sessions")
+            .select("id, expires_at")
+            .eq("session_token", testerSessionToken)
+            .maybeSingle();
 
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "tester" as any)
-          .maybeSingle();
-
-        if (error) {
-          console.error("Error checking tester role:", error);
-          setIsTester(false);
+          if (error) {
+            console.error("Error checking tester session:", error);
+            localStorage.removeItem('tester_session_token');
+            setIsTester(false);
+          } else if (data && new Date(data.expires_at) > new Date()) {
+            setIsTester(true);
+          } else {
+            localStorage.removeItem('tester_session_token');
+            setIsTester(false);
+          }
         } else {
-          setIsTester(!!data);
+          // Check if user has tester role in user_roles table (legacy support)
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data, error } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", user.id)
+              .eq("role", "tester" as any)
+              .maybeSingle();
+
+            if (error) {
+              console.error("Error checking tester role:", error);
+              setIsTester(false);
+            } else {
+              setIsTester(!!data);
+            }
+          } else {
+            setIsTester(false);
+          }
         }
       } catch (error) {
         console.error("Error in tester check:", error);

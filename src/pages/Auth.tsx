@@ -20,6 +20,8 @@ const Auth = () => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const [showDisabledAlert, setShowDisabledAlert] = useState(false);
+  const [isTesterLogin, setIsTesterLogin] = useState(false);
+  const [testerKey, setTesterKey] = useState("");
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -198,6 +200,39 @@ const Auth = () => {
     await handleSignUp(new Event('submit') as any);
   };
 
+  const handleTesterLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setShowDisabledAlert(false);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-tester-key', {
+        body: { keyCode: testerKey }
+      });
+
+      if (error) throw error;
+
+      // Store tester session token in localStorage
+      localStorage.setItem('tester_session_token', data.sessionToken);
+      
+      toast({
+        title: "Success!",
+        description: "Logged in as tester",
+      });
+
+      navigate("/");
+    } catch (error: any) {
+      console.error('Error with tester key:', error);
+      toast({
+        title: "Invalid Key",
+        description: error.message || "The tester key is invalid or expired",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <Card className="w-full max-w-md border shadow-lg">
@@ -208,12 +243,14 @@ const Auth = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">
-            {showOtpInput ? "Verify Your Email" : (isSignUp ? "Create Account" : "Welcome Back")}
+            {showOtpInput ? "Verify Your Email" : isTesterLogin ? "Tester Access" : (isSignUp ? "Create Account" : "Welcome Back")}
           </CardTitle>
           <CardDescription>
             {showOtpInput 
               ? "Enter the 6-digit code sent to your email"
-              : (isSignUp ? "Sign up to get started" : "Sign in to your account")
+              : isTesterLogin 
+                ? "Enter your tester access key"
+                : (isSignUp ? "Sign up to get started" : "Sign in to your account")
             }
           </CardDescription>
         </CardHeader>
@@ -228,7 +265,7 @@ const Auth = () => {
             </Alert>
           )}
           
-          {!showOtpInput ? (
+          {!showOtpInput && !isTesterLogin ? (
             <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
@@ -269,7 +306,7 @@ const Auth = () => {
                   isSignUp ? "Sign Up" : "Sign In"
                 )}
               </Button>
-              <div className="text-center">
+              <div className="text-center space-y-2">
                 <Button
                   type="button"
                   variant="link"
@@ -279,6 +316,61 @@ const Auth = () => {
                   className="text-sm"
                 >
                   {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+                </Button>
+                <div className="text-sm text-muted-foreground">or</div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsTesterLogin(true)}
+                  disabled={isLoading}
+                  className="text-sm"
+                >
+                  Login with Tester Key
+                </Button>
+              </div>
+            </form>
+          ) : isTesterLogin ? (
+            <form onSubmit={handleTesterLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="testerKey">Tester Access Key</Label>
+                <Input
+                  id="testerKey"
+                  type="text"
+                  placeholder="Enter your tester key"
+                  value={testerKey}
+                  onChange={(e) => setTesterKey(e.target.value.trim())}
+                  required
+                  disabled={isLoading}
+                  className="font-mono"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !testerKey}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Validating...
+                  </>
+                ) : (
+                  "Access as Tester"
+                )}
+              </Button>
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsTesterLogin(false);
+                    setTesterKey("");
+                  }}
+                  disabled={isLoading}
+                >
+                  Back to regular login
                 </Button>
               </div>
             </form>

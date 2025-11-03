@@ -687,6 +687,71 @@ export type Database = {
         }
         Relationships: []
       }
+      tester_keys: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          key_code: string
+          last_used_at: string | null
+          usage_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_code: string
+          last_used_at?: string | null
+          usage_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_code?: string
+          last_used_at?: string | null
+          usage_count?: number
+        }
+        Relationships: []
+      }
+      tester_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          session_token: string
+          tester_key_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_token: string
+          tester_key_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_token?: string
+          tester_key_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tester_sessions_tester_key_id_fkey"
+            columns: ["tester_key_id"]
+            isOneToOne: false
+            referencedRelation: "tester_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trend_analyses: {
         Row: {
           analysis_content: string

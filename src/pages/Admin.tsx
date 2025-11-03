@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw, Users, Activity, Mail, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw, Users, Activity, Mail, CheckCircle, XCircle, Key, Copy, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ActivityLogs from "@/components/ActivityLogs";
@@ -37,6 +37,8 @@ export default function Admin() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [testerKeys, setTesterKeys] = useState<any[]>([]);
+  const [loadingKeys, setLoadingKeys] = useState(false);
 
   useEffect(() => {
     if (!adminCheckLoading && !isAdmin) {
@@ -52,6 +54,7 @@ export default function Admin() {
   useEffect(() => {
     if (isAdmin) {
       fetchUsers();
+      fetchTesterKeys();
     }
   }, [isAdmin]);
 
@@ -379,6 +382,118 @@ export default function Admin() {
     }
   };
 
+  const fetchTesterKeys = async () => {
+    try {
+      setLoadingKeys(true);
+      const { data, error } = await supabase
+        .from('tester_keys')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTesterKeys(data || []);
+    } catch (error) {
+      console.error("Error fetching tester keys:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch tester keys",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingKeys(false);
+    }
+  };
+
+  const generateTesterKey = async () => {
+    try {
+      const keyCode = `TESTER-${crypto.randomUUID().substring(0, 18).toUpperCase()}`;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from('tester_keys')
+        .insert({
+          key_code: keyCode,
+          created_by: user.id,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Tester key generated successfully",
+      });
+
+      fetchTesterKeys();
+    } catch (error: any) {
+      console.error("Error generating tester key:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate tester key",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleTesterKey = async (keyId: string, isActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('tester_keys')
+        .update({ is_active: !isActive })
+        .eq('id', keyId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Tester key ${!isActive ? 'activated' : 'deactivated'}`,
+      });
+
+      fetchTesterKeys();
+    } catch (error: any) {
+      console.error("Error toggling tester key:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update tester key",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteTesterKey = async (keyId: string) => {
+    try {
+      const { error } = await supabase
+        .from('tester_keys')
+        .delete()
+        .eq('id', keyId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Tester key deleted",
+      });
+
+      fetchTesterKeys();
+    } catch (error: any) {
+      console.error("Error deleting tester key:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete tester key",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: "Tester key copied to clipboard",
+    });
+  };
+
   if (adminCheckLoading || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -442,12 +557,16 @@ export default function Admin() {
           </Card>
         </div>
 
-        {/* Tabs for Users and Activity Logs */}
+        {/* Tabs for Users, Tester Keys and Activity Logs */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsList className="grid w-full grid-cols-3 max-w-2xl">
             <TabsTrigger value="users" className="gap-2">
               <Users className="h-4 w-4" />
               Users
+            </TabsTrigger>
+            <TabsTrigger value="tester-keys" className="gap-2">
+              <Key className="h-4 w-4" />
+              Tester Keys
             </TabsTrigger>
             <TabsTrigger value="logs" className="gap-2">
               <Activity className="h-4 w-4" />
@@ -666,6 +785,106 @@ export default function Admin() {
                                   ) : (
                                     "Force Reset"
                                   )}
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="tester-keys" className="mt-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Tester Access Keys</CardTitle>
+                    <CardDescription>Generate and manage tester login keys</CardDescription>
+                  </div>
+                  <Button onClick={generateTesterKey}>
+                    <Key className="h-4 w-4 mr-2" />
+                    Generate New Key
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loadingKeys ? (
+                  <div className="flex justify-center p-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : testerKeys.length === 0 ? (
+                  <div className="text-center p-8 text-muted-foreground">
+                    No tester keys generated yet
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Key Code</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Usage Count</TableHead>
+                          <TableHead>Last Used</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {testerKeys.map((key) => (
+                          <TableRow key={key.id}>
+                            <TableCell className="font-mono text-sm">
+                              <div className="flex items-center gap-2">
+                                {key.key_code}
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => copyToClipboard(key.key_code)}
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {key.is_active ? (
+                                <Badge variant="default" className="bg-green-500">
+                                  Active
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary">
+                                  Inactive
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>{key.usage_count}</TableCell>
+                            <TableCell>
+                              {key.last_used_at 
+                                ? new Date(key.last_used_at).toLocaleDateString()
+                                : 'Never'}
+                            </TableCell>
+                            <TableCell>
+                              {new Date(key.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => toggleTesterKey(key.id, key.is_active)}
+                                >
+                                  {key.is_active ? 'Deactivate' : 'Activate'}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => deleteTesterKey(key.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </TableCell>

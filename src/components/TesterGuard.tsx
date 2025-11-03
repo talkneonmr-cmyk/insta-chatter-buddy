@@ -36,7 +36,7 @@ export default function TesterGuard({
             <div>
               <CardTitle>Tester Account - Limited Access</CardTitle>
               <CardDescription>
-                Sorry! {featureName} is not available for tester accounts
+                {featureName} is not available for tester accounts
               </CardDescription>
             </div>
           </div>
@@ -51,14 +51,17 @@ export default function TesterGuard({
             </ul>
           </div>
           <p className="text-sm text-muted-foreground">
-            To access all features, you need to become a partner. Please contact the administrator.
+            To access all features, contact the administrator to become a partner.
           </p>
           <Button 
-            onClick={() => navigate("/")} 
+            onClick={() => {
+              localStorage.removeItem('tester_session_token');
+              navigate("/auth");
+            }} 
             className="w-full" 
             variant="outline"
           >
-            Back to Dashboard
+            Logout
           </Button>
         </CardContent>
       </Card>
