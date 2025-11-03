@@ -188,7 +188,7 @@ export default function Dubbing() {
           </CardHeader>
           <CardContent>
             {dubbedAudio ? (
-              <EnhancedAudioPlayer audioUrl={dubbedAudio} />
+              <EnhancedAudioPlayer src={dubbedAudio} />
             ) : (
               <div className="text-center py-12">
                 <Languages className="h-16 w-16 mx-auto text-muted-foreground mb-4" />

@@ -1,10 +1,13 @@
-import { pipeline, env } from '@huggingface/transformers';
+import { pipeline, env, RawImage } from '@huggingface/transformers';
 
 // Configure transformers.js to always download models
 env.allowLocalModels = false;
 env.useBrowserCache = true;
 
 const MAX_IMAGE_DIMENSION = 1024;
+
+// Labels that should be considered as foreground (person/subject)
+const FOREGROUND_LABELS = ['person', 'human', 'face', 'head', 'torso', 'body'];
 
 function resizeImageIfNeeded(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, image: HTMLImageElement) {
   let width = image.naturalWidth;
@@ -34,7 +37,16 @@ function resizeImageIfNeeded(canvas: HTMLCanvasElement, ctx: CanvasRenderingCont
 export const removeBackground = async (imageElement: HTMLImageElement): Promise<Blob> => {
   try {
     console.log('Starting background removal process...');
-    const segmenter = await pipeline('image-segmentation', 'Xenova/segformer-b0-finetuned-ade-512-512');
+    
+    // Use WebGPU if available for better performance (check as any to avoid TS errors)
+    const device = (navigator as any).gpu ? 'webgpu' : 'wasm';
+    console.log(`Using device: ${device}`);
+    
+    const segmenter = await pipeline(
+      'image-segmentation', 
+      'Xenova/segformer-b0-finetuned-ade-512-512',
+      { device }
+    );
     
     // Convert HTMLImageElement to canvas
     const canvas = document.createElement('canvas');
@@ -46,9 +58,9 @@ export const removeBackground = async (imageElement: HTMLImageElement): Promise<
     const wasResized = resizeImageIfNeeded(canvas, ctx, imageElement);
     console.log(`Image ${wasResized ? 'was' : 'was not'} resized. Final dimensions: ${canvas.width}x${canvas.height}`);
     
-    // Get image data as base64
-    const imageData = canvas.toDataURL('image/jpeg', 0.8);
-    console.log('Image converted to base64');
+    // Convert to RawImage for better processing
+    const imageData = canvas.toDataURL('image/png');
+    console.log('Image converted to data URL');
     
     // Process the image with the segmentation model
     console.log('Processing with segmentation model...');
@@ -56,11 +68,11 @@ export const removeBackground = async (imageElement: HTMLImageElement): Promise<
     
     console.log('Segmentation result:', result);
     
-    if (!result || !Array.isArray(result) || result.length === 0 || !result[0].mask) {
+    if (!result || !Array.isArray(result) || result.length === 0) {
       throw new Error('Invalid segmentation result');
     }
     
-    // Create a new canvas for the masked image
+    // Create a combined mask for all foreground segments
     const outputCanvas = document.createElement('canvas');
     outputCanvas.width = canvas.width;
     outputCanvas.height = canvas.height;
@@ -71,18 +83,55 @@ export const removeBackground = async (imageElement: HTMLImageElement): Promise<
     // Draw original image
     outputCtx.drawImage(canvas, 0, 0);
     
-    // Apply the mask
-    const outputImageData = outputCtx.getImageData(
-      0, 0,
-      outputCanvas.width,
-      outputCanvas.height
-    );
+    // Get image data to modify
+    const outputImageData = outputCtx.getImageData(0, 0, outputCanvas.width, outputCanvas.height);
     const data = outputImageData.data;
     
-    // Apply inverted mask to alpha channel
-    for (let i = 0; i < result[0].mask.data.length; i++) {
-      // Invert the mask value (1 - value) to keep the subject instead of the background
-      const alpha = Math.round((1 - result[0].mask.data[i]) * 255);
+    // Initialize combined mask (all background initially)
+    const combinedMask = new Float32Array(canvas.width * canvas.height).fill(0);
+    
+    // Combine masks from segments that are likely foreground
+    for (const segment of result) {
+      const label = segment.label.toLowerCase();
+      console.log(`Found segment: ${label}`);
+      
+      // Check if this segment is a foreground object
+      const isForeground = FOREGROUND_LABELS.some(fg => label.includes(fg));
+      
+      if (isForeground && segment.mask && segment.mask.data) {
+        console.log(`Adding ${label} to foreground mask`);
+        // Add this mask to combined mask
+        for (let i = 0; i < segment.mask.data.length; i++) {
+          combinedMask[i] = Math.max(combinedMask[i], segment.mask.data[i]);
+        }
+      }
+    }
+    
+    // If no person detected, use the largest segment as foreground
+    const hasPersonMask = combinedMask.some(v => v > 0);
+    if (!hasPersonMask && result.length > 0) {
+      console.log('No person detected, using largest segment');
+      // Find the segment with the highest score or largest mask
+      let bestSegment = result[0];
+      for (const segment of result) {
+        if (segment.score > bestSegment.score) {
+          bestSegment = segment;
+        }
+      }
+      
+      if (bestSegment.mask && bestSegment.mask.data) {
+        for (let i = 0; i < bestSegment.mask.data.length; i++) {
+          combinedMask[i] = bestSegment.mask.data[i];
+        }
+      }
+    }
+    
+    // Apply smoothing to the mask for better edges
+    const smoothedMask = smoothMask(combinedMask, canvas.width, canvas.height);
+    
+    // Apply the combined and smoothed mask to alpha channel
+    for (let i = 0; i < smoothedMask.length; i++) {
+      const alpha = Math.round(smoothedMask[i] * 255);
       data[i * 4 + 3] = alpha;
     }
     
@@ -109,6 +158,36 @@ export const removeBackground = async (imageElement: HTMLImageElement): Promise<
     throw error;
   }
 };
+
+// Smooth mask edges for cleaner cutout
+function smoothMask(mask: Float32Array, width: number, height: number, radius: number = 2): Float32Array {
+  const smoothed = new Float32Array(mask.length);
+  
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = y * width + x;
+      let sum = 0;
+      let count = 0;
+      
+      // Average with neighbors
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const ny = y + dy;
+          const nx = x + dx;
+          
+          if (ny >= 0 && ny < height && nx >= 0 && nx < width) {
+            sum += mask[ny * width + nx];
+            count++;
+          }
+        }
+      }
+      
+      smoothed[idx] = sum / count;
+    }
+  }
+  
+  return smoothed;
+}
 
 export const loadImage = (file: Blob): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
