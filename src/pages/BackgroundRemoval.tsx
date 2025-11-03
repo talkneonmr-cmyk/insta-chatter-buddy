@@ -1,10 +1,9 @@
 import { useState, useRef } from "react";
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, Download, Loader2, ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { removeBackground } from "@/lib/backgroundRemoval";
+import { supabase } from "@/integrations/supabase/client";
 
 const BackgroundRemoval = () => {
   const [image, setImage] = useState<string | null>(null);
@@ -34,14 +33,21 @@ const BackgroundRemoval = () => {
       const response = await fetch(image);
       const blob = await response.blob();
       
-      // Load image element
-      const { loadImage } = await import("@/lib/backgroundRemoval");
-      const imageElement = await loadImage(blob);
+      // Create form data
+      const formData = new FormData();
+      formData.append('image_file', blob, 'image.png');
       
-      // Remove background
-      const resultBlob = await removeBackground(imageElement);
-      
-      // Convert blob to data URL for display
+      // Call edge function
+      const { data, error } = await supabase.functions.invoke('remove-background', {
+        body: formData,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Convert response to blob and then to data URL
+      const resultBlob = new Blob([data], { type: 'image/png' });
       const reader = new FileReader();
       reader.onloadend = () => {
         setProcessedImage(reader.result as string);
@@ -55,7 +61,7 @@ const BackgroundRemoval = () => {
       console.error('Background removal error:', error);
       toast({
         title: "Error",
-        description: "Failed to remove background. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to remove background. Please try again.",
         variant: "destructive",
       });
     } finally {
