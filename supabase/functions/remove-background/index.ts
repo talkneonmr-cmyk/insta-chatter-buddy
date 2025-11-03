@@ -1,83 +1,65 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const REMOVE_BG_API_KEY = Deno.env.get('REMOVE_BG_API_KEY');
-    if (!REMOVE_BG_API_KEY) {
-      throw new Error('REMOVE_BG_API_KEY not configured');
-    }
+    const REMOVE_BG_API_KEY = Deno.env.get("REMOVE_BG_API_KEY");
+    if (!REMOVE_BG_API_KEY) throw new Error("REMOVE_BG_API_KEY not configured");
 
-    const formData = await req.formData();
-    const imageFile = formData.get('image_file');
-
-    if (!imageFile || !(imageFile instanceof File)) {
+    // Expect JSON: { imageDataUrl: string }
+    const { imageDataUrl } = await req.json();
+    if (!imageDataUrl || typeof imageDataUrl !== "string") {
       return new Response(
-        JSON.stringify({ error: 'No image file provided' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ error: "imageDataUrl is required (data URL string)" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log('Processing background removal for image:', imageFile.name);
+    // Extract base64 (strip data URL prefix if present)
+    const commaIndex = imageDataUrl.indexOf(",");
+    const base64 = commaIndex !== -1 ? imageDataUrl.slice(commaIndex + 1) : imageDataUrl;
 
-    // Create form data for remove.bg API
-    const removeBgFormData = new FormData();
-    removeBgFormData.append('image_file', imageFile);
-    removeBgFormData.append('size', 'auto');
+    const fd = new FormData();
+    fd.append("image_file_b64", base64);
+    fd.append("size", "auto");
 
-    const response = await fetch('https://api.remove.bg/v1.0/removebg', {
-      method: 'POST',
-      headers: {
-        'X-Api-Key': REMOVE_BG_API_KEY,
-      },
-      body: removeBgFormData,
+    const resp = await fetch("https://api.remove.bg/v1.0/removebg", {
+      method: "POST",
+      headers: { "X-Api-Key": REMOVE_BG_API_KEY },
+      body: fd,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Remove.bg API error:', response.status, errorText);
+    if (!resp.ok) {
+      const errText = await resp.text();
+      console.error("remove.bg error", resp.status, errText);
       return new Response(
-        JSON.stringify({ 
-          error: 'Background removal failed', 
-          details: errorText 
-        }),
-        { 
-          status: response.status, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ error: "Background removal failed", details: errText }),
+        { status: resp.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const resultBlob = await response.blob();
-    console.log('Background removed successfully');
+    // remove.bg returns an image (PNG by default)
+    const blob = await resp.blob();
+    const ab = await blob.arrayBuffer();
+    const b64 = btoa(String.fromCharCode(...new Uint8Array(ab)));
 
-    return new Response(resultBlob, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'image/png',
-      },
-    });
-  } catch (error) {
-    console.error('Error in remove-background function:', error);
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
-      }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      JSON.stringify({ image: `data:image/png;base64,${b64}` }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (e) {
+    console.error("remove-background function error:", e);
+    return new Response(
+      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

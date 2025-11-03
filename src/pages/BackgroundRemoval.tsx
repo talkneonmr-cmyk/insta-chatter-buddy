@@ -29,41 +29,22 @@ const BackgroundRemoval = () => {
 
     setIsProcessing(true);
     try {
-      // Convert data URL to blob
-      const response = await fetch(image);
-      const blob = await response.blob();
-      
-      // Create form data
-      const formData = new FormData();
-      formData.append('image_file', blob, 'image.png');
-      
-      // Call edge function
+      // Call backend function with JSON payload (base64 data URL)
       const { data, error } = await supabase.functions.invoke('remove-background', {
-        body: formData,
+        body: { imageDataUrl: image },
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error as any;
 
-      // Convert response to blob and then to data URL
-      const resultBlob = new Blob([data], { type: 'image/png' });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProcessedImage(reader.result as string);
-        toast({
-          title: "Success!",
-          description: "Background removed successfully",
-        });
-      };
-      reader.readAsDataURL(resultBlob);
-    } catch (error) {
+      const imgDataUrl = (data as any)?.image as string | undefined;
+      if (!imgDataUrl) throw new Error('No image returned from background removal');
+
+      setProcessedImage(imgDataUrl);
+      toast({ title: 'Success!', description: 'Background removed successfully' });
+    } catch (error: any) {
       console.error('Background removal error:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to remove background. Please try again.",
-        variant: "destructive",
-      });
+      const message = error?.message || 'Failed to remove background. Please try again.';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
     } finally {
       setIsProcessing(false);
     }
