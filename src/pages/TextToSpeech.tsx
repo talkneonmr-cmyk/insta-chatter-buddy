@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import EnhancedAudioPlayer from "@/components/EnhancedAudioPlayer";
 import * as BrowserTTS from "@diffusionstudio/vits-web";
-import TesterGuard from "@/components/TesterGuard";
 
 // Voice list will be loaded from the in-browser TTS engine
 const DEFAULT_VOICE_ID = "en_US-hfc_female-medium";
@@ -214,11 +212,135 @@ const TextToSpeech = () => {
   };
 
   return (
-    <TesterGuard featureName="Text to Speech">
-      
-...
-      
-    </TesterGuard>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold mb-2">Text to Speech</h1>
+        <p className="text-muted-foreground">
+          Convert text to natural-sounding speech in your browser - Powered by AI
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Input Section */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Volume2 className="w-5 h-5" />
+            Text Input
+          </h2>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="text">Enter text to convert</Label>
+              <Textarea
+                id="text"
+                placeholder="Type or paste your text here..."
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={8}
+                className="mt-2"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="voice">Voice</Label>
+              <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                <SelectTrigger id="voice" className="mt-2">
+                  <SelectValue placeholder="Select a voice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {voices.length > 0 ? (
+                    voices.map((voice) => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        {voice.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value={DEFAULT_VOICE_ID}>Loading voices...</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button 
+              onClick={handleGenerate}
+              disabled={isProcessing || !text.trim()}
+              className="w-full"
+              size="lg"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Volume2 className="mr-2 h-5 w-5" />
+                  Generate Speech
+                </>
+              )}
+            </Button>
+          </div>
+        </Card>
+
+        {/* Output Section */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Play className="w-5 h-5" />
+            Generated Audio
+          </h2>
+
+          {generatedAudio ? (
+            <div className="space-y-4">
+              <audio 
+                ref={audioRef}
+                src={generatedAudio} 
+                controls 
+                className="w-full"
+              />
+              
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handlePlay}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Play
+                </Button>
+                <Button 
+                  onClick={handleDownload}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Volume2 className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                Your generated speech will appear here
+              </p>
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Info Card */}
+      <Card className="p-4 bg-blue-500/10 border-blue-500/20">
+        <div className="flex gap-3">
+          <Volume2 className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-blue-500 mb-1">Browser-Based Processing</h4>
+            <p className="text-sm text-muted-foreground">
+              All speech generation happens locally in your browser. No data is sent to servers. The first generation may take longer as the AI model loads.
+            </p>
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 };
 
