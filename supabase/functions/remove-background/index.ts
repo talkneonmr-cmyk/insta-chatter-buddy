@@ -32,16 +32,16 @@ serve(async (req) => {
 
     // Decode base64 safely
     const cleaned = base64Raw.replace(/\s/g, "");
-    const binary = atob(cleaned);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
+    const decodedBinary = atob(cleaned);
+    const decodedBytes = new Uint8Array(decodedBinary.length);
+    for (let i = 0; i < decodedBinary.length; i++) {
+      decodedBytes[i] = decodedBinary.charCodeAt(i);
     }
 
     // Build multipart form with a real file blob (more reliable for remove.bg)
     const fd = new FormData();
     const ext = mimeType.split("/")[1] || "png";
-    const file = new Blob([bytes], { type: mimeType });
+    const file = new Blob([decodedBytes], { type: mimeType });
     fd.append("image_file", file, `upload.${ext}`);
     fd.append("size", "auto");
 
@@ -63,7 +63,13 @@ serve(async (req) => {
     // remove.bg returns an image (PNG by default)
     const blob = await resp.blob();
     const ab = await blob.arrayBuffer();
-    const b64 = btoa(String.fromCharCode(...new Uint8Array(ab)));
+    const bytes = new Uint8Array(ab);
+    let binary = "";
+    const CHUNK_SIZE = 0x8000; // 32KB chunks to avoid stack overflow
+    for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK_SIZE));
+    }
+    const b64 = btoa(binary);
 
     return new Response(
       JSON.stringify({ image: `data:image/png;base64,${b64}` }),
