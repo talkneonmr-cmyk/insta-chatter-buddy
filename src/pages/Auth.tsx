@@ -25,12 +25,6 @@ const Auth = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    // Check tester session first
-    const testerSessionToken = localStorage.getItem('tester_session_token');
-    if (testerSessionToken) {
-      navigate('/');
-      return;
-    }
 
     // Then check regular auth
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -326,17 +320,6 @@ const Auth = () => {
                   className="text-sm"
                 >
                   {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
-                </Button>
-                <div className="text-sm text-muted-foreground">or</div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsTesterLogin(true)}
-                  disabled={isLoading}
-                  className="text-sm"
-                >
-                  Login with Tester Key
                 </Button>
               </div>
             </form>

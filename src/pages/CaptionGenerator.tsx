@@ -35,14 +35,6 @@ const CaptionGenerator = () => {
   const [refreshHistory, setRefreshHistory] = useState(0);
 
   useEffect(() => {
-    const isTester = localStorage.getItem('is_tester') === 'true';
-    const testerSession = localStorage.getItem('tester_session_token');
-
-    if (isTester && testerSession) {
-      setLoading(false);
-      return;
-    }
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
@@ -56,7 +48,7 @@ const CaptionGenerator = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (!session && !(localStorage.getItem('tester_session_token') && localStorage.getItem('is_tester') === 'true')) {
+      if (!session) {
         navigate("/auth");
       }
     });

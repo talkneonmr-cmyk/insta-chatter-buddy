@@ -32,21 +32,10 @@ const Dashboard = () => {
   const { plan, isLoading: subscriptionLoading } = useSubscription();
 
   useEffect(() => {
-    const testerSession = localStorage.getItem('tester_session_token');
-    const isTester = localStorage.getItem('is_tester') === 'true';
-
-    if (testerSession && isTester) {
-      // Allow dashboard for testers without redirecting
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
-    // Regular auth flow for normal users
+    // Regular auth flow
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
-      
       if (!session) {
         navigate("/auth");
       } else {
@@ -59,7 +48,7 @@ const Dashboard = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (!session && !(localStorage.getItem('tester_session_token') && localStorage.getItem('is_tester') === 'true')) {
+      if (!session) {
         navigate("/auth");
       } else if (session) {
         fetchDashboardStats(session.user.id);

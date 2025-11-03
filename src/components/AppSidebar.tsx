@@ -63,11 +63,7 @@ export function AppSidebar() {
       : "hover:bg-accent/50 transition-all";
 
   const handleSignOut = async () => {
-    // Clear tester session if present
-    localStorage.removeItem('tester_session_token');
-    localStorage.removeItem('is_tester');
-
-    // Sign out regular session if present
+    // Sign out session
     await supabase.auth.signOut();
     toast({
       title: "Signed out",
