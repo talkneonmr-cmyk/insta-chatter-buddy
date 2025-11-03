@@ -20,9 +20,7 @@ import TrendAnalyzer from "./pages/TrendAnalyzer";
 import SEOOptimizer from "./pages/SEOOptimizer";
 import HashtagGenerator from "./pages/HashtagGenerator";
 import SpeechToText from "./pages/SpeechToText";
-import ImageClassification from "./pages/ImageClassification";
 import TextSummarizer from "./pages/TextSummarizer";
-import ObjectDetection from "./pages/ObjectDetection";
 import BackgroundRemoval from "./pages/BackgroundRemoval";
 import ImageEnhancement from "./pages/ImageEnhancement";
 import VoiceCloning from "./pages/VoiceCloning";
@@ -57,9 +55,7 @@ const App = () => (
           <Route path="/hashtag-generator" element={<Layout><HashtagGenerator /></Layout>} />
           <Route path="/background-removal" element={<Layout><BackgroundRemoval /></Layout>} />
           <Route path="/speech-to-text" element={<Layout><SpeechToText /></Layout>} />
-          <Route path="/image-classification" element={<Layout><ImageClassification /></Layout>} />
           <Route path="/text-summarizer" element={<Layout><TextSummarizer /></Layout>} />
-          <Route path="/object-detection" element={<Layout><ObjectDetection /></Layout>} />
           <Route path="/image-enhancement" element={<Layout><ImageEnhancement /></Layout>} />
           <Route path="/voice-cloning" element={<Layout><VoiceCloning /></Layout>} />
           <Route path="/text-to-speech" element={<Layout><TextToSpeech /></Layout>} />

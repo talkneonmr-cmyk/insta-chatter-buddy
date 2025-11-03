@@ -64,13 +64,7 @@ verify_jwt = true
 [functions.speech-to-text]
 verify_jwt = true
 
-[functions.classify-image]
-verify_jwt = true
-
 [functions.summarize-text]
-verify_jwt = true
-
-[functions.detect-objects]
 verify_jwt = true
 
 [functions.enhance-image]
