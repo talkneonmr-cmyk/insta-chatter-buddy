@@ -27,11 +27,42 @@ const BackgroundRemoval = () => {
   const handleRemoveBackground = async () => {
     if (!image) return;
 
+    // Downscale and compress before sending to reduce payload size and avoid timeouts
+    const compressDataUrl = (dataUrl: string, maxDim = 2000, quality = 0.9) =>
+      new Promise<string>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.naturalWidth;
+          let h = img.naturalHeight;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return reject(new Error('Canvas not supported'));
+          ctx.drawImage(img, 0, 0, w, h);
+          const out = canvas.toDataURL('image/jpeg', quality);
+          resolve(out);
+        };
+        img.onerror = () => reject(new Error('Failed to load image for compression'));
+        img.src = dataUrl;
+      });
+
     setIsProcessing(true);
     try {
+      const payloadImage = await compressDataUrl(image);
+
       // Call backend function with JSON payload (base64 data URL)
       const { data, error } = await supabase.functions.invoke('remove-background', {
-        body: { imageDataUrl: image },
+        body: { imageDataUrl: payloadImage },
       });
 
       if (error) throw error as any;
@@ -43,7 +74,10 @@ const BackgroundRemoval = () => {
       toast({ title: 'Success!', description: 'Background removed successfully' });
     } catch (error: any) {
       console.error('Background removal error:', error);
-      const message = error?.message || 'Failed to remove background. Please try again.';
+      const message =
+        error?.message?.includes('Failed to send request')
+          ? 'Upload too large or network blocked. Try a smaller image (under ~10MB).'
+          : error?.message || 'Failed to remove background. Please try again.';
       toast({ title: 'Error', description: message, variant: 'destructive' });
     } finally {
       setIsProcessing(false);
