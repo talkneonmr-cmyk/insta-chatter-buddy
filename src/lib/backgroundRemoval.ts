@@ -69,27 +69,26 @@ export const removeBackground = async (imageElement: HTMLImageElement): Promise<
 
     // Prepare a combined mask (foreground opacity in [0,1]) at canvas resolution
     const combined = new Float32Array(canvas.width * canvas.height).fill(0);
+
+    // Build masks concurrently and combine
+    const masks = await Promise.all(
+      segments.map(async (seg) => {
+        const lbl = typeof seg?.label === 'string' ? seg.label.toLowerCase() : '';
+        // Skip explicit background labels
+        const skip = lbl === 'background';
+        if (skip) return null;
+        const fm = await maskToFloat(seg?.mask, canvas.width, canvas.height);
+        return fm;
+      })
+    );
+
     let anyMask = false;
-
-    for (const seg of segments) {
-      // Try to extract a Float32 mask from RawImage-like structures
-      const maskInfo = toFloatMask(seg?.mask);
-      if (!maskInfo) continue;
-
-      // Optionally bias toward likely foreground labels
-      const lbl = typeof seg?.label === 'string' ? seg.label.toLowerCase() : '';
-      const likelyForeground = lbl
-        ? (FOREGROUND_LABELS.some((fg) => lbl.includes(fg)) || lbl !== 'background')
-        : true;
-
-      // Resample mask to canvas size if needed
-      const maskResampled = resampleMask(maskInfo.data, maskInfo.width, maskInfo.height, canvas.width, canvas.height);
-
-      if (likelyForeground) {
-        for (let i = 0; i < combined.length; i++) {
-          combined[i] = Math.max(combined[i], maskResampled[i]);
-        }
-        anyMask = true;
+    for (const m of masks) {
+      if (!m) continue;
+      anyMask = true;
+      for (let i = 0; i < combined.length && i < m.length; i++) {
+        // Combine by maximum (keeps strongest foreground)
+        combined[i] = Math.max(combined[i], m[i]);
       }
     }
 
@@ -168,6 +167,71 @@ function toFloatMask(mask: any): { data: Float32Array; width: number; height: nu
   }
 
   return { data: out, width, height };
+}
+
+// Convert various possible mask formats (RawImage, data URL, {url}, HTMLImageElement) to Float32 mask at target size
+async function maskToFloat(mask: any, targetW: number, targetH: number): Promise<Float32Array | null> {
+  // Case 1: RawImage-like
+  const info = toFloatMask(mask);
+  if (info) {
+    return resampleMask(info.data, info.width, info.height, targetW, targetH);
+  }
+
+  // Case 2: data URL string or remote URL
+  let url: string | null = null;
+  if (typeof mask === 'string') {
+    if (mask.startsWith('data:image') || mask.startsWith('http')) url = mask;
+  } else if (mask && typeof mask === 'object') {
+    if (typeof mask.url === 'string') url = mask.url;
+  }
+
+  if (url) {
+    try {
+      const img = await loadImageFromUrl(url);
+      return extractMaskFromImage(img, targetW, targetH);
+    } catch (e) {
+      console.warn('Failed to load mask image URL', e);
+    }
+  }
+
+  // Case 3: HTMLImageElement directly
+  if (typeof HTMLImageElement !== 'undefined' && mask instanceof HTMLImageElement) {
+    try {
+      return extractMaskFromImage(mask, targetW, targetH);
+    } catch (e) {
+      console.warn('Failed to extract from HTMLImageElement', e);
+    }
+  }
+
+  return null;
+}
+
+function extractMaskFromImage(img: HTMLImageElement, targetW: number, targetH: number): Float32Array {
+  const c = document.createElement('canvas');
+  c.width = targetW;
+  c.height = targetH;
+  const cx = c.getContext('2d');
+  if (!cx) throw new Error('No 2D context');
+  cx.drawImage(img, 0, 0, targetW, targetH);
+  const imageData = cx.getImageData(0, 0, targetW, targetH).data;
+  const out = new Float32Array(targetW * targetH);
+  for (let i = 0; i < targetW * targetH; i++) {
+    const r = imageData[i * 4];
+    const a = imageData[i * 4 + 3];
+    const v = (a !== undefined && a !== null ? a : r) / 255;
+    out[i] = v;
+  }
+  return out;
+}
+
+function loadImageFromUrl(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
 }
 
 // Nearest-neighbor resampling of a mask array to desired size
