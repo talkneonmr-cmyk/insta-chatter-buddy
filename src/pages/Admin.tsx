@@ -227,7 +227,7 @@ export default function Admin() {
           .from("user_roles")
           .delete()
           .eq("user_id", userId)
-          .eq("role", "tester");
+          .eq("role", "tester" as any);
 
         if (error) throw error;
 
@@ -239,7 +239,7 @@ export default function Admin() {
         // Add tester role
         const { error } = await supabase
           .from("user_roles")
-          .insert({ user_id: userId, role: "tester" });
+          .insert({ user_id: userId, role: "tester" } as any);
 
         if (error) throw error;
 
@@ -566,6 +566,11 @@ export default function Admin() {
                                   <Crown className="h-3 w-3" />
                                   Admin
                                 </Badge>
+                              ) : user.role === "tester" ? (
+                                <Badge variant="secondary" className="gap-1 bg-orange-500/10 text-orange-500 border-orange-500">
+                                  <Users className="h-3 w-3" />
+                                  Tester
+                                </Badge>
                               ) : (
                                 <Badge variant="outline">User</Badge>
                               )}
@@ -587,6 +592,21 @@ export default function Admin() {
                                     "Remove Admin"
                                   ) : (
                                     "Make Admin"
+                                  )}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-orange-500 text-orange-500 hover:bg-orange-500/10"
+                                  onClick={() => toggleTesterRole(user.id, user.role)}
+                                  disabled={updating === user.id}
+                                >
+                                  {updating === user.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : user.role === "tester" ? (
+                                    "Remove Tester"
+                                  ) : (
+                                    "Make Tester"
                                   )}
                                 </Button>
                                 <Button

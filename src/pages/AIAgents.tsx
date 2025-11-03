@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Bot, Mic, MicOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import TesterGuard from "@/components/TesterGuard";
+import { Layout } from "@/components/Layout";
 
 export default function AIAgents() {
   const [isConnected, setIsConnected] = useState(false);
@@ -277,7 +279,8 @@ export default function AIAgents() {
             </p>
           </div>
         </Card>
-      </div>
-    </div>
+        </div>
+      </Layout>
+    </TesterGuard>
   );
 }

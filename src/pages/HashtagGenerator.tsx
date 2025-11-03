@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Hash, Sparkles, Copy, Check } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
+import TesterGuard from "@/components/TesterGuard";
 
 export default function HashtagGenerator() {
   const [topic, setTopic] = useState("");
@@ -80,8 +81,9 @@ export default function HashtagGenerator() {
 
   return (
     <Layout>
-      <SubscriptionGuard>
-        <div className="max-w-6xl mx-auto p-4 space-y-8">
+      <TesterGuard featureName="Hashtag Generator">
+        <SubscriptionGuard>
+          <div className="max-w-6xl mx-auto p-4 space-y-8">
           <div className="text-center space-y-2 slide-in">
             <h1 className="text-4xl font-bold gradient-text flex items-center justify-center gap-2">
               <Hash className="h-10 w-10" />
@@ -258,6 +260,7 @@ export default function HashtagGenerator() {
           )}
         </div>
       </SubscriptionGuard>
+      </TesterGuard>
     </Layout>
   );
 }

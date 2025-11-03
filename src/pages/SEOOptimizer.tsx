@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search, Sparkles, Copy, Check } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
+import TesterGuard from "@/components/TesterGuard";
 
 export default function SEOOptimizer() {
   const [title, setTitle] = useState("");
@@ -77,8 +78,9 @@ export default function SEOOptimizer() {
 
   return (
     <Layout>
-      <SubscriptionGuard>
-        <div className="max-w-6xl mx-auto p-4 space-y-8">
+      <TesterGuard featureName="SEO Optimizer">
+        <SubscriptionGuard>
+          <div className="max-w-6xl mx-auto p-4 space-y-8">
           <div className="text-center space-y-2 slide-in">
             <h1 className="text-4xl font-bold gradient-text flex items-center justify-center gap-2">
               <Search className="h-10 w-10" />
@@ -247,6 +249,7 @@ export default function SEOOptimizer() {
           )}
         </div>
       </SubscriptionGuard>
+      </TesterGuard>
     </Layout>
   );
 }

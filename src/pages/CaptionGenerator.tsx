@@ -9,6 +9,7 @@ import CaptionGeneratorForm from "@/components/CaptionGeneratorForm";
 import CaptionPreview from "@/components/CaptionPreview";
 import CaptionHistory from "@/components/CaptionHistory";
 import CaptionTemplates from "@/components/CaptionTemplates";
+import TesterGuard from "@/components/TesterGuard";
 
 export interface GeneratedCaption {
   caption: string;
@@ -86,60 +87,33 @@ const CaptionGenerator = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-      {/* Top Navigation */}
-      <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <div className="p-2 rounded-xl bg-gradient-to-r from-primary via-secondary to-accent float-animation">
-                <Sparkles className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="font-bold text-xl gradient-text">
-                  AI Caption Generator
-                </h1>
-                <p className="text-xs text-muted-foreground">Create viral Instagram captions</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground hidden sm:inline">
-                {user?.email}
-              </span>
-              <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}>
-                <Settings className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleSignOut}>
-                <LogOut className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <TesterGuard featureName="AI Caption Generator">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+        {/* Top Navigation */}
+        <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+...
+        </nav>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column - Form & Templates */}
-          <div className="lg:col-span-2 space-y-6">
-            <CaptionGeneratorForm onCaptionGenerated={handleCaptionGenerated} />
-            <CaptionTemplates onTemplateApply={handleTemplateApply} />
-          </div>
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left Column - Form & Templates */}
+            <div className="lg:col-span-2 space-y-6">
+              <CaptionGeneratorForm onCaptionGenerated={handleCaptionGenerated} />
+              <CaptionTemplates onTemplateApply={handleTemplateApply} />
+            </div>
 
-          {/* Right Column - Preview & History */}
-          <div className="space-y-6">
-            {generatedCaption && (
-              <CaptionPreview caption={generatedCaption} />
-            )}
-            <CaptionHistory key={refreshHistory} />
+            {/* Right Column - Preview & History */}
+            <div className="space-y-6">
+              {generatedCaption && (
+                <CaptionPreview caption={generatedCaption} />
+              )}
+              <CaptionHistory key={refreshHistory} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </TesterGuard>
   );
 };
 
