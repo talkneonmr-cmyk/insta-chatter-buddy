@@ -22,10 +22,10 @@ serve(async (req) => {
       );
     }
 
-    const { audio, targetLanguage } = requestBody;
+    const { audioUrl, targetLanguage } = requestBody;
 
-    if (!audio) {
-      throw new Error('No audio data provided');
+    if (!audioUrl) {
+      throw new Error('No audio URL provided');
     }
 
     const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY');
@@ -33,13 +33,17 @@ serve(async (req) => {
       throw new Error('ElevenLabs API key not configured');
     }
 
-    // Convert base64 to binary
-    const binaryAudio = Uint8Array.from(atob(audio), c => c.charCodeAt(0));
+    // Fetch audio from URL
+    const audioResponse = await fetch(audioUrl);
+    if (!audioResponse.ok) {
+      throw new Error('Failed to fetch audio file');
+    }
+    
+    const audioBlob = await audioResponse.blob();
     
     // Create form data for dubbing
     const formData = new FormData();
-    const blob = new Blob([binaryAudio], { type: 'audio/mpeg' });
-    formData.append('file', blob, 'audio.mp3');
+    formData.append('file', audioBlob, 'audio.mp3');
     formData.append('target_lang', targetLanguage);
     formData.append('mode', 'automatic');
 

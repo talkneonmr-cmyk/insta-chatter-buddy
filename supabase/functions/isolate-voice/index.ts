@@ -22,10 +22,10 @@ serve(async (req) => {
       );
     }
 
-    const { audio } = requestBody;
+    const { audioUrl } = requestBody;
 
-    if (!audio) {
-      throw new Error('No audio data provided');
+    if (!audioUrl) {
+      throw new Error('No audio URL provided');
     }
 
     const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY');
@@ -33,13 +33,17 @@ serve(async (req) => {
       throw new Error('ElevenLabs API key not configured');
     }
 
-    // Convert base64 to binary
-    const binaryAudio = Uint8Array.from(atob(audio), c => c.charCodeAt(0));
+    // Fetch audio from URL
+    const audioResponse = await fetch(audioUrl);
+    if (!audioResponse.ok) {
+      throw new Error('Failed to fetch audio file');
+    }
+    
+    const audioBlob = await audioResponse.blob();
     
     // Create form data
     const formData = new FormData();
-    const blob = new Blob([binaryAudio], { type: 'audio/mpeg' });
-    formData.append('audio', blob, 'audio.mp3');
+    formData.append('audio', audioBlob, 'audio.mp3');
 
     // Call ElevenLabs Voice Isolator API
     const response = await fetch('https://api.elevenlabs.io/v1/audio-isolation', {
@@ -59,10 +63,10 @@ serve(async (req) => {
     // Get isolated audio
     const audioBuffer = await response.arrayBuffer();
     const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)));
-    const audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
+    const resultAudioUrl = `data:audio/mpeg;base64,${base64Audio}`;
 
     return new Response(
-      JSON.stringify({ audioUrl }),
+      JSON.stringify({ audioUrl: resultAudioUrl }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }

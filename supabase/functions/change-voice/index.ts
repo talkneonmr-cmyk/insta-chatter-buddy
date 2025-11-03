@@ -22,10 +22,10 @@ serve(async (req) => {
       );
     }
 
-    const { audio, targetVoice } = requestBody;
+    const { audioUrl, targetVoice } = requestBody;
 
-    if (!audio) {
-      throw new Error('No audio data provided');
+    if (!audioUrl) {
+      throw new Error('No audio URL provided');
     }
 
     const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY');
@@ -43,12 +43,16 @@ serve(async (req) => {
 
     const voiceId = voiceMap[targetVoice] || voiceMap['male'];
 
-    // Convert base64 to binary
-    const binaryAudio = Uint8Array.from(atob(audio), c => c.charCodeAt(0));
+    // Fetch audio from URL
+    const audioResponse = await fetch(audioUrl);
+    if (!audioResponse.ok) {
+      throw new Error('Failed to fetch audio file');
+    }
+    
+    const audioBlob = await audioResponse.blob();
     
     // Create form data for speech-to-speech
     const formData = new FormData();
-    const audioBlob = new Blob([binaryAudio], { type: 'audio/mpeg' });
     formData.append('audio', audioBlob, 'audio.mp3');
     formData.append('model_id', 'eleven_english_sts_v2');
 
@@ -69,10 +73,10 @@ serve(async (req) => {
 
     const audioBuffer = await response.arrayBuffer();
     const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)));
-    const audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
+    const resultAudioUrl = `data:audio/mpeg;base64,${base64Audio}`;
 
     return new Response(
-      JSON.stringify({ audioUrl }),
+      JSON.stringify({ audioUrl: resultAudioUrl }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }

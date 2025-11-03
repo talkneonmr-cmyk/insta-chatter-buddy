@@ -29,24 +29,40 @@ export default function VoiceIsolator() {
       return;
     }
 
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (audioFile.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "Please select an audio file smaller than 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      const base64Audio = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result?.toString().split(',')[1];
-          if (result) resolve(result);
-          else reject(new Error("Failed to read audio file"));
-        };
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(audioFile);
-      });
+      // Upload to storage first
+      const fileName = `${Date.now()}-${audioFile.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('voice-samples')
+        .upload(fileName, audioFile);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('voice-samples')
+        .getPublicUrl(fileName);
       
       const { data, error } = await supabase.functions.invoke('isolate-voice', {
-        body: { audio: base64Audio }
+        body: { audioUrl: publicUrl }
       });
 
       if (error) throw error;
+
+      // Cleanup uploaded file
+      await supabase.storage.from('voice-samples').remove([fileName]);
 
       setIsolatedAudio(data.audioUrl);
       toast({
