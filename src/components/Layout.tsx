@@ -21,60 +21,56 @@ export function Layout({ children }: LayoutProps) {
   useEffect(() => {
     // Check for tester session first
     const testerSessionToken = localStorage.getItem('tester_session_token');
-    const isTesterFlag = localStorage.getItem('is_tester');
-    
-    if (testerSessionToken && isTesterFlag === 'true') {
-      // Verify tester session is valid
+    const isTesterFlag = localStorage.getItem('is_tester') === 'true';
+
+    if (testerSessionToken && isTesterFlag) {
+      // Optimistically allow access, validate in background to avoid loops
+      setLoading(false);
+
       supabase
         .from('tester_sessions')
         .select('id, expires_at')
         .eq('session_token', testerSessionToken)
         .maybeSingle()
         .then(({ data, error }) => {
-          if (error || !data || new Date(data.expires_at) < new Date()) {
-            // Invalid or expired tester session
+          const invalid = error || !data || new Date(data.expires_at) < new Date();
+          if (invalid) {
             localStorage.removeItem('tester_session_token');
             localStorage.removeItem('is_tester');
             navigate('/auth');
-          } else {
-            // Valid tester session - allow access
-            setLoading(false);
           }
         });
-    } else {
-      // No tester session, check regular auth
-      checkRegularAuth();
+      return;
     }
 
-    function checkRegularAuth() {
-      // Set up auth state listener FIRST
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          console.log('Auth state changed:', event);
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          // Redirect to auth if no session and no tester token
-          if (!session && !localStorage.getItem('tester_session_token')) {
-            navigate('/auth');
-          }
-        }
-      );
-
-      // THEN check for existing session
-      supabase.auth.getSession().then(({ data: { session } }) => {
+    // No tester session, check regular auth
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state changed:', event);
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
         
         // Redirect to auth if no session and no tester token
         if (!session && !localStorage.getItem('tester_session_token')) {
           navigate('/auth');
         }
-      });
+      }
+    );
 
-      return () => subscription.unsubscribe();
-    }
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+      
+      // Redirect to auth if no session and no tester token
+      if (!session && !localStorage.getItem('tester_session_token')) {
+        navigate('/auth');
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   // Show loading state while checking authentication

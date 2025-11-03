@@ -96,11 +96,12 @@ Deno.serve(async (req) => {
         status: 200,
       }
     );
-  } catch (error) {
-    console.error('Error in validate-tester-key function:', error);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Error in validate-tester-key function:', err);
     return new Response(
       JSON.stringify({
-        error: error.message,
+        error: message,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
