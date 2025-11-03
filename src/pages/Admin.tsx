@@ -217,6 +217,51 @@ export default function Admin() {
     }
   };
 
+  const toggleTesterRole = async (userId: string, currentRole: string | null) => {
+    try {
+      setUpdating(userId);
+
+      if (currentRole === "tester") {
+        // Remove tester role
+        const { error } = await supabase
+          .from("user_roles")
+          .delete()
+          .eq("user_id", userId)
+          .eq("role", "tester");
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Tester role removed",
+        });
+      } else {
+        // Add tester role
+        const { error } = await supabase
+          .from("user_roles")
+          .insert({ user_id: userId, role: "tester" });
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Tester role granted",
+        });
+      }
+
+      fetchUsers();
+    } catch (error) {
+      console.error("Error toggling tester role:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update tester role",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const resetUsage = async (userId: string) => {
     try {
       setUpdating(userId);
