@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Layout } from "@/components/Layout";
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -215,9 +215,9 @@ const TextToSpeech = () => {
 
   return (
     <TesterGuard featureName="Text to Speech">
-      <Layout>
+      
 ...
-      </Layout>
+      
     </TesterGuard>
   );
 };

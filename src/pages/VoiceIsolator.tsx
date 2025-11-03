@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Wand2, Upload, Loader2 } from "lucide-react";
 import EnhancedAudioPlayer from "@/components/EnhancedAudioPlayer";
 import TesterGuard from "@/components/TesterGuard";
-import { Layout } from "@/components/Layout";
+
 
 export default function VoiceIsolator() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -85,11 +85,11 @@ export default function VoiceIsolator() {
 
   return (
     <TesterGuard featureName="Voice Isolator">
-      <Layout>
+      
         <div className="container mx-auto p-6 max-w-4xl">
 ...
         </div>
-      </Layout>
+      
     </TesterGuard>
   );
 }

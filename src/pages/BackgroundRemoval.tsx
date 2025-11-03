@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Layout } from "@/components/Layout";
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, Download, Loader2, ImageIcon } from "lucide-react";
@@ -73,7 +73,7 @@ const BackgroundRemoval = () => {
   };
 
   return (
-    <Layout>
+    
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">Background Removal</h1>
@@ -197,7 +197,7 @@ const BackgroundRemoval = () => {
           </div>
         </Card>
       </div>
-    </Layout>
+    
   );
 };
 

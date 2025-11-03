@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, TrendingUp, Sparkles } from "lucide-react";
-import { Layout } from "@/components/Layout";
+
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import TesterGuard from "@/components/TesterGuard";
 
@@ -65,7 +65,7 @@ export default function TrendAnalyzer() {
   };
 
   return (
-    <Layout>
+    
       <TesterGuard featureName="Trend Analyzer">
         <SubscriptionGuard>
           <div className="max-w-6xl mx-auto p-4 space-y-8">
@@ -155,6 +155,6 @@ export default function TrendAnalyzer() {
         </div>
       </SubscriptionGuard>
       </TesterGuard>
-    </Layout>
+    
   );
 }

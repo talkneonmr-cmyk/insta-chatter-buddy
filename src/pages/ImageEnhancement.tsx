@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Layout } from "@/components/Layout";
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, Download, Loader2, ImageIcon, Sparkles, Eye } from "lucide-react";
@@ -89,7 +89,7 @@ const ImageEnhancement = () => {
   };
 
   return (
-    <Layout>
+    
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">AI Image Enhancement</h1>
@@ -290,7 +290,7 @@ const ImageEnhancement = () => {
           </div>
         </Card>
       </div>
-    </Layout>
+    
   );
 };
 

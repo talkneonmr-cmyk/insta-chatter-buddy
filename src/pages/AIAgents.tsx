@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Bot, Mic, MicOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import TesterGuard from "@/components/TesterGuard";
-import { Layout } from "@/components/Layout";
+
 
 export default function AIAgents() {
   const [isConnected, setIsConnected] = useState(false);
@@ -215,7 +215,7 @@ export default function AIAgents() {
 
   return (
     <TesterGuard featureName="AI Voice Agents">
-      <Layout>
+      
         <div className="relative min-h-[calc(100vh-4rem)] container mx-auto p-6 max-w-4xl">
       {/* Background Content - Blurred */}
       <div className="blur-md pointer-events-none select-none">
@@ -283,7 +283,7 @@ export default function AIAgents() {
         </Card>
       </div>
     </div>
-      </Layout>
+      
     </TesterGuard>
   );
 }

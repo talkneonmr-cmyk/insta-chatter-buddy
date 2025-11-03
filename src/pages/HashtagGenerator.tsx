@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Hash, Sparkles, Copy, Check } from "lucide-react";
-import { Layout } from "@/components/Layout";
+
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import TesterGuard from "@/components/TesterGuard";
 
@@ -80,7 +80,7 @@ export default function HashtagGenerator() {
   };
 
   return (
-    <Layout>
+    
       <TesterGuard featureName="Hashtag Generator">
         <SubscriptionGuard>
           <div className="max-w-6xl mx-auto p-4 space-y-8">
@@ -261,6 +261,6 @@ export default function HashtagGenerator() {
         </div>
       </SubscriptionGuard>
       </TesterGuard>
-    </Layout>
+    
   );
 }
