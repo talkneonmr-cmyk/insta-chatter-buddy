@@ -93,12 +93,39 @@ export const removeBackground = async (imageElement: HTMLImageElement): Promise<
     }
 
     if (!anyMask) {
+      console.log('Trying person segmentation fallback (DeeplabV3)...');
+      try {
+        const personSegmenter = await pipeline('image-segmentation', 'Xenova/deeplabv3-resnet50', { device });
+        const personRes: any = await personSegmenter(imageDataURL);
+        const personSegs: any[] = Array.isArray(personRes) ? personRes : personRes ? [personRes] : [];
+        for (const seg of personSegs) {
+          const lbl = String(seg?.label || '').toLowerCase();
+          if (lbl.includes('person') || lbl.includes('human')) {
+            const fm = await maskToFloat(seg?.mask, canvas.width, canvas.height);
+            if (fm) {
+              anyMask = true;
+              for (let i = 0; i < combined.length && i < fm.length; i++) {
+                combined[i] = Math.max(combined[i], fm[i]);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Fallback person segmentation failed:', e);
+      }
+    }
+
+    if (!anyMask) {
       console.warn('No usable mask from segmentation; returning original image.');
       return await blobFromCanvas(canvas);
     }
 
-    // Smooth edges for less jagged cutouts
+    // Smooth edges and apply soft threshold for clean cutout
     const smoothed = smoothMask(combined, canvas.width, canvas.height, 2);
+    for (let i = 0; i < smoothed.length; i++) {
+      // Feathered threshold: values <0.3 -> 0, >1.0 -> 1, smooth in between
+      smoothed[i] = Math.min(1, Math.max(0, (smoothed[i] - 0.3) / 0.7));
+    }
 
     // Apply alpha to original image
     const out = document.createElement('canvas');
