@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ScriptHistory from "@/components/ScriptHistory";
 import ScriptTemplates from "@/components/ScriptTemplates";
-import TesterGuard from "@/components/TesterGuard";
+
 
 const ScriptWriter = () => {
   const navigate = useNavigate();
@@ -103,18 +103,175 @@ const ScriptWriter = () => {
     }
   };
 
-  const handleTemplateSelect = (template: any) => {
+  const handleTemplateSelect = (template: { topic: string; length: string; tone: string }) => {
     setVideoTopic(template.topic);
     setVideoLength(template.length);
     setTone(template.tone);
   };
 
   return (
-    <TesterGuard featureName="AI Script Writer">
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-4 md:p-8">
-...
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-4 md:p-8">
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate("/")} 
+        className="mb-6"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
+
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
+            <FileText className="h-10 w-10" />
+            AI Script Writer
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Generate professional video scripts with AI
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" />
+                  Generate Script
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Script Title (Optional)</Label>
+                  <Input
+                    id="title"
+                    placeholder="My Video Script"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="topic">Video Topic *</Label>
+                  <Textarea
+                    id="topic"
+                    placeholder="What's your video about?"
+                    value={videoTopic}
+                    onChange={(e) => setVideoTopic(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Video Length</Label>
+                    <RadioGroup value={videoLength} onValueChange={setVideoLength}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="1min" id="1min" />
+                        <Label htmlFor="1min">1 minute</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="5min" id="5min" />
+                        <Label htmlFor="5min">5 minutes</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="10min" id="10min" />
+                        <Label htmlFor="10min">10 minutes</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tone">Tone</Label>
+                    <Select value={tone} onValueChange={setTone}>
+                      <SelectTrigger id="tone">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="energetic">Energetic</SelectItem>
+                        <SelectItem value="professional">Professional</SelectItem>
+                        <SelectItem value="casual">Casual</SelectItem>
+                        <SelectItem value="educational">Educational</SelectItem>
+                        <SelectItem value="humorous">Humorous</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="audience">Target Audience (Optional)</Label>
+                  <Input
+                    id="audience"
+                    placeholder="e.g., Beginners, Tech enthusiasts"
+                    value={targetAudience}
+                    onChange={(e) => setTargetAudience(e.target.value)}
+                  />
+                </div>
+
+                <Button 
+                  onClick={handleGenerate}
+                  disabled={loading}
+                  className="w-full"
+                  size="lg"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      Generate Script
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <ScriptTemplates onSelectTemplate={handleTemplateSelect} />
+          </div>
+
+          <div className="space-y-6">
+            {generatedScript && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Generated Script</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCopyScript}
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-4 w-4 mr-2" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    value={generatedScript.script_content}
+                    readOnly
+                    className="min-h-[400px] font-mono text-sm"
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            <ScriptHistory key={refreshHistory} />
+          </div>
+        </div>
       </div>
-    </TesterGuard>
+    </div>
   );
 };
 
