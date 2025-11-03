@@ -23,12 +23,26 @@ serve(async (req) => {
       );
     }
 
-    // Extract base64 (strip data URL prefix if present)
+    // Extract and decode base64 + mime type
     const commaIndex = imageDataUrl.indexOf(",");
-    const base64 = commaIndex !== -1 ? imageDataUrl.slice(commaIndex + 1) : imageDataUrl;
+    const header = commaIndex !== -1 ? imageDataUrl.slice(0, commaIndex) : "";
+    const base64Raw = commaIndex !== -1 ? imageDataUrl.slice(commaIndex + 1) : imageDataUrl;
+    const mimeMatch = header.match(/data:(.*?);base64/);
+    const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
 
+    // Decode base64 safely
+    const cleaned = base64Raw.replace(/\s/g, "");
+    const binary = atob(cleaned);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    // Build multipart form with a real file blob (more reliable for remove.bg)
     const fd = new FormData();
-    fd.append("image_file_b64", base64);
+    const ext = mimeType.split("/")[1] || "png";
+    const file = new Blob([bytes], { type: mimeType });
+    fd.append("image_file", file, `upload.${ext}`);
     fd.append("size", "auto");
 
     const resp = await fetch("https://api.remove.bg/v1.0/removebg", {
