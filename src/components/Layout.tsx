@@ -21,8 +21,9 @@ export function Layout({ children }: LayoutProps) {
   useEffect(() => {
     // Check for tester session first
     const testerSessionToken = localStorage.getItem('tester_session_token');
+    const isTesterFlag = localStorage.getItem('is_tester');
     
-    if (testerSessionToken) {
+    if (testerSessionToken && isTesterFlag === 'true') {
       // Verify tester session is valid
       supabase
         .from('tester_sessions')
@@ -31,11 +32,12 @@ export function Layout({ children }: LayoutProps) {
         .maybeSingle()
         .then(({ data, error }) => {
           if (error || !data || new Date(data.expires_at) < new Date()) {
+            // Invalid or expired tester session
             localStorage.removeItem('tester_session_token');
-            // Fall back to regular auth check
-            checkRegularAuth();
+            localStorage.removeItem('is_tester');
+            navigate('/auth');
           } else {
-            // Valid tester session
+            // Valid tester session - allow access
             setLoading(false);
           }
         });

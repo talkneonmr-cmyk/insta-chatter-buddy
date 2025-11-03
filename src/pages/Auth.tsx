@@ -25,6 +25,14 @@ const Auth = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
+    // Check tester session first
+    const testerSessionToken = localStorage.getItem('tester_session_token');
+    if (testerSessionToken) {
+      navigate('/');
+      return;
+    }
+
+    // Then check regular auth
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate('/');
@@ -214,13 +222,15 @@ const Auth = () => {
 
       // Store tester session token in localStorage
       localStorage.setItem('tester_session_token', data.sessionToken);
+      localStorage.setItem('is_tester', 'true');
       
       toast({
         title: "Success!",
         description: "Logged in as tester",
       });
 
-      navigate("/");
+      // Force reload to apply tester session
+      window.location.href = "/";
     } catch (error: any) {
       console.error('Error with tester key:', error);
       toast({
