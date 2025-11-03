@@ -65,9 +65,8 @@ serve(async (req) => {
     const ab = await blob.arrayBuffer();
     const bytes = new Uint8Array(ab);
     let binary = "";
-    const CHUNK_SIZE = 0x8000; // 32KB chunks to avoid stack overflow
-    for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
-      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK_SIZE));
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
     }
     const b64 = btoa(binary);
 
