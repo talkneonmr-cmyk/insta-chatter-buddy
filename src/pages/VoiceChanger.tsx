@@ -33,23 +33,28 @@ export default function VoiceChanger() {
 
     setIsProcessing(true);
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(audioFile);
-      reader.onload = async () => {
-        const base64Audio = reader.result?.toString().split(',')[1];
-        
-        const { data, error } = await supabase.functions.invoke('change-voice', {
-          body: { audio: base64Audio, targetVoice }
-        });
+      const base64Audio = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result?.toString().split(',')[1];
+          if (result) resolve(result);
+          else reject(new Error("Failed to read audio file"));
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(audioFile);
+      });
+      
+      const { data, error } = await supabase.functions.invoke('change-voice', {
+        body: { audio: base64Audio, targetVoice }
+      });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        setChangedAudio(data.audioUrl);
-        toast({
-          title: "Voice Changed!",
-          description: "Voice transformation completed successfully",
-        });
-      };
+      setChangedAudio(data.audioUrl);
+      toast({
+        title: "Voice Changed!",
+        description: "Voice transformation completed successfully",
+      });
     } catch (error: any) {
       console.error('Error changing voice:', error);
       toast({

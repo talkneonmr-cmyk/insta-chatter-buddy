@@ -33,30 +33,35 @@ export default function Dubbing() {
 
     setIsProcessing(true);
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(audioFile);
-      reader.onload = async () => {
-        const base64Audio = reader.result?.toString().split(',')[1];
-        
-        const { data, error } = await supabase.functions.invoke('dub-audio', {
-          body: { audio: base64Audio, targetLanguage }
+      const base64Audio = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result?.toString().split(',')[1];
+          if (result) resolve(result);
+          else reject(new Error("Failed to read audio file"));
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(audioFile);
+      });
+      
+      const { data, error } = await supabase.functions.invoke('dub-audio', {
+        body: { audio: base64Audio, targetLanguage }
+      });
+
+      if (error) throw error;
+
+      if (data.status === 'processing') {
+        toast({
+          title: "Dubbing Started",
+          description: data.message,
         });
-
-        if (error) throw error;
-
-        if (data.status === 'processing') {
-          toast({
-            title: "Dubbing Started",
-            description: data.message,
-          });
-        } else if (data.audioUrl) {
-          setDubbedAudio(data.audioUrl);
-          toast({
-            title: "Dubbing Complete!",
-            description: "Audio dubbed to target language successfully",
-          });
-        }
-      };
+      } else if (data.audioUrl) {
+        setDubbedAudio(data.audioUrl);
+        toast({
+          title: "Dubbing Complete!",
+          description: "Audio dubbed to target language successfully",
+        });
+      }
     } catch (error: any) {
       console.error('Error dubbing audio:', error);
       toast({

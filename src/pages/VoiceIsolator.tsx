@@ -31,23 +31,28 @@ export default function VoiceIsolator() {
 
     setIsProcessing(true);
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(audioFile);
-      reader.onload = async () => {
-        const base64Audio = reader.result?.toString().split(',')[1];
-        
-        const { data, error } = await supabase.functions.invoke('isolate-voice', {
-          body: { audio: base64Audio }
-        });
+      const base64Audio = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result?.toString().split(',')[1];
+          if (result) resolve(result);
+          else reject(new Error("Failed to read audio file"));
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(audioFile);
+      });
+      
+      const { data, error } = await supabase.functions.invoke('isolate-voice', {
+        body: { audio: base64Audio }
+      });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        setIsolatedAudio(data.audioUrl);
-        toast({
-          title: "Voice Isolated!",
-          description: "Background noise removed successfully",
-        });
-      };
+      setIsolatedAudio(data.audioUrl);
+      toast({
+        title: "Voice Isolated!",
+        description: "Background noise removed successfully",
+      });
     } catch (error: any) {
       console.error('Error isolating voice:', error);
       toast({
