@@ -64,80 +64,83 @@ export const removeBackground = async (imageElement: HTMLImageElement): Promise<
     
     // Process the image with the segmentation model
     console.log('Processing with segmentation model...');
-    const result = await segmenter(imageData);
-    
+    const result: any = await segmenter(imageData);
     console.log('Segmentation result:', result);
-    
-    if (!result || !Array.isArray(result) || result.length === 0) {
-      throw new Error('Invalid segmentation result');
+
+    // Normalize to array of segments
+    const segments: any[] = Array.isArray(result)
+      ? result
+      : result && typeof result === 'object'
+        ? [result]
+        : [];
+
+    // Build combined mask from available masks (exclude obvious background labels when present)
+    const combinedMask = new Float32Array(canvas.width * canvas.height).fill(0);
+    let anyMaskAdded = false;
+
+    for (const seg of segments) {
+      const lbl = typeof seg?.label === 'string' ? seg.label.toLowerCase() : '';
+      const isForeground = lbl
+        ? FOREGROUND_LABELS.some((fg) => lbl.includes(fg)) || lbl !== 'background'
+        : true; // if label missing, assume foreground candidate
+
+      const maskData: Float32Array | number[] | undefined = seg?.mask?.data as any;
+      if (!maskData) continue;
+
+      // Some models return mask at model resolution; assume lengths match, otherwise blend up to available length
+      const len = Math.min(maskData.length, combinedMask.length);
+      if (isForeground) {
+        for (let i = 0; i < len; i++) {
+          const v = typeof maskData[i] === 'number' ? (maskData[i] as number) : 0;
+          combinedMask[i] = Math.max(combinedMask[i], v);
+        }
+        anyMaskAdded = true;
+      }
     }
-    
-    // Create a combined mask for all foreground segments
+
+    // Fallbacks: pick the strongest/first mask if none added
+    if (!anyMaskAdded && segments.length > 0) {
+      const candidate = segments.find((s) => s?.mask?.data) || segments[0];
+      const maskData: Float32Array | number[] | undefined = candidate?.mask?.data as any;
+      if (maskData) {
+        const len = Math.min(maskData.length, combinedMask.length);
+        for (let i = 0; i < len; i++) combinedMask[i] = Number(maskData[i] || 0);
+        anyMaskAdded = true;
+      }
+    }
+
+    if (!anyMaskAdded) {
+      console.warn('No usable mask returned from segmentation. Returning original image alpha intact.');
+      // Return original image as PNG (no background removed) to avoid hard failure
+      return await new Promise((resolve, reject) =>
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Canvas toBlob failed'))), 'image/png', 1.0),
+      );
+    }
+
+    // Create a new canvas for the masked image
     const outputCanvas = document.createElement('canvas');
     outputCanvas.width = canvas.width;
     outputCanvas.height = canvas.height;
     const outputCtx = outputCanvas.getContext('2d');
-    
     if (!outputCtx) throw new Error('Could not get output canvas context');
-    
-    // Draw original image
+
+    // Draw original image then update alpha using smoothed mask
     outputCtx.drawImage(canvas, 0, 0);
-    
-    // Get image data to modify
     const outputImageData = outputCtx.getImageData(0, 0, outputCanvas.width, outputCanvas.height);
     const data = outputImageData.data;
-    
-    // Initialize combined mask (all background initially)
-    const combinedMask = new Float32Array(canvas.width * canvas.height).fill(0);
-    
-    // Combine masks from segments that are likely foreground
-    for (const segment of result) {
-      const label = segment.label.toLowerCase();
-      console.log(`Found segment: ${label}`);
-      
-      // Check if this segment is a foreground object
-      const isForeground = FOREGROUND_LABELS.some(fg => label.includes(fg));
-      
-      if (isForeground && segment.mask && segment.mask.data) {
-        console.log(`Adding ${label} to foreground mask`);
-        // Add this mask to combined mask
-        for (let i = 0; i < segment.mask.data.length; i++) {
-          combinedMask[i] = Math.max(combinedMask[i], segment.mask.data[i]);
-        }
-      }
-    }
-    
-    // If no person detected, use the largest segment as foreground
-    const hasPersonMask = combinedMask.some(v => v > 0);
-    if (!hasPersonMask && result.length > 0) {
-      console.log('No person detected, using largest segment');
-      // Find the segment with the highest score or largest mask
-      let bestSegment = result[0];
-      for (const segment of result) {
-        if (segment.score > bestSegment.score) {
-          bestSegment = segment;
-        }
-      }
-      
-      if (bestSegment.mask && bestSegment.mask.data) {
-        for (let i = 0; i < bestSegment.mask.data.length; i++) {
-          combinedMask[i] = bestSegment.mask.data[i];
-        }
-      }
-    }
-    
-    // Apply smoothing to the mask for better edges
+
+    // Apply smoothing for cleaner edges
     const smoothedMask = smoothMask(combinedMask, canvas.width, canvas.height);
-    
-    // Apply the combined and smoothed mask to alpha channel
+
+    // Apply to alpha channel (mask value represents foreground opacity)
     for (let i = 0; i < smoothedMask.length; i++) {
       const alpha = Math.round(smoothedMask[i] * 255);
       data[i * 4 + 3] = alpha;
     }
-    
+
     outputCtx.putImageData(outputImageData, 0, 0);
     console.log('Mask applied successfully');
-    
+
     // Convert canvas to blob
     return new Promise((resolve, reject) => {
       outputCanvas.toBlob(
@@ -150,7 +153,7 @@ export const removeBackground = async (imageElement: HTMLImageElement): Promise<
           }
         },
         'image/png',
-        1.0
+        1.0,
       );
     });
   } catch (error) {
