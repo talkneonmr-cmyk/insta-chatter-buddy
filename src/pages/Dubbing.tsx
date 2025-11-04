@@ -63,16 +63,11 @@ export default function Dubbing() {
 
       await supabase.storage.from('voice-samples').remove([fileName]);
 
-      if (data.status === 'processing') {
-        toast({
-          title: "Dubbing Started",
-          description: data.message,
-        });
-      } else if (data.audioUrl) {
+      if (data.audioUrl) {
         setDubbedAudio(data.audioUrl);
         toast({
           title: "Dubbing Complete!",
-          description: "Audio dubbed to target language successfully",
+          description: "Audio dubbed successfully using free AI models",
         });
       }
     } catch (error: any) {
