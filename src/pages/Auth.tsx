@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, AlertCircle } from "lucide-react";
+import { Loader2, Mail, AlertCircle, Sparkles, Lock } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -238,30 +238,51 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md border shadow-lg">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 rounded-full bg-primary/10">
-              <Mail className="w-8 h-8 text-primary" />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-mesh relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl float-animation" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl float-animation" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent/20 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }} />
+      </div>
+
+      <Card className="w-full max-w-md card-glass border-border/50 relative z-10 scale-in overflow-hidden">
+        {/* Decorative top gradient bar */}
+        <div className="h-1 w-full bg-gradient-to-r from-primary via-secondary to-accent" />
+        
+        <CardHeader className="space-y-4 text-center pb-6">
+          <div className="flex justify-center mb-2">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-full blur-md opacity-75 animate-pulse" />
+              <div className="relative p-4 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 backdrop-blur-sm border border-primary/30">
+                {showOtpInput ? (
+                  <Mail className="w-8 h-8 text-primary" />
+                ) : isTesterLogin ? (
+                  <Lock className="w-8 h-8 text-accent" />
+                ) : (
+                  <Sparkles className="w-8 h-8 text-primary" />
+                )}
+              </div>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">
-            {showOtpInput ? "Verify Your Email" : isTesterLogin ? "Tester Access" : (isSignUp ? "Create Account" : "Welcome Back")}
-          </CardTitle>
-          <CardDescription>
-            {showOtpInput 
-              ? "Enter the 6-digit code sent to your email"
-              : isTesterLogin 
-                ? "Enter your tester access key"
-                : (isSignUp ? "Sign up to get started" : "Sign in to your account")
-            }
-          </CardDescription>
+          <div className="space-y-2">
+            <CardTitle className="text-3xl font-bold gradient-text">
+              {showOtpInput ? "Verify Your Email" : isTesterLogin ? "Tester Access" : (isSignUp ? "Create Account" : "Welcome Back")}
+            </CardTitle>
+            <CardDescription className="text-base">
+              {showOtpInput 
+                ? "Enter the 6-digit code sent to your email"
+                : isTesterLogin 
+                  ? "Enter your tester access key"
+                  : (isSignUp ? "Sign up to get started" : "Sign in to your account")
+              }
+            </CardDescription>
+          </div>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="pb-8">
           {showDisabledAlert && (
-            <Alert variant="info" className="mb-4">
+            <Alert variant="info" className="mb-6 animate-fade-in border-destructive/50 bg-destructive/5">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 Acc disabled please appeal
@@ -270,89 +291,106 @@ const Auth = () => {
           )}
           
           {!showOtpInput && !isTesterLogin ? (
-            <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
+            <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-5 slide-in">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
+                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                <div className="relative group">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={isLoading}
+                    className="pl-10 h-12 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  minLength={6}
-                />
+                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                <div className="relative group">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={isLoading}
+                    minLength={6}
+                    className="pl-10 h-12 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all"
+                  />
+                </div>
               </div>
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-xl btn-3d"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     {isSignUp ? "Creating account..." : "Signing in..."}
                   </>
                 ) : (
-                  isSignUp ? "Sign Up" : "Sign In"
+                  <>
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    {isSignUp ? "Create Account" : "Sign In"}
+                  </>
                 )}
               </Button>
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-2 pt-2">
                 <Button
                   type="button"
-                  variant="link"
+                  variant="ghost"
                   size="sm"
                   onClick={() => setIsSignUp(!isSignUp)}
                   disabled={isLoading}
-                  className="text-sm"
+                  className="text-sm hover:text-primary transition-colors"
                 >
                   {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
                 </Button>
               </div>
             </form>
           ) : isTesterLogin ? (
-            <form onSubmit={handleTesterLogin} className="space-y-4">
+            <form onSubmit={handleTesterLogin} className="space-y-5 slide-in">
               <div className="space-y-2">
-                <Label htmlFor="testerKey">Tester Access Key</Label>
-                <Input
-                  id="testerKey"
-                  type="text"
-                  placeholder="Enter your tester key"
-                  value={testerKey}
-                  onChange={(e) => setTesterKey(e.target.value.trim())}
-                  required
-                  disabled={isLoading}
-                  className="font-mono"
-                />
+                <Label htmlFor="testerKey" className="text-sm font-medium">Tester Access Key</Label>
+                <div className="relative group">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                  <Input
+                    id="testerKey"
+                    type="text"
+                    placeholder="Enter your tester key"
+                    value={testerKey}
+                    onChange={(e) => setTesterKey(e.target.value.trim())}
+                    required
+                    disabled={isLoading}
+                    className="pl-10 h-12 font-mono bg-background/50 border-border/50 focus:border-accent/50 focus:bg-background transition-all"
+                  />
+                </div>
               </div>
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-accent to-accent-glow hover:opacity-90 transition-all shadow-lg hover:shadow-xl btn-3d"
                 disabled={isLoading || !testerKey}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Validating...
                   </>
                 ) : (
-                  "Access as Tester"
+                  <>
+                    <Lock className="mr-2 h-5 w-5" />
+                    Access as Tester
+                  </>
                 )}
               </Button>
-              <div className="text-center">
+              <div className="text-center pt-2">
                 <Button
                   type="button"
                   variant="ghost"
@@ -362,25 +400,29 @@ const Auth = () => {
                     setTesterKey("");
                   }}
                   disabled={isLoading}
+                  className="text-sm hover:text-accent transition-colors"
                 >
                   Back to regular login
                 </Button>
               </div>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOTP} className="space-y-4">
+            <form onSubmit={handleVerifyOTP} className="space-y-5 slide-in">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  disabled
-                  className="bg-muted"
-                />
+                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    disabled
+                    className="pl-10 h-12 bg-muted/50 border-border/50"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="otp">Verification Code</Label>
+              <div className="space-y-3">
+                <Label htmlFor="otp" className="text-sm font-medium">Verification Code</Label>
                 <Input
                   id="otp"
                   type="text"
@@ -390,27 +432,31 @@ const Auth = () => {
                   required
                   disabled={isLoading}
                   maxLength={6}
-                  className="text-center text-2xl tracking-widest font-mono"
+                  className="text-center text-3xl tracking-widest font-mono h-14 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all"
                 />
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
                   Code expires in 10 minutes
                 </p>
               </div>
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-xl btn-3d"
                 disabled={isLoading || otp.length !== 6}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Verifying...
                   </>
                 ) : (
-                  "Verify & Sign In"
+                  <>
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Verify & Sign In
+                  </>
                 )}
               </Button>
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-3 pt-2">
                 <Button
                   type="button"
                   variant="ghost"
@@ -420,12 +466,13 @@ const Auth = () => {
                     setOtp("");
                   }}
                   disabled={isLoading}
+                  className="text-sm hover:text-primary transition-colors"
                 >
                   Change email
                 </Button>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm">
                   {resendTimer > 0 ? (
-                    <span>Resend code in {resendTimer}s</span>
+                    <span className="text-muted-foreground">Resend code in <span className="font-semibold text-primary">{resendTimer}s</span></span>
                   ) : (
                     <Button
                       type="button"
@@ -433,7 +480,7 @@ const Auth = () => {
                       size="sm"
                       onClick={handleResendOTP}
                       disabled={isLoading}
-                      className="p-0 h-auto"
+                      className="p-0 h-auto text-primary hover:text-primary/80 font-medium"
                     >
                       Resend verification code
                     </Button>
