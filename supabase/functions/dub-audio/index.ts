@@ -80,16 +80,16 @@ serve(async (req) => {
       let lastErrText = '';
 
       for (const model of whisperModels) {
-        const url = `https://api-inference.huggingface.co/models/${model}`;
+        const url = `https://router.huggingface.co/hf-inference/models/${model}`;
         console.log('Trying Whisper model:', model);
         const transcriptionResponse = await fetch(url, {
           method: 'POST',
           headers: {
-            'authorization': `Bearer ${HF_TOKEN}`,
-            'content-type': 'application/octet-stream',
-            'accept': 'application/json',
-            'x-wait-for-model': 'true',
-            'x-use-cache': 'false',
+            'Authorization': `Bearer ${HF_TOKEN}`,
+            'Content-Type': 'application/octet-stream',
+            'Accept': 'application/json',
+            'X-Wait-For-Model': 'true',
+            'X-Use-Cache': 'false',
           },
           body: audioArrayBuffer!,
         });
@@ -117,7 +117,7 @@ serve(async (req) => {
     console.log('Translating text...');
     try {
       const translationResponse = await fetch(
-        'https://api-inference.huggingface.co/models/facebook/nllb-200-distilled-600M',
+        'https://router.huggingface.co/hf-inference/models/facebook/nllb-200-distilled-600M',
         {
           method: 'POST',
           headers: {
@@ -152,7 +152,7 @@ serve(async (req) => {
     
     try {
       const ttsResponse = await fetch(
-        'https://api-inference.huggingface.co/models/facebook/mms-tts-eng',
+        'https://router.huggingface.co/hf-inference/models/facebook/mms-tts-eng',
         {
           method: 'POST',
           headers: {
