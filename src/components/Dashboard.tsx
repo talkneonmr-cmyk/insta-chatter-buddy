@@ -99,45 +99,52 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* 3D Animated Background Elements */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse floating" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse floating" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-accent/15 rounded-full blur-2xl floating" style={{ animationDelay: '2s' }} />
+      </div>
+      
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in">
         
         {/* Hero Section with Greeting */}
-        <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 p-4 sm:p-6 md:p-8 lg:p-12 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary)/0.1),transparent_50%),radial-gradient(circle_at_70%_50%,hsl(var(--secondary)/0.1),transparent_50%)]"></div>
+        <div className="relative overflow-hidden rounded-3xl border border-primary/20 p-4 sm:p-6 md:p-8 lg:p-12 glass shine-effect">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10"></div>
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-xl blur-sm opacity-60"></div>
-                    <div className="relative p-2 rounded-xl bg-gradient-to-br from-primary/80 via-secondary/80 to-accent/80 backdrop-blur-sm shadow-lg">
-                      <Sparkles className="w-5 h-5 text-white" />
+                  <div className="relative floating">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur-md opacity-60 glow-effect"></div>
+                    <div className="relative p-3 rounded-2xl bg-gradient-to-br from-primary via-secondary to-accent backdrop-blur-sm shadow-2xl">
+                      <Sparkles className="w-6 h-6 text-white" />
                     </div>
                   </div>
                   {plan === "pro" && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400">
-                      <Crown className="w-3 h-3" />
-                      Pro
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold glass glow-effect border border-yellow-500/30">
+                      <Crown className="w-3.5 h-3.5 text-yellow-500" />
+                      <span className="text-gradient-secondary">Pro</span>
                     </span>
                   )}
                 </div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold gradient-text">
                   {getGreeting()}, {user?.email?.split("@")[0]}!
                 </h1>
                 <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-2xl">
-                  Ready to create amazing content? Your AI-powered studio is ready to help you shine.
+                  Your AI-powered creative studio awaits. Let's create something amazing today.
                 </p>
               </div>
               {plan === "free" && (
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-primary via-secondary to-accent text-white border-0 hover:opacity-90 transition-opacity shadow-lg"
+                  className="btn-3d bg-gradient-to-r from-primary via-secondary to-accent text-white border-0 hover:opacity-90 transition-opacity shadow-2xl group"
                   onClick={() => navigate("/pricing")}
                 >
-                  <Crown className="w-4 h-4 mr-2" />
-                  Upgrade to Pro
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <Crown className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
+                  <span className="font-semibold">Upgrade to Pro</span>
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               )}
             </div>
@@ -146,59 +153,68 @@ const Dashboard = () => {
 
         {/* Stats Overview Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1 sm:space-y-2">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Uploads</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.totalUploads}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3 text-green-500" />
-                    <span>Videos uploaded</span>
-                  </p>
+          <div className="perspective-card animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <Card className="card-3d border border-red-500/30 overflow-hidden group hover:border-red-500/50 transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <CardContent className="p-4 sm:p-6 relative z-10">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1 sm:space-y-2">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Uploads</p>
+                    <p className="text-3xl sm:text-4xl font-bold gradient-text">{stats.totalUploads}</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3 text-green-500" />
+                      <span>Videos uploaded</span>
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-red-500/10 to-red-600/10 group-hover:from-red-500/20 group-hover:to-red-600/20 transition-all floating">
+                    <Video className="w-8 h-8 text-red-500" />
+                  </div>
                 </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-red-500/10 to-red-600/10 group-hover:from-red-500/20 group-hover:to-red-600/20 transition-all">
-                  <Video className="w-6 h-6 text-red-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1 sm:space-y-2">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">AI Captions</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.totalCaptions}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Activity className="w-3 h-3 text-primary" />
-                    <span>Generated</span>
-                  </p>
+          <div className="perspective-card animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <Card className="card-3d border border-primary/30 overflow-hidden group hover:border-primary/50 transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <CardContent className="p-4 sm:p-6 relative z-10">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1 sm:space-y-2">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">AI Captions</p>
+                    <p className="text-3xl sm:text-4xl font-bold gradient-text">{stats.totalCaptions}</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Activity className="w-3 h-3 text-primary" />
+                      <span>Generated</span>
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 group-hover:from-primary/20 group-hover:to-secondary/20 transition-all floating">
+                    <Sparkles className="w-8 h-8 text-primary" />
+                  </div>
                 </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 group-hover:from-primary/20 group-hover:to-secondary/20 transition-all">
-                  <Sparkles className="w-6 h-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1 sm:space-y-2">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">AI Music</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.totalMusic}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-purple-500" />
-                    <span>Tracks created</span>
-                  </p>
+          <div className="perspective-card animate-fade-in" style={{ animationDelay: '300ms' }}>
+            <Card className="card-3d border border-purple-500/30 overflow-hidden group hover:border-purple-500/50 transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <CardContent className="p-4 sm:p-6 relative z-10">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1 sm:space-y-2">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">AI Music</p>
+                    <p className="text-3xl sm:text-4xl font-bold gradient-text">{stats.totalMusic}</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Zap className="w-3 h-3 text-purple-500" />
+                      <span>Tracks created</span>
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 group-hover:from-purple-500/20 group-hover:to-pink-500/20 transition-all floating">
+                    <Music className="w-8 h-8 text-purple-500" />
+                  </div>
                 </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 group-hover:from-purple-500/20 group-hover:to-pink-500/20 transition-all">
-                  <Music className="w-6 h-6 text-purple-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Main Content Grid */}
@@ -207,30 +223,32 @@ const Dashboard = () => {
           {/* Quick Actions */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-1">Quick Actions</h2>
-              <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">Jump into your creative workflow</p>
+              <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-2">Quick Actions</h2>
+              <p className="text-muted-foreground text-sm sm:text-base mb-4 sm:mb-6">Jump into your creative workflow</p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
               {/* YouTube Manager Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-red-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/youtube-manager")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-2 sm:pb-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2.5 rounded-xl bg-red-500/10 group-hover:bg-red-500/20 transition-all">
-                      <Youtube className="w-5 h-5 text-red-500" />
+              <div className="perspective-card animate-fade-in" style={{ animationDelay: '400ms' }}>
+                <Card className="card-3d border border-red-500/30 overflow-hidden group hover:border-red-500/50 cursor-pointer transition-all shine-effect h-full" onClick={() => navigate("/youtube-manager")}>
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <CardHeader className="relative z-10 pb-3">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-3 rounded-2xl bg-gradient-to-br from-red-500/10 to-red-600/10 group-hover:from-red-500/20 group-hover:to-red-600/20 transition-all floating">
+                        <Youtube className="w-6 h-6 text-red-500" />
+                      </div>
+                      <CardTitle className="text-xl group-hover:text-gradient-primary transition-all">YouTube Manager</CardTitle>
                     </div>
-                    <CardTitle className="text-lg">YouTube Manager</CardTitle>
-                  </div>
-                  <CardDescription>Upload, schedule, and manage your video content</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{stats.totalUploads} videos uploaded</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </CardContent>
-              </Card>
+                    <CardDescription className="text-sm">Upload, schedule, and manage your video content with AI assistance</CardDescription>
+                  </CardHeader>
+                  <CardContent className="relative z-10">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span className="font-medium">{stats.totalUploads} videos uploaded</span>
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
               {/* Caption Generator Card */}
               <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/caption-generator")}>
