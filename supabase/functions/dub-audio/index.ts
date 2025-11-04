@@ -59,8 +59,9 @@ serve(async (req) => {
     if (!audioResponse.ok) {
       throw new Error('Failed to fetch audio file');
     }
-    const audioBlob = await audioResponse.blob();
-    console.log('Audio file fetched, size:', audioBlob.size);
+    const audioBuffer = await audioResponse.arrayBuffer();
+    const audioBytes = new Uint8Array(audioBuffer);
+    console.log('Audio file fetched, size:', audioBytes.byteLength);
 
     // Step 2: Transcribe audio using Whisper (direct API call)
     console.log('Transcribing audio with Whisper...');
@@ -73,8 +74,11 @@ serve(async (req) => {
           headers: {
             'Authorization': `Bearer ${HF_TOKEN}`,
             'Content-Type': 'application/octet-stream',
+            'Accept': 'application/json',
+            'x-wait-for-model': 'true',
+            'x-use-cache': 'false',
           },
-          body: audioBlob,
+          body: audioBytes,
         }
       );
 
