@@ -33,6 +33,7 @@ const CaptionGenerator = () => {
   const [loading, setLoading] = useState(true);
   const [generatedCaption, setGeneratedCaption] = useState<GeneratedCaption | null>(null);
   const [refreshHistory, setRefreshHistory] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -71,8 +72,7 @@ const CaptionGenerator = () => {
   };
 
   const handleTemplateApply = (template: string) => {
-    // This will be used to pre-fill the form with template
-    console.log("Template applied:", template);
+    setSelectedTemplate(template);
   };
 
   if (loading) {
@@ -99,7 +99,10 @@ const CaptionGenerator = () => {
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Form & Templates */}
             <div className="lg:col-span-2 space-y-6">
-              <CaptionGeneratorForm onCaptionGenerated={handleCaptionGenerated} />
+              <CaptionGeneratorForm 
+                onCaptionGenerated={handleCaptionGenerated} 
+                templateText={selectedTemplate}
+              />
               <CaptionTemplates onTemplateApply={handleTemplateApply} />
             </div>
 

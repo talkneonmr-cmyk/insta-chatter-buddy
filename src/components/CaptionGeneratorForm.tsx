@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -31,9 +31,10 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface CaptionGeneratorFormProps {
   onCaptionGenerated: (caption: GeneratedCaption) => void;
+  templateText?: string;
 }
 
-const CaptionGeneratorForm = ({ onCaptionGenerated }: CaptionGeneratorFormProps) => {
+const CaptionGeneratorForm = ({ onCaptionGenerated, templateText }: CaptionGeneratorFormProps) => {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -52,6 +53,12 @@ const CaptionGeneratorForm = ({ onCaptionGenerated }: CaptionGeneratorFormProps)
 
   const { plan } = useSubscription();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (templateText) {
+      form.setValue("reelIdea", templateText);
+    }
+  }, [templateText, form]);
 
   const onSubmit = async (values: FormValues) => {
     setIsGenerating(true);
