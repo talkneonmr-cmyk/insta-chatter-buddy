@@ -238,7 +238,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-mesh relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 bg-mesh relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl float-animation" />
@@ -246,9 +246,92 @@ const Auth = () => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent/20 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }} />
       </div>
 
-      <Card className="w-full max-w-md card-glass border-border/50 relative z-10 scale-in overflow-hidden">
-        {/* Decorative top gradient bar */}
-        <div className="h-1 w-full bg-gradient-to-r from-primary via-secondary to-accent" />
+      <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
+        {/* Left Side - Branding & Hero */}
+        <div className="hidden lg:block space-y-8 slide-in">
+          <div className="space-y-6">
+            {/* Logo/Brand */}
+            <div className="flex items-center gap-3 group cursor-pointer">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity" />
+                <div className="relative bg-gradient-to-br from-primary to-secondary p-4 rounded-2xl shadow-xl">
+                  <Sparkles className="w-10 h-10 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold gradient-text">Fabuos</h1>
+                <p className="text-sm text-muted-foreground">AI-Powered Content Studio</p>
+              </div>
+            </div>
+
+            {/* Hero Content */}
+            <div className="space-y-4">
+              <h2 className="text-5xl font-bold leading-tight">
+                Create Amazing <span className="gradient-text">Content</span> in Minutes
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Transform your ideas into professional content with AI-powered tools. Generate scripts, thumbnails, music, and more - all in one place.
+              </p>
+            </div>
+
+            {/* Features List */}
+            <div className="space-y-4 pt-4">
+              {[
+                { icon: "✨", title: "AI Script Writer", desc: "Generate engaging scripts instantly" },
+                { icon: "🎵", title: "Music Generator", desc: "Create custom background music" },
+                { icon: "🎨", title: "Thumbnail Designer", desc: "Design eye-catching thumbnails" },
+                { icon: "🎙️", title: "Voice Tools", desc: "Text-to-speech & voice cloning" },
+              ].map((feature, i) => (
+                <div 
+                  key={i} 
+                  className="flex items-start gap-4 p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all hover:translate-x-2"
+                  style={{ animationDelay: `${i * 0.1}s` }}
+                >
+                  <div className="text-3xl">{feature.icon}</div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4 pt-6">
+              {[
+                { value: "10K+", label: "Active Users" },
+                { value: "50K+", label: "Content Created" },
+                { value: "4.9/5", label: "User Rating" },
+              ].map((stat, i) => (
+                <div key={i} className="text-center p-4 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20">
+                  <div className="text-2xl font-bold gradient-text">{stat.value}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side - Auth Form */}
+        <Card className="w-full card-glass border-border/50 scale-in overflow-hidden shadow-2xl">
+          {/* Mobile Logo */}
+          <div className="lg:hidden p-6 pb-0">
+            <div className="flex items-center gap-3 justify-center mb-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-xl blur-md opacity-75" />
+                <div className="relative bg-gradient-to-br from-primary to-secondary p-3 rounded-xl shadow-xl">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold gradient-text">Fabuos</h1>
+                <p className="text-xs text-muted-foreground">AI Content Studio</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Decorative top gradient bar */}
+          <div className="h-1 w-full bg-gradient-to-r from-primary via-secondary to-accent" />
         
         <CardHeader className="space-y-4 text-center pb-6">
           <div className="flex justify-center mb-2">
@@ -491,6 +574,7 @@ const Auth = () => {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };
