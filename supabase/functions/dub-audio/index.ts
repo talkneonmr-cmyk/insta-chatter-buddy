@@ -59,7 +59,18 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('ElevenLabs Dubbing API error:', response.status, errorText);
-      throw new Error(`Dubbing initiated. Process takes time - check back later.`);
+      
+      let errorMessage = 'Failed to start dubbing process';
+      try {
+        const errorJson = JSON.parse(errorText);
+        if (errorJson.detail?.message) {
+          errorMessage = errorJson.detail.message;
+        }
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const { dubbing_id } = await response.json();
