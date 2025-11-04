@@ -1,118 +1,7 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Languages, Upload, Loader2 } from "lucide-react";
-import EnhancedAudioPlayer from "@/components/EnhancedAudioPlayer";
-
+import { Languages, Upload } from "lucide-react";
 
 export default function Dubbing() {
-  const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [targetLanguage, setTargetLanguage] = useState("es");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [dubbedAudio, setDubbedAudio] = useState<string | null>(null);
-  const { toast } = useToast();
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setAudioFile(e.target.files[0]);
-      setDubbedAudio(null);
-    }
-  };
-
-  const localTranscribe = async (file: File): Promise<string | null> => {
-    try {
-      const { pipeline } = await import("@huggingface/transformers");
-      // Try WebGPU first, fallback to CPU
-      const transcriber = await pipeline("automatic-speech-recognition", "onnx-community/whisper-tiny.en", { device: "webgpu" }).catch(async () => {
-        return await pipeline("automatic-speech-recognition", "onnx-community/whisper-tiny.en");
-      });
-      const buffer = await file.arrayBuffer();
-      const arr = new Float32Array(buffer);
-      const output: any = await transcriber(arr);
-      const text = output?.text || null;
-      console.log("Local transcript:", text);
-      return text;
-    } catch (e) {
-      console.error("Local transcription failed:", e);
-      return null;
-    }
-  };
-
-  const handleDubAudio = async () => {
-    if (!audioFile) {
-      toast({
-        title: "No file selected",
-        description: "Please select an audio file first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const maxSize = 10 * 1024 * 1024;
-    if (audioFile.size > maxSize) {
-      toast({
-        title: "File too large",
-        description: "Please select an audio file smaller than 10MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      // Try local transcription first (no API, runs on your device)
-      toast({ title: "Transcribing locally...", description: "This may take 10–30s" });
-      const transcript = await localTranscribe(audioFile);
-
-      if (transcript) {
-        const { data, error } = await supabase.functions.invoke('dub-audio', {
-          body: { targetLanguage, transcript },
-        });
-        if (error) throw error;
-        if (data?.audioUrl) {
-          setDubbedAudio(data.audioUrl);
-          toast({ title: "Dubbing Complete!", description: "Local STT + free TTS succeeded" });
-        }
-        return;
-      }
-
-      // Fallback: upload and let backend transcribe
-      const fileName = `${Date.now()}-${audioFile.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from('voice-samples')
-        .upload(fileName, audioFile);
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('voice-samples')
-        .getPublicUrl(fileName);
-      
-      const { data, error } = await supabase.functions.invoke('dub-audio', {
-        body: { audioUrl: publicUrl, targetLanguage }
-      });
-      if (error) throw error;
-
-      await supabase.storage.from('voice-samples').remove([fileName]);
-
-      if (data?.audioUrl) {
-        setDubbedAudio(data.audioUrl);
-        toast({ title: "Dubbing Complete!", description: "Backend STT + free TTS succeeded" });
-      }
-    } catch (error: any) {
-      console.error('Error dubbing audio:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to dub audio",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
@@ -125,107 +14,27 @@ export default function Dubbing() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upload Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
-              Upload Audio
-            </CardTitle>
-            <CardDescription>
-              Select audio file to translate and dub
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors">
-              <input
-                type="file"
-                onChange={handleFileChange}
-                accept="audio/*"
-                className="hidden"
-                id="audio-upload"
-              />
-              <label htmlFor="audio-upload" className="cursor-pointer">
-                <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground mb-1">
-                  {audioFile ? audioFile.name : "Click to upload audio file"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  MP3, WAV (max 10MB)
-                </p>
-              </label>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Target Language
-              </label>
-              <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="es">Spanish</SelectItem>
-                  <SelectItem value="fr">French</SelectItem>
-                  <SelectItem value="de">German</SelectItem>
-                  <SelectItem value="it">Italian</SelectItem>
-                  <SelectItem value="pt">Portuguese</SelectItem>
-                  <SelectItem value="ja">Japanese</SelectItem>
-                  <SelectItem value="ko">Korean</SelectItem>
-                  <SelectItem value="zh">Chinese</SelectItem>
-                  <SelectItem value="ar">Arabic</SelectItem>
-                  <SelectItem value="hi">Hindi</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button 
-              onClick={handleDubAudio}
-              disabled={!audioFile || isProcessing}
-              className="w-full"
-              size="lg"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Languages className="mr-2 h-5 w-5" />
-                  Dub Audio
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Result Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Languages className="h-5 w-5" />
-              Dubbed Audio
-            </CardTitle>
-            <CardDescription>
-              Your translated audio will appear here
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {dubbedAudio ? (
-              <EnhancedAudioPlayer src={dubbedAudio} />
-            ) : (
-              <div className="text-center py-12">
-                <Languages className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">
-                  Upload and process audio to see the dubbed result
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {/* Development Notice */}
+      <Card className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-yellow-700 dark:text-yellow-500">
+            <Upload className="h-5 w-5" />
+            Feature Under Development
+          </CardTitle>
+          <CardDescription className="text-yellow-600 dark:text-yellow-400">
+            Coming soon with advanced AI capabilities
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-yellow-700 dark:text-yellow-400">
+            We're currently working on improving the AI dubbing feature to provide you with the best possible experience. 
+            This feature will allow you to translate and dub audio files into multiple languages using advanced AI models.
+          </p>
+          <p className="text-yellow-700 dark:text-yellow-400">
+            Stay tuned for updates! In the meantime, you can explore other powerful AI tools available in the sidebar.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

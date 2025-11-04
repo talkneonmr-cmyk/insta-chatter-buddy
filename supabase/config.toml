@@ -70,12 +70,6 @@ verify_jwt = true
 [functions.enhance-image]
 verify_jwt = true
 
-[functions.isolate-voice]
-verify_jwt = true
-
-[functions.change-voice]
-verify_jwt = true
-
 [functions.dub-audio]
 verify_jwt = true
 

@@ -38,7 +38,6 @@ const aiTools = [
   { title: "Image Enhancement", url: "/image-enhancement", icon: Wand2 },
   { title: "Voice Cloning", url: "/voice-cloning", icon: Volume2 },
   { title: "Text to Speech", url: "/text-to-speech", icon: MessageSquareText },
-  { title: "Voice Isolator", url: "/voice-isolator", icon: Radio },
   { title: "AI Dubbing", url: "/dubbing", icon: Languages },
   { title: "AI Agents", url: "/ai-agents", icon: Bot },
 ];
