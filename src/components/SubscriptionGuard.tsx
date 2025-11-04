@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,8 +18,15 @@ export default function SubscriptionGuard({
 }: SubscriptionGuardProps) {
   const { plan, isLoading } = useSubscription();
   const navigate = useNavigate();
+  const [timedOut, setTimedOut] = useState(false);
 
-  if (isLoading) {
+  // Prevent indefinite loading from blocking pages
+  useEffect(() => {
+    const t = setTimeout(() => setTimedOut(true), 6000);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (isLoading && !timedOut) {
     return (
       <div className="flex items-center justify-center p-8">
         <Sparkles className="w-8 h-8 text-primary animate-pulse" />
