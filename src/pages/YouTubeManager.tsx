@@ -17,33 +17,25 @@ const YouTubeManager = () => {
   const [activeTab, setActiveTab] = useState("upload");
 
   return (
-    <div className="min-h-screen relative overflow-hidden p-3 md:p-8">
-      {/* Animated background */}
-      <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute top-20 right-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
-      </div>
-      
-      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-3 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3 md:gap-4 animate-fade-in">
+        <div className="flex items-center gap-3 slide-in">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate("/")}
-            className="card-3d shrink-0 glass hover:glass-dark"
+            className="btn-3d shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className="flex items-center gap-3 md:gap-4 min-w-0 glass rounded-2xl p-4 md:p-6 flex-1">
-            <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl floating shrink-0 shadow-lg">
-              <Youtube className="h-6 w-6 md:h-8 md:w-8 text-white" />
+          <div className="flex items-center gap-2 md:gap-3 min-w-0">
+            <div className="p-2 bg-red-500/10 rounded-lg float-animation shrink-0">
+              <Youtube className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl md:text-4xl font-bold gradient-text">YouTube Manager</h1>
-              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
-                Upload, schedule, and manage your videos with AI
-              </p>
+              <h1 className="text-xl md:text-3xl font-bold gradient-text">YouTube Manager</h1>
+              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">Upload, schedule, and manage your YouTube videos with AI</p>
             </div>
           </div>
         </div>
@@ -52,7 +44,7 @@ const YouTubeManager = () => {
         <YouTubeAccountConnect />
 
         {/* Main Content */}
-        <Card className="glass border-0 shadow-2xl p-4 md:p-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <Card className="p-3 md:p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-6 h-auto gap-1">
               <TabsTrigger value="upload" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">

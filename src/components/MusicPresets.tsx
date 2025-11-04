@@ -97,7 +97,7 @@ export default function MusicPresets({ onApplyPreset }: MusicPresetsProps) {
             className="group relative overflow-hidden border-2 hover:border-primary transition-all duration-300 hover:shadow-xl hover:shadow-primary/20 cursor-pointer"
             onClick={() => handleApplyPreset(preset)}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
             <div className="relative p-6 space-y-3">
               <div className="text-4xl mb-2">{preset.icon}</div>
