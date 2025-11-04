@@ -133,16 +133,6 @@ export function AppSidebar() {
 
       {/* Footer */}
       <SidebarFooter className="p-4 border-t bg-card">
-        {/* Plan Badge */}
-        {showText && !planLoading && plan === "pro" && (
-          <div className="mb-3">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20">
-              <Crown className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm font-semibold text-yellow-500">Pro Plan</span>
-            </div>
-          </div>
-        )}
-
         {/* Action Buttons */}
         <div className="space-y-1">
           <SidebarMenuButton asChild className="h-10">
