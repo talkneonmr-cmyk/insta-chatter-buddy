@@ -22,6 +22,25 @@ export default function Dubbing() {
     }
   };
 
+  const localTranscribe = async (file: File): Promise<string | null> => {
+    try {
+      const { pipeline } = await import("@huggingface/transformers");
+      // Try WebGPU first, fallback to CPU
+      const transcriber = await pipeline("automatic-speech-recognition", "onnx-community/whisper-tiny.en", { device: "webgpu" }).catch(async () => {
+        return await pipeline("automatic-speech-recognition", "onnx-community/whisper-tiny.en");
+      });
+      const buffer = await file.arrayBuffer();
+      const arr = new Float32Array(buffer);
+      const output: any = await transcriber(arr);
+      const text = output?.text || null;
+      console.log("Local transcript:", text);
+      return text;
+    } catch (e) {
+      console.error("Local transcription failed:", e);
+      return null;
+    }
+  };
+
   const handleDubAudio = async () => {
     if (!audioFile) {
       toast({
@@ -44,11 +63,27 @@ export default function Dubbing() {
 
     setIsProcessing(true);
     try {
+      // Try local transcription first (no API, runs on your device)
+      toast({ title: "Transcribing locally...", description: "This may take 10–30s" });
+      const transcript = await localTranscribe(audioFile);
+
+      if (transcript) {
+        const { data, error } = await supabase.functions.invoke('dub-audio', {
+          body: { targetLanguage, transcript },
+        });
+        if (error) throw error;
+        if (data?.audioUrl) {
+          setDubbedAudio(data.audioUrl);
+          toast({ title: "Dubbing Complete!", description: "Local STT + free TTS succeeded" });
+        }
+        return;
+      }
+
+      // Fallback: upload and let backend transcribe
       const fileName = `${Date.now()}-${audioFile.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('voice-samples')
         .upload(fileName, audioFile);
-
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
@@ -58,17 +93,13 @@ export default function Dubbing() {
       const { data, error } = await supabase.functions.invoke('dub-audio', {
         body: { audioUrl: publicUrl, targetLanguage }
       });
-
       if (error) throw error;
 
       await supabase.storage.from('voice-samples').remove([fileName]);
 
-      if (data.audioUrl) {
+      if (data?.audioUrl) {
         setDubbedAudio(data.audioUrl);
-        toast({
-          title: "Dubbing Complete!",
-          description: "Audio dubbed successfully using free AI models",
-        });
+        toast({ title: "Dubbing Complete!", description: "Backend STT + free TTS succeeded" });
       }
     } catch (error: any) {
       console.error('Error dubbing audio:', error);

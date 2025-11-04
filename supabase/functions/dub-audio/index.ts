@@ -39,10 +39,10 @@ serve(async (req) => {
       );
     }
 
-    const { audioUrl, targetLanguage } = requestBody;
+    const { audioUrl, targetLanguage, transcript } = requestBody;
 
-    if (!audioUrl || !targetLanguage) {
-      throw new Error('Audio URL and target language are required');
+    if (!targetLanguage || (!audioUrl && !transcript)) {
+      throw new Error('Target language and either audioUrl or transcript are required');
     }
 
     const HF_TOKEN = Deno.env.get('HUGGING_FACE_ACCESS_TOKEN');
@@ -53,15 +53,22 @@ serve(async (req) => {
     console.log('Starting dubbing process...');
     console.log('Target language:', targetLanguage);
 
-    // Step 1: Fetch audio file
-    console.log('Fetching audio file...');
-    const audioResponse = await fetch(audioUrl);
-    if (!audioResponse.ok) {
-      throw new Error('Failed to fetch audio file');
+    let transcribedText: string | undefined = transcript ? String(transcript) : undefined;
+
+    let audioArrayBuffer: ArrayBuffer | undefined;
+    let audioBytesLen = 0;
+
+    if (!transcribedText) {
+      // Step 1: Fetch audio file
+      console.log('Fetching audio file...');
+      const audioResponse = await fetch(audioUrl);
+      if (!audioResponse.ok) {
+        throw new Error('Failed to fetch audio file');
+      }
+      audioArrayBuffer = await audioResponse.arrayBuffer();
+      audioBytesLen = audioArrayBuffer.byteLength;
+      console.log('Audio file fetched, size:', audioBytesLen);
     }
-    const audioBuffer = await audioResponse.arrayBuffer();
-    const audioBytes = new Uint8Array(audioBuffer);
-    console.log('Audio file fetched, size:', audioBytes.byteLength);
 
     // Step 2: Transcribe audio using Whisper (fallback to smaller models via api-inference)
     console.log('Transcribing audio with Whisper...');
@@ -84,7 +91,7 @@ serve(async (req) => {
             'x-wait-for-model': 'true',
             'x-use-cache': 'false',
           },
-          body: audioBytes,
+          body: audioArrayBuffer!,
         });
 
         if (!transcriptionResponse.ok) {
