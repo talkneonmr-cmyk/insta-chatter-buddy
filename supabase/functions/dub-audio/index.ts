@@ -63,37 +63,45 @@ serve(async (req) => {
     const audioBytes = new Uint8Array(audioBuffer);
     console.log('Audio file fetched, size:', audioBytes.byteLength);
 
-    // Step 2: Transcribe audio using Whisper (direct API call)
+    // Step 2: Transcribe audio using Whisper (fallback to smaller models via router)
     console.log('Transcribing audio with Whisper...');
     
     try {
-      const transcriptionResponse = await fetch(
-        'https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo',
-        {
+      const whisperModels = ['openai/whisper-small', 'openai/whisper-base'];
+      let transcribedText = '';
+      let lastErrText = '';
+
+      for (const model of whisperModels) {
+        const url = `https://router.huggingface.co/hf-inference/models/${model}`;
+        console.log('Trying Whisper model:', model);
+        const transcriptionResponse = await fetch(url, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${HF_TOKEN}`,
             'Content-Type': 'application/octet-stream',
             'Accept': 'application/json',
-            'x-wait-for-model': 'true',
-            'x-use-cache': 'false',
+            'X-Wait-For-Model': 'true',
+            'X-Use-Cache': 'false',
           },
           body: audioBytes,
-        }
-      );
+        });
 
-      if (!transcriptionResponse.ok) {
-        const errorText = await transcriptionResponse.text();
-        console.error('Whisper API error:', transcriptionResponse.status, errorText);
-        throw new Error(`Whisper API returned ${transcriptionResponse.status}`);
+        if (!transcriptionResponse.ok) {
+          lastErrText = await transcriptionResponse.text();
+          console.error('Whisper API error:', model, transcriptionResponse.status, lastErrText);
+          continue; // try next model
+        }
+
+        const transcriptionResult = await transcriptionResponse.json();
+        transcribedText = transcriptionResult.text || '';
+        if (transcribedText) {
+          console.log('Transcription complete:', transcribedText);
+          break;
+        }
       }
 
-      const transcriptionResult = await transcriptionResponse.json();
-      const transcribedText = transcriptionResult.text;
-      console.log('Transcription complete:', transcribedText);
-      
       if (!transcribedText) {
-        throw new Error('No transcription text received');
+        throw new Error(`No transcription text received. ${lastErrText ? 'Last error: ' + lastErrText : ''}`);
       }
 
     // Step 3: Translate text using NLLB-200 (direct API call)
@@ -117,15 +125,16 @@ serve(async (req) => {
         }
       );
 
+      let translatedText: string;
       if (!translationResponse.ok) {
         const errorText = await translationResponse.text();
         console.error('Translation API error:', translationResponse.status, errorText);
         // If translation fails, use original text
         console.log('Using original text without translation');
-        var translatedText = transcribedText;
+        translatedText = transcribedText;
       } else {
         const translationResult = await translationResponse.json();
-        var translatedText = translationResult[0]?.translation_text || transcribedText;
+        translatedText = translationResult[0]?.translation_text ?? transcribedText;
       }
       console.log('Translation complete:', translatedText);
 
