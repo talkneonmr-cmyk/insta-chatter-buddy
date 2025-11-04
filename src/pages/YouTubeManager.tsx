@@ -8,9 +8,6 @@ import VideoUploadForm from "@/components/VideoUploadForm";
 import ScheduledVideosList from "@/components/ScheduledVideosList";
 import YouTubeAccountConnect from "@/components/YouTubeAccountConnect";
 import UploadHistory from "@/components/UploadHistory";
-import YouTubeContentIdeas from "@/components/YouTubeContentIdeas";
-import YouTubeAnalytics from "@/components/YouTubeAnalytics";
-import YouTubeQuickActions from "@/components/YouTubeQuickActions";
 
 const YouTubeManager = () => {
   const navigate = useNavigate();
@@ -43,13 +40,10 @@ const YouTubeManager = () => {
         {/* YouTube Account Connection */}
         <YouTubeAccountConnect />
 
-        {/* Quick Actions */}
-        <YouTubeQuickActions />
-
         {/* Main Content */}
         <Card className="p-3 md:p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 h-auto gap-1">
+            <TabsList className="grid w-full grid-cols-3 h-auto">
               <TabsTrigger value="upload" className="text-xs md:text-sm px-2 py-2">
                 <span className="hidden sm:inline">Upload & Schedule</span>
                 <span className="sm:hidden">Upload</span>
@@ -61,14 +55,6 @@ const YouTubeManager = () => {
               <TabsTrigger value="history" className="text-xs md:text-sm px-2 py-2">
                 <span className="hidden sm:inline">Upload History</span>
                 <span className="sm:hidden">History</span>
-              </TabsTrigger>
-              <TabsTrigger value="ideas" className="text-xs md:text-sm px-2 py-2">
-                <span className="hidden sm:inline">Content Ideas</span>
-                <span className="sm:hidden">Ideas</span>
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 py-2">
-                <span className="hidden sm:inline">Analytics</span>
-                <span className="sm:hidden">Stats</span>
               </TabsTrigger>
             </TabsList>
 
@@ -82,14 +68,6 @@ const YouTubeManager = () => {
 
             <TabsContent value="history" className="mt-4 md:mt-6">
               <UploadHistory />
-            </TabsContent>
-
-            <TabsContent value="ideas" className="mt-4 md:mt-6">
-              <YouTubeContentIdeas />
-            </TabsContent>
-
-            <TabsContent value="analytics" className="mt-4 md:mt-6">
-              <YouTubeAnalytics />
             </TabsContent>
           </Tabs>
         </Card>
