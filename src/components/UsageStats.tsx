@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Video, Sparkles, Youtube, Music, Crown, Image, FileText, TrendingUp, Hash, Search } from "lucide-react";
+import { Video, Sparkles, Youtube, Music, Crown, Image, FileText, TrendingUp, Hash, Search, Mic, Volume2, UserCircle, Languages, AudioLines, Eraser, Wand2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -17,30 +17,54 @@ interface UsageData {
   ai_trends_count: number;
   ai_hashtags_count: number;
   ai_seo_count: number;
+  ai_speech_to_text_count: number;
+  ai_text_to_speech_count: number;
+  ai_voice_cloning_count: number;
+  ai_dubbing_count: number;
+  ai_voice_isolation_count: number;
+  ai_background_removal_count: number;
+  ai_image_enhancement_count: number;
+  ai_text_summarizer_count: number;
 }
 
 const PLAN_LIMITS = {
   free: {
-    video_uploads: 3,      // 3 per day
-    ai_captions: 4,        // 4 per day
-    youtube_channels: 4,   // 4 channels
-    ai_music: 4,           // 4 per day
-    ai_thumbnails: 4,      // 4 per day
-    ai_scripts: 4,         // 4 per day
-    ai_trends: 4,          // 4 per day
-    ai_hashtags: 4,        // 4 per day
-    ai_seo: 4,             // 4 per day
+    video_uploads: 3,
+    ai_captions: 4,
+    youtube_channels: 4,
+    ai_music: 4,
+    ai_thumbnails: 4,
+    ai_scripts: 4,
+    ai_trends: 4,
+    ai_hashtags: 4,
+    ai_seo: 4,
+    ai_speech_to_text: 4,
+    ai_text_to_speech: 4,
+    ai_voice_cloning: 4,
+    ai_dubbing: 4,
+    ai_voice_isolation: 4,
+    ai_background_removal: 4,
+    ai_image_enhancement: 4,
+    ai_text_summarizer: 4,
   },
   pro: {
     video_uploads: -1,
     ai_captions: -1,
     youtube_channels: -1,
-    ai_music: 200,         // 200 per day
-    ai_thumbnails: 10,     // 10 per day
-    ai_scripts: -1,        // unlimited
-    ai_trends: 20,         // 20 per day
-    ai_hashtags: 20,       // 20 per day
-    ai_seo: 20,            // 20 per day
+    ai_music: 200,
+    ai_thumbnails: 10,
+    ai_scripts: -1,
+    ai_trends: 20,
+    ai_hashtags: 20,
+    ai_seo: 20,
+    ai_speech_to_text: 20,
+    ai_text_to_speech: 20,
+    ai_voice_cloning: 20,
+    ai_dubbing: 20,
+    ai_voice_isolation: 20,
+    ai_background_removal: 20,
+    ai_image_enhancement: 20,
+    ai_text_summarizer: 20,
   },
 };
 
@@ -81,7 +105,7 @@ export default function UsageStats() {
 
       const { data, error } = await supabase
         .from("usage_tracking")
-        .select("video_uploads_count, ai_captions_count, youtube_channels_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count")
+        .select("video_uploads_count, ai_captions_count, youtube_channels_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count, ai_speech_to_text_count, ai_text_to_speech_count, ai_voice_cloning_count, ai_dubbing_count, ai_voice_isolation_count, ai_background_removal_count, ai_image_enhancement_count, ai_text_summarizer_count")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -110,6 +134,14 @@ export default function UsageStats() {
           ai_trends_count: 0,
           ai_hashtags_count: 0,
           ai_seo_count: 0,
+          ai_speech_to_text_count: 0,
+          ai_text_to_speech_count: 0,
+          ai_voice_cloning_count: 0,
+          ai_dubbing_count: 0,
+          ai_voice_isolation_count: 0,
+          ai_background_removal_count: 0,
+          ai_image_enhancement_count: 0,
+          ai_text_summarizer_count: 0,
         });
         return;
       }
@@ -124,6 +156,14 @@ export default function UsageStats() {
         ai_trends_count: data.ai_trends_count || 0,
         ai_hashtags_count: data.ai_hashtags_count || 0,
         ai_seo_count: data.ai_seo_count || 0,
+        ai_speech_to_text_count: data.ai_speech_to_text_count || 0,
+        ai_text_to_speech_count: data.ai_text_to_speech_count || 0,
+        ai_voice_cloning_count: data.ai_voice_cloning_count || 0,
+        ai_dubbing_count: data.ai_dubbing_count || 0,
+        ai_voice_isolation_count: data.ai_voice_isolation_count || 0,
+        ai_background_removal_count: data.ai_background_removal_count || 0,
+        ai_image_enhancement_count: data.ai_image_enhancement_count || 0,
+        ai_text_summarizer_count: data.ai_text_summarizer_count || 0,
       });
     } catch (error) {
       console.error("Error in fetchUsage:", error);
@@ -278,6 +318,62 @@ export default function UsageStats() {
           used={usage?.ai_seo_count || 0}
           limit={limits.ai_seo}
           color="text-green-500"
+        />
+        <UsageItem
+          icon={Mic}
+          label="AI Speech to Text (Daily)"
+          used={usage?.ai_speech_to_text_count || 0}
+          limit={limits.ai_speech_to_text}
+          color="text-cyan-500"
+        />
+        <UsageItem
+          icon={Volume2}
+          label="AI Text to Speech (Daily)"
+          used={usage?.ai_text_to_speech_count || 0}
+          limit={limits.ai_text_to_speech}
+          color="text-teal-500"
+        />
+        <UsageItem
+          icon={UserCircle}
+          label="AI Voice Cloning (Daily)"
+          used={usage?.ai_voice_cloning_count || 0}
+          limit={limits.ai_voice_cloning}
+          color="text-violet-500"
+        />
+        <UsageItem
+          icon={Languages}
+          label="AI Dubbing (Daily)"
+          used={usage?.ai_dubbing_count || 0}
+          limit={limits.ai_dubbing}
+          color="text-amber-500"
+        />
+        <UsageItem
+          icon={AudioLines}
+          label="AI Voice Isolation (Daily)"
+          used={usage?.ai_voice_isolation_count || 0}
+          limit={limits.ai_voice_isolation}
+          color="text-rose-500"
+        />
+        <UsageItem
+          icon={Eraser}
+          label="AI Background Removal (Daily)"
+          used={usage?.ai_background_removal_count || 0}
+          limit={limits.ai_background_removal}
+          color="text-lime-500"
+        />
+        <UsageItem
+          icon={Wand2}
+          label="AI Image Enhancement (Daily)"
+          used={usage?.ai_image_enhancement_count || 0}
+          limit={limits.ai_image_enhancement}
+          color="text-fuchsia-500"
+        />
+        <UsageItem
+          icon={BookOpen}
+          label="AI Text Summarizer (Daily)"
+          used={usage?.ai_text_summarizer_count || 0}
+          limit={limits.ai_text_summarizer}
+          color="text-sky-500"
         />
 
         {plan === "free" && (

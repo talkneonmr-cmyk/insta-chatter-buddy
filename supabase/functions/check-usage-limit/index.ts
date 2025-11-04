@@ -15,30 +15,54 @@ interface UsageLimits {
   aiTrends: number;
   aiSeo: number;
   aiHashtags: number;
+  aiSpeechToText: number;
+  aiTextToSpeech: number;
+  aiVoiceCloning: number;
+  aiDubbing: number;
+  aiVoiceIsolation: number;
+  aiBackgroundRemoval: number;
+  aiImageEnhancement: number;
+  aiTextSummarizer: number;
 }
 
 const PLAN_LIMITS = {
   free: {
-    videoUploads: 3,       // 3 per day
-    aiCaptions: 4,         // 4 per day
-    youtubeChannels: 4,    // 4 channels
-    aiMusic: 4,            // 4 per day
-    aiThumbnails: 4,       // 4 per day
-    aiScripts: 4,          // 4 per day
-    aiTrends: 4,           // 4 per day
-    aiSeo: 4,              // 4 per day
-    aiHashtags: 4,         // 4 per day
+    videoUploads: 3,
+    aiCaptions: 4,
+    youtubeChannels: 4,
+    aiMusic: 4,
+    aiThumbnails: 4,
+    aiScripts: 4,
+    aiTrends: 4,
+    aiSeo: 4,
+    aiHashtags: 4,
+    aiSpeechToText: 4,
+    aiTextToSpeech: 4,
+    aiVoiceCloning: 4,
+    aiDubbing: 4,
+    aiVoiceIsolation: 4,
+    aiBackgroundRemoval: 4,
+    aiImageEnhancement: 4,
+    aiTextSummarizer: 4,
   },
   pro: {
-    videoUploads: -1, // unlimited
-    aiCaptions: -1, // unlimited
+    videoUploads: -1,
+    aiCaptions: -1,
     youtubeChannels: -1,
-    aiMusic: 200,     // 200 per day
-    aiThumbnails: 10,  // 10 per day
-    aiScripts: -1,     // unlimited
-    aiTrends: 20,     // 20 per day
-    aiSeo: 20,        // 20 per day
-    aiHashtags: 20,   // 20 per day
+    aiMusic: 200,
+    aiThumbnails: 10,
+    aiScripts: -1,
+    aiTrends: 20,
+    aiSeo: 20,
+    aiHashtags: 20,
+    aiSpeechToText: 20,
+    aiTextToSpeech: 20,
+    aiVoiceCloning: 20,
+    aiDubbing: 20,
+    aiVoiceIsolation: 20,
+    aiBackgroundRemoval: 20,
+    aiImageEnhancement: 20,
+    aiTextSummarizer: 20,
   },
 };
 
@@ -139,6 +163,14 @@ Deno.serve(async (req) => {
           ai_trends_count: 0,
           ai_seo_count: 0,
           ai_hashtags_count: 0,
+          ai_speech_to_text_count: 0,
+          ai_text_to_speech_count: 0,
+          ai_voice_cloning_count: 0,
+          ai_dubbing_count: 0,
+          ai_voice_isolation_count: 0,
+          ai_background_removal_count: 0,
+          ai_image_enhancement_count: 0,
+          ai_text_summarizer_count: 0,
           reset_at: now.toISOString(),
         })
         .eq('user_id', user.id);
@@ -245,6 +277,70 @@ Deno.serve(async (req) => {
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} hashtag generations remaining today`
           : `You've reached your daily limit of ${limit} hashtag generations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_speech_to_text':
+        currentUsage = usage?.ai_speech_to_text_count || 0;
+        limit = limits.aiSpeechToText;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} speech to text conversions remaining today`
+          : `You've reached your daily limit of ${limit} speech to text conversions. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_text_to_speech':
+        currentUsage = usage?.ai_text_to_speech_count || 0;
+        limit = limits.aiTextToSpeech;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} text to speech conversions remaining today`
+          : `You've reached your daily limit of ${limit} text to speech conversions. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_voice_cloning':
+        currentUsage = usage?.ai_voice_cloning_count || 0;
+        limit = limits.aiVoiceCloning;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} voice cloning generations remaining today`
+          : `You've reached your daily limit of ${limit} voice cloning generations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_dubbing':
+        currentUsage = usage?.ai_dubbing_count || 0;
+        limit = limits.aiDubbing;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} dubbing generations remaining today`
+          : `You've reached your daily limit of ${limit} dubbing generations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_voice_isolation':
+        currentUsage = usage?.ai_voice_isolation_count || 0;
+        limit = limits.aiVoiceIsolation;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} voice isolation processes remaining today`
+          : `You've reached your daily limit of ${limit} voice isolation processes. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_background_removal':
+        currentUsage = usage?.ai_background_removal_count || 0;
+        limit = limits.aiBackgroundRemoval;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} background removals remaining today`
+          : `You've reached your daily limit of ${limit} background removals. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_image_enhancement':
+        currentUsage = usage?.ai_image_enhancement_count || 0;
+        limit = limits.aiImageEnhancement;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} image enhancements remaining today`
+          : `You've reached your daily limit of ${limit} image enhancements. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+        break;
+      case 'ai_text_summarizer':
+        currentUsage = usage?.ai_text_summarizer_count || 0;
+        limit = limits.aiTextSummarizer;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} text summarizations remaining today`
+          : `You've reached your daily limit of ${limit} text summarizations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
         break;
     }
 

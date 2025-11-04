@@ -784,13 +784,21 @@ export type Database = {
       }
       usage_tracking: {
         Row: {
+          ai_background_removal_count: number
           ai_captions_count: number
+          ai_dubbing_count: number
           ai_hashtags_count: number | null
+          ai_image_enhancement_count: number
           ai_music_count: number
           ai_scripts_count: number
           ai_seo_count: number | null
+          ai_speech_to_text_count: number
+          ai_text_summarizer_count: number
+          ai_text_to_speech_count: number
           ai_thumbnails_count: number
           ai_trends_count: number | null
+          ai_voice_cloning_count: number
+          ai_voice_isolation_count: number
           created_at: string
           id: string
           reset_at: string
@@ -800,13 +808,21 @@ export type Database = {
           youtube_channels_count: number
         }
         Insert: {
+          ai_background_removal_count?: number
           ai_captions_count?: number
+          ai_dubbing_count?: number
           ai_hashtags_count?: number | null
+          ai_image_enhancement_count?: number
           ai_music_count?: number
           ai_scripts_count?: number
           ai_seo_count?: number | null
+          ai_speech_to_text_count?: number
+          ai_text_summarizer_count?: number
+          ai_text_to_speech_count?: number
           ai_thumbnails_count?: number
           ai_trends_count?: number | null
+          ai_voice_cloning_count?: number
+          ai_voice_isolation_count?: number
           created_at?: string
           id?: string
           reset_at?: string
@@ -816,13 +832,21 @@ export type Database = {
           youtube_channels_count?: number
         }
         Update: {
+          ai_background_removal_count?: number
           ai_captions_count?: number
+          ai_dubbing_count?: number
           ai_hashtags_count?: number | null
+          ai_image_enhancement_count?: number
           ai_music_count?: number
           ai_scripts_count?: number
           ai_seo_count?: number | null
+          ai_speech_to_text_count?: number
+          ai_text_summarizer_count?: number
+          ai_text_to_speech_count?: number
           ai_thumbnails_count?: number
           ai_trends_count?: number | null
+          ai_voice_cloning_count?: number
+          ai_voice_isolation_count?: number
           created_at?: string
           id?: string
           reset_at?: string
