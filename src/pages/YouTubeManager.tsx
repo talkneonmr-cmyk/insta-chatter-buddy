@@ -19,7 +19,7 @@ const YouTubeManager = () => {
   return (
     <div className="min-h-screen relative overflow-hidden p-3 md:p-8">
       {/* Animated background */}
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 -z-10 pointer-events-none">
         <div className="absolute top-20 right-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
       </div>

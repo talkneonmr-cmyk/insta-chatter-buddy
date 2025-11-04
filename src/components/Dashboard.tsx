@@ -101,7 +101,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* 3D Animated Background Elements */}
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 -z-10 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse floating" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse floating" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-accent/15 rounded-full blur-2xl floating" style={{ animationDelay: '2s' }} />
@@ -111,7 +111,7 @@ const Dashboard = () => {
         
         {/* Hero Section with Greeting */}
         <div className="relative overflow-hidden rounded-3xl border border-primary/20 p-4 sm:p-6 md:p-8 lg:p-12 glass shine-effect">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 pointer-events-none"></div>
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div className="space-y-2">
@@ -155,7 +155,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           <div className="perspective-card animate-fade-in" style={{ animationDelay: '100ms' }}>
             <Card className="card-3d border border-red-500/30 overflow-hidden group hover:border-red-500/50 transition-all">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
               <CardContent className="p-4 sm:p-6 relative z-10">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1 sm:space-y-2">
@@ -176,7 +176,7 @@ const Dashboard = () => {
 
           <div className="perspective-card animate-fade-in" style={{ animationDelay: '200ms' }}>
             <Card className="card-3d border border-primary/30 overflow-hidden group hover:border-primary/50 transition-all">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
               <CardContent className="p-4 sm:p-6 relative z-10">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1 sm:space-y-2">
@@ -197,7 +197,7 @@ const Dashboard = () => {
 
           <div className="perspective-card animate-fade-in" style={{ animationDelay: '300ms' }}>
             <Card className="card-3d border border-purple-500/30 overflow-hidden group hover:border-purple-500/50 transition-all">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
               <CardContent className="p-4 sm:p-6 relative z-10">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1 sm:space-y-2">
@@ -231,7 +231,7 @@ const Dashboard = () => {
               {/* YouTube Manager Card */}
               <div className="perspective-card animate-fade-in" style={{ animationDelay: '400ms' }}>
                 <Card className="card-3d border border-red-500/30 overflow-hidden group hover:border-red-500/50 cursor-pointer transition-all shine-effect h-full" onClick={() => navigate("/youtube-manager")}>
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                   <CardHeader className="relative z-10 pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-3 rounded-2xl bg-gradient-to-br from-red-500/10 to-red-600/10 group-hover:from-red-500/20 group-hover:to-red-600/20 transition-all floating">
@@ -252,7 +252,7 @@ const Dashboard = () => {
 
               {/* Caption Generator Card */}
               <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/caption-generator")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 <CardHeader className="relative z-10 pb-2 sm:pb-3">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-all">
@@ -272,7 +272,7 @@ const Dashboard = () => {
 
               {/* Music Generator Card */}
               <Card className="card-3d border-2 overflow-hidden group hover:border-purple-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/music-generator")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 <CardHeader className="relative z-10 pb-2 sm:pb-3">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2.5 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 transition-all">
@@ -292,7 +292,7 @@ const Dashboard = () => {
 
               {/* Thumbnail Generator Card */}
               <Card className="card-3d border-2 overflow-hidden group hover:border-blue-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/thumbnail-generator")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 <CardHeader className="relative z-10 pb-2 sm:pb-3">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2.5 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-all">
@@ -312,7 +312,7 @@ const Dashboard = () => {
 
               {/* Script Writer Card */}
               <Card className="card-3d border-2 overflow-hidden group hover:border-green-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/script-writer")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 <CardHeader className="relative z-10 pb-2 sm:pb-3">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2.5 rounded-xl bg-green-500/10 group-hover:bg-green-500/20 transition-all">
@@ -332,7 +332,7 @@ const Dashboard = () => {
 
               {/* Trend Analyzer Card */}
               <Card className="card-3d border-2 overflow-hidden group hover:border-orange-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/trend-analyzer")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 <CardHeader className="relative z-10 pb-2 sm:pb-3">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2.5 rounded-xl bg-orange-500/10 group-hover:bg-orange-500/20 transition-all">
@@ -352,7 +352,7 @@ const Dashboard = () => {
 
               {/* Hashtag Generator Card */}
               <Card className="card-3d border-2 overflow-hidden group hover:border-indigo-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/hashtag-generator")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 <CardHeader className="relative z-10 pb-2 sm:pb-3">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2.5 rounded-xl bg-indigo-500/10 group-hover:bg-indigo-500/20 transition-all">
@@ -373,7 +373,7 @@ const Dashboard = () => {
               {/* Pricing/Upgrade Card */}
               {plan === "free" && (
                 <Card className="card-3d border-2 border-yellow-500/30 overflow-hidden group hover:border-yellow-500/50 cursor-pointer bg-gradient-to-br from-yellow-500/5 to-orange-500/5 active:scale-[0.98] transition-transform" onClick={() => navigate("/pricing")}>
-                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                   <CardHeader className="relative z-10 pb-2 sm:pb-3">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="p-2.5 rounded-xl bg-yellow-500/10 group-hover:bg-yellow-500/20 transition-all">
