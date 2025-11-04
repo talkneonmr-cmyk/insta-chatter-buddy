@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Mic, MicOff, Copy, Download, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 
 const SpeechToText = () => {
@@ -35,7 +36,7 @@ const SpeechToText = () => {
     recognitionInstance.interimResults = true;
     recognitionInstance.lang = 'en-US';
 
-    recognitionInstance.onresult = (event: any) => {
+    recognitionInstance.onresult = async (event: any) => {
       let interimTranscript = '';
       let finalTranscript = '';
 
@@ -48,7 +49,19 @@ const SpeechToText = () => {
         }
       }
 
+      const prevLength = transcript.length;
       setTranscript(prev => prev + finalTranscript);
+      
+      // Track usage only for the first transcription (when transcript was empty)
+      if (prevLength === 0 && finalTranscript.trim().length > 0) {
+        try {
+          await supabase.functions.invoke('increment-usage', {
+            body: { usageType: 'ai_speech_to_text' }
+          });
+        } catch (err) {
+          console.error('Failed to track usage:', err);
+        }
+      }
     };
 
     recognitionInstance.onerror = (event: any) => {

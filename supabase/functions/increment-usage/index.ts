@@ -89,6 +89,7 @@ Deno.serve(async (req) => {
         updateData = { ai_scripts_count: usage.ai_scripts_count + 1 };
         break;
       case 'ai_trends':
+      case 'ai_trend_analysis':
         updateData = { ai_trends_count: usage.ai_trends_count + 1 };
         break;
       case 'ai_seo':
@@ -96,6 +97,28 @@ Deno.serve(async (req) => {
         break;
       case 'ai_hashtags':
         updateData = { ai_hashtags_count: usage.ai_hashtags_count + 1 };
+        break;
+      case 'ai_speech_to_text':
+        updateData = { ai_speech_to_text_count: usage.ai_speech_to_text_count + 1 };
+        break;
+      case 'ai_text_to_speech':
+        updateData = { ai_text_to_speech_count: usage.ai_text_to_speech_count + 1 };
+        break;
+      case 'ai_voice_cloning':
+        updateData = { ai_voice_cloning_count: usage.ai_voice_cloning_count + 1 };
+        break;
+      case 'ai_dubbing':
+        updateData = { ai_dubbing_count: usage.ai_dubbing_count + 1 };
+        break;
+      case 'ai_background_removal':
+        updateData = { ai_background_removal_count: usage.ai_background_removal_count + 1 };
+        break;
+      case 'ai_image_enhancement':
+        updateData = { ai_image_enhancement_count: usage.ai_image_enhancement_count + 1 };
+        break;
+      case 'ai_text_summary':
+      case 'ai_text_summarizer':
+        updateData = { ai_text_summary_count: usage.ai_text_summary_count + 1 };
         break;
       default:
         throw new Error('Invalid usage type');

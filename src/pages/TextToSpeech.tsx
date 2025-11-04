@@ -153,6 +153,11 @@ const TextToSpeech = () => {
       }, 0);
 
       if (mountedRef.current) {
+        // Increment usage
+        await supabase.functions.invoke('increment-usage', {
+          body: { usageType: 'ai_text_to_speech' }
+        });
+        
         toast({
           title: "Success!",
           description: "Speech generated. You can play or download it below.",

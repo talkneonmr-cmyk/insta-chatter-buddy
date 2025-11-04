@@ -39,6 +39,12 @@ const YouTubeAccountConnect = () => {
       if (error) throw error as any;
 
       console.log('[YouTube OAuth] Exchange success:', data);
+      
+      // Increment usage for connecting a YouTube channel
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'youtube_channels' }
+      });
+      
       toast({
         title: "Success",
         description: `Connected to YouTube channel: ${data.channelTitle}`,
