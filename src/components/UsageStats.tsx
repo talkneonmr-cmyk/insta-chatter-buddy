@@ -69,7 +69,7 @@ const PLAN_LIMITS = {
 };
 
 export default function UsageStats() {
-  const { plan } = useSubscription();
+  const { plan, isLoading: planLoading } = useSubscription();
   const navigate = useNavigate();
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -172,7 +172,7 @@ export default function UsageStats() {
     }
   };
 
-  if (loading) {
+  if (loading || planLoading) {
     return (
       <Card className="animate-pulse">
         <CardHeader>
