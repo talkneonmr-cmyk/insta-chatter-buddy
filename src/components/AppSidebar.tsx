@@ -49,7 +49,7 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { plan } = useSubscription();
+  const { plan, isLoading: planLoading } = useSubscription();
   const currentPath = location.pathname;
   
   // Show text if sidebar is open OR if we're on mobile (drawer is full width)
@@ -134,7 +134,7 @@ export function AppSidebar() {
       {/* Footer */}
       <SidebarFooter className="p-4 border-t bg-card">
         {/* Plan Badge */}
-        {showText && (
+        {showText && !planLoading && (
           <div className="mb-3">
             {plan === "pro" ? (
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20">
