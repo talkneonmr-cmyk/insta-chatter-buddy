@@ -215,7 +215,8 @@ export default function AIAgents() {
 
   return (
     <TesterGuard featureName="AI Voice Agents">
-      <div className="relative min-h-[calc(100vh-4rem)] container mx-auto p-6 max-w-4xl">
+      
+        <div className="relative min-h-[calc(100vh-4rem)] container mx-auto p-6 max-w-4xl">
       {/* Background Content - Blurred */}
       <div className="blur-md pointer-events-none select-none">
         <div className="mb-8 slide-in">
@@ -281,7 +282,8 @@ export default function AIAgents() {
           </div>
         </Card>
       </div>
-      </div>
+    </div>
+      
     </TesterGuard>
   );
 }

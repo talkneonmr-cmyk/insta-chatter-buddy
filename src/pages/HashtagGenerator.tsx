@@ -80,8 +80,9 @@ export default function HashtagGenerator() {
   };
 
   return (
-    <TesterGuard featureName="Hashtag Generator">
-      <SubscriptionGuard>
+    
+      <TesterGuard featureName="Hashtag Generator">
+        <SubscriptionGuard>
           <div className="max-w-6xl mx-auto p-4 space-y-8">
           <div className="text-center space-y-2 slide-in">
             <h1 className="text-4xl font-bold gradient-text flex items-center justify-center gap-2">
@@ -259,6 +260,7 @@ export default function HashtagGenerator() {
           )}
         </div>
       </SubscriptionGuard>
-    </TesterGuard>
+      </TesterGuard>
+    
   );
 }
