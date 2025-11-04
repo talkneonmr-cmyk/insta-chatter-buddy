@@ -289,36 +289,9 @@ export default function UsageStats() {
         )}
         
         {plan === "pro" && (
-          <div className="pt-4 border-t space-y-2">
-            <p className="text-xs font-semibold text-center text-primary">Pro Plan Active ✨</p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="text-center p-2 rounded bg-primary/5">
-                <p className="font-medium">Video Uploads</p>
-                <p className="text-muted-foreground">Unlimited</p>
-              </div>
-              <div className="text-center p-2 rounded bg-primary/5">
-                <p className="font-medium">AI Captions</p>
-                <p className="text-muted-foreground">Unlimited</p>
-              </div>
-              <div className="text-center p-2 rounded bg-primary/5">
-                <p className="font-medium">AI Scripts</p>
-                <p className="text-muted-foreground">Unlimited</p>
-              </div>
-              <div className="text-center p-2 rounded bg-primary/5">
-                <p className="font-medium">Thumbnails</p>
-                <p className="text-muted-foreground">10/day</p>
-              </div>
-              <div className="text-center p-2 rounded bg-primary/5">
-                <p className="font-medium">Music</p>
-                <p className="text-muted-foreground">200/day</p>
-              </div>
-              <div className="text-center p-2 rounded bg-primary/5">
-                <p className="font-medium">Trends/SEO/Hashtags</p>
-                <p className="text-muted-foreground">20 each/day</p>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground text-center pt-2">
-              Daily limits reset every 24 hours. Billing cycle: Monthly
+          <div className="pt-4 border-t">
+            <p className="text-xs text-muted-foreground text-center">
+              Pro Plan Active ✨ Daily limits reset every 24 hours. Billing cycle resets monthly.
             </p>
           </div>
         )}
