@@ -64,6 +64,11 @@ const ThumbnailGenerator = () => {
       setGeneratedThumbnail(data.thumbnail.thumbnail_url);
       setRefreshHistory(prev => prev + 1);
       
+      // Increment usage
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'ai_thumbnails' }
+      });
+      
       toast({
         title: "Thumbnail generated!",
         description: "Your AI thumbnail has been created successfully"
