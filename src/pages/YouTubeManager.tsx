@@ -46,30 +46,27 @@ const YouTubeManager = () => {
         {/* Main Content */}
         <Card className="p-3 md:p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-6 h-auto">
-              <TabsTrigger value="upload" className="text-xs md:text-sm px-2 py-2">
-                <span className="hidden sm:inline">Upload</span>
-                <span className="sm:hidden">Upload</span>
+            <TabsList className="grid w-full grid-cols-6 h-auto gap-1">
+              <TabsTrigger value="upload" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">
+                <span className="truncate">Upload</span>
               </TabsTrigger>
-              <TabsTrigger value="scheduled" className="text-xs md:text-sm px-2 py-2">
-                <span className="hidden sm:inline">Scheduled</span>
-                <span className="sm:hidden">Scheduled</span>
+              <TabsTrigger value="scheduled" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">
+                <span className="truncate hidden xs:inline">Scheduled</span>
+                <span className="truncate xs:hidden">Sched</span>
               </TabsTrigger>
-              <TabsTrigger value="history" className="text-xs md:text-sm px-2 py-2">
-                <span className="hidden sm:inline">History</span>
-                <span className="sm:hidden">History</span>
+              <TabsTrigger value="history" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">
+                <span className="truncate">History</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 py-2">
-                <span className="hidden sm:inline">Analytics</span>
-                <span className="sm:hidden">Analytics</span>
+              <TabsTrigger value="analytics" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">
+                <span className="truncate hidden xs:inline">Analytics</span>
+                <span className="truncate xs:hidden">Stats</span>
               </TabsTrigger>
-              <TabsTrigger value="videos" className="text-xs md:text-sm px-2 py-2">
-                <span className="hidden sm:inline">Videos</span>
-                <span className="sm:hidden">Videos</span>
+              <TabsTrigger value="videos" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">
+                <span className="truncate">Videos</span>
               </TabsTrigger>
-              <TabsTrigger value="playlists" className="text-xs md:text-sm px-2 py-2">
-                <span className="hidden sm:inline">Playlists</span>
-                <span className="sm:hidden">Playlists</span>
+              <TabsTrigger value="playlists" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">
+                <span className="truncate hidden xs:inline">Playlists</span>
+                <span className="truncate xs:hidden">Lists</span>
               </TabsTrigger>
             </TabsList>
 
