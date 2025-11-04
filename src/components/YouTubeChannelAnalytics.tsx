@@ -23,15 +23,46 @@ const YouTubeChannelAnalytics = () => {
   const [stats, setStats] = useState<ChannelStats | null>(null);
   const [recentVideos, setRecentVideos] = useState<RecentVideo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchAnalytics();
+    checkConnectionAndFetch();
   }, []);
+
+  const checkConnectionAndFetch = async () => {
+    try {
+      setLoading(true);
+      
+      // Check if YouTube account is connected
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: ytAccount } = await supabase
+        .from('youtube_accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!ytAccount) {
+        setIsConnected(false);
+        setLoading(false);
+        return;
+      }
+
+      setIsConnected(true);
+      await fetchAnalytics();
+    } catch (error: any) {
+      console.error('Error checking connection:', error);
+      setLoading(false);
+    }
+  };
 
   const fetchAnalytics = async () => {
     try {
-      setLoading(true);
       const { data, error } = await supabase.functions.invoke('youtube-analytics');
 
       if (error) throw error;
@@ -64,11 +95,26 @@ const YouTubeChannelAnalytics = () => {
     );
   }
 
+  if (!isConnected) {
+    return (
+      <Card className="p-6">
+        <div className="text-center space-y-3">
+          <p className="text-muted-foreground">
+            Connect your YouTube account above to view channel analytics
+          </p>
+          <p className="text-sm text-muted-foreground/60">
+            Get insights on views, subscribers, and recent video performance
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
   if (!stats) {
     return (
       <Card className="p-6">
         <p className="text-center text-muted-foreground">
-          Connect your YouTube account to view analytics
+          Unable to load analytics
         </p>
       </Card>
     );
