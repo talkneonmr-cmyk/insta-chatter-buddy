@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { HfInference } from 'https://esm.sh/@huggingface/inference@2.3.2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,89 +65,39 @@ serve(async (req) => {
 
     // Step 2: Transcribe audio using Whisper
     console.log('Transcribing audio with Whisper...');
-    const transcriptionFormData = new FormData();
-    transcriptionFormData.append('file', audioBlob, 'audio.mp3');
+    const hf = new HfInference(HF_TOKEN);
+    
+    const transcriptionResult = await hf.automaticSpeechRecognition({
+      data: audioBlob,
+      model: 'openai/whisper-large-v3',
+    });
 
-    const transcriptionResponse = await fetch(
-      'https://api-inference.huggingface.co/models/openai/whisper-large-v3',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${HF_TOKEN}`,
-        },
-        body: audioBlob,
-      }
-    );
-
-    if (!transcriptionResponse.ok) {
-      const errorText = await transcriptionResponse.text();
-      console.error('Whisper API error:', errorText);
-      throw new Error('Failed to transcribe audio');
-    }
-
-    const transcriptionResult = await transcriptionResponse.json();
     const transcribedText = transcriptionResult.text;
     console.log('Transcription complete:', transcribedText);
+    
+    if (!transcribedText) {
+      throw new Error('No transcription text received');
+    }
 
     // Step 3: Translate text using NLLB-200
     console.log('Translating text...');
-    const translationResponse = await fetch(
-      'https://api-inference.huggingface.co/models/facebook/nllb-200-distilled-600M',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${HF_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          inputs: transcribedText,
-          parameters: {
-            src_lang: 'eng_Latn',
-            tgt_lang: `${targetLanguage}_Latn`,
-          },
-        }),
-      }
-    );
+    const translationResult = await hf.translation({
+      model: 'facebook/nllb-200-distilled-600M',
+      inputs: transcribedText,
+    });
 
-    if (!translationResponse.ok) {
-      const errorText = await translationResponse.text();
-      console.error('Translation API error:', errorText);
-      throw new Error('Failed to translate text');
-    }
-
-    const translationResult = await translationResponse.json();
-    const translatedText = translationResult[0]?.translation_text || transcribedText;
+    const translatedText = translationResult.translation_text || transcribedText;
     console.log('Translation complete:', translatedText);
 
-    // Step 4: Generate speech using Edge TTS
-    console.log('Generating speech with Edge TTS...');
-    const ttsLang = edgeTTSLanguages[targetLanguage] || edgeTTSLanguages['en'];
+    // Step 4: Generate speech using HuggingFace TTS
+    console.log('Generating speech with HuggingFace TTS...');
     
-    // Use Edge TTS service (Microsoft's free TTS)
-    const ttsResponse = await fetch(
-      `https://eastus.tts.speech.microsoft.com/cognitiveservices/v1`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/ssml+xml',
-          'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3',
-          'User-Agent': 'Lovable-Dubbing',
-        },
-        body: `<speak version='1.0' xml:lang='${ttsLang.code}'>
-          <voice xml:lang='${ttsLang.code}' name='${ttsLang.voice}'>
-            ${translatedText}
-          </voice>
-        </speak>`,
-      }
-    );
+    const ttsResult = await hf.textToSpeech({
+      model: 'facebook/mms-tts-eng',
+      inputs: translatedText,
+    });
 
-    if (!ttsResponse.ok) {
-      const errorText = await ttsResponse.text();
-      console.error('Edge TTS API error:', errorText);
-      throw new Error('Failed to generate speech');
-    }
-
-    const audioArrayBuffer = await ttsResponse.arrayBuffer();
+    const audioArrayBuffer = await ttsResult.arrayBuffer();
     console.log('Speech generation complete, size:', audioArrayBuffer.byteLength);
 
     // Step 5: Upload to Supabase Storage
