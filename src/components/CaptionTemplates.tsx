@@ -56,28 +56,33 @@ const CaptionTemplates = ({ onTemplateApply }: CaptionTemplatesProps) => {
   };
 
   const applyTemplate = async (template: Template) => {
-    try {
-      // Increment usage count
-      await supabase
+    // Pre-fill the form immediately
+    onTemplateApply(template.template_structure);
+
+    // Increment usage count in the background (ignore RLS failures)
+    (async () => {
+      const { error } = await supabase
         .from('caption_templates')
         .update({ usage_count: template.usage_count + 1 })
         .eq('id', template.id);
+      if (error) console.warn('Template usage update failed:', error);
+    })();
 
-      // Copy template to clipboard
+    // Attempt to copy to clipboard, but don't fail UX if it doesn't work
+    let copied = false;
+    try {
       await navigator.clipboard.writeText(template.template_structure);
-      
-      onTemplateApply(template.template_structure);
-      
-      toast({
-        title: "Template Applied! 📋",
-        description: `${template.name} copied to clipboard`,
-      });
-    } catch (error) {
-      toast({
-        title: "Failed to apply template",
-        variant: "destructive",
-      });
+      copied = true;
+    } catch (err) {
+      console.warn('Clipboard write failed:', err);
     }
+
+    toast({
+      title: "Template Applied! ✨",
+      description: copied
+        ? `${template.name} copied to clipboard`
+        : `${template.name} applied to form. You can paste manually if needed.`,
+    });
   };
 
   if (loading) {
