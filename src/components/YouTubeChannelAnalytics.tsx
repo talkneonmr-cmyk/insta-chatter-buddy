@@ -94,14 +94,14 @@ const YouTubeChannelAnalytics = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {statCards.map((stat) => (
-          <Card key={stat.label} className="p-6">
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-lg bg-muted ${stat.color}`}>
-                <stat.icon className="h-6 w-6" />
+          <Card key={stat.label} className="p-4 md:p-6">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className={`p-2 md:p-3 rounded-lg bg-muted ${stat.color} shrink-0`}>
+                <stat.icon className="h-5 w-5 md:h-6 md:w-6" />
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="text-2xl font-bold">{stat.value}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">{stat.label}</p>
+                <p className="text-lg md:text-xl lg:text-2xl font-bold break-all">{stat.value}</p>
               </div>
             </div>
           </Card>
