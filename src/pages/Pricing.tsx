@@ -43,12 +43,15 @@ export default function Pricing() {
   };
 
   const freePlanFeatures = [
-    "2 Video Uploads per month",
-    "2 AI Captions per month",
-    "2 AI Thumbnails per day",
-    "5 AI Scripts per day",
-    "5 AI Music tracks per month",
-    "1 YouTube Channel",
+    "4 Video Uploads per day",
+    "4 AI Captions per day",
+    "4 AI Thumbnails per day",
+    "4 AI Scripts per day",
+    "4 AI Music tracks per day",
+    "4 AI Hashtags per day",
+    "4 AI Trend Analyses per day",
+    "4 AI SEO Optimizations per day",
+    "4 YouTube Channels",
     "10 minutes Text to Speech (Multilingual v2)",
     "20 minutes Text to Speech (Flash v2.5)",
     "Speech to Text API",
@@ -65,6 +68,9 @@ export default function Pricing() {
     "10 AI Thumbnails per day",
     "Unlimited AI Scripts",
     "200 AI Music tracks per day",
+    "20 AI Trend Analyses per day",
+    "20 AI Hashtags per day",
+    "20 AI SEO Optimizations per day",
     "Unlimited YouTube Channels",
     "Priority Processing",
     "Premium Support"

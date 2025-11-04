@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Video, Sparkles, Youtube, Music, Crown, Image, FileText } from "lucide-react";
+import { Video, Sparkles, Youtube, Music, Crown, Image, FileText, TrendingUp, Hash, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -14,24 +14,33 @@ interface UsageData {
   ai_music_count: number;
   ai_thumbnails_count: number;
   ai_scripts_count: number;
+  ai_trends_count: number;
+  ai_hashtags_count: number;
+  ai_seo_count: number;
 }
 
 const PLAN_LIMITS = {
   free: {
-    video_uploads: 2,
-    ai_captions: 2,
-    youtube_channels: 1,
-    ai_music: 5,
-    ai_thumbnails: 2,  // 2 per day
-    ai_scripts: 5,     // 5 per day
+    video_uploads: 4,      // 4 per day
+    ai_captions: 4,        // 4 per day
+    youtube_channels: 4,   // 4 channels
+    ai_music: 4,           // 4 per day
+    ai_thumbnails: 4,      // 4 per day
+    ai_scripts: 4,         // 4 per day
+    ai_trends: 4,          // 4 per day
+    ai_hashtags: 4,        // 4 per day
+    ai_seo: 4,             // 4 per day
   },
   pro: {
     video_uploads: -1,
     ai_captions: -1,
     youtube_channels: -1,
-    ai_music: 200,     // 200 per day
-    ai_thumbnails: 10,  // 10 per day
-    ai_scripts: -1,     // unlimited
+    ai_music: 200,         // 200 per day
+    ai_thumbnails: 10,     // 10 per day
+    ai_scripts: -1,        // unlimited
+    ai_trends: 20,         // 20 per day
+    ai_hashtags: 20,       // 20 per day
+    ai_seo: 20,            // 20 per day
   },
 };
 
@@ -72,7 +81,7 @@ export default function UsageStats() {
 
       const { data, error } = await supabase
         .from("usage_tracking")
-        .select("video_uploads_count, ai_captions_count, youtube_channels_count, ai_music_count, ai_thumbnails_count, ai_scripts_count")
+        .select("video_uploads_count, ai_captions_count, youtube_channels_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -98,6 +107,9 @@ export default function UsageStats() {
           ai_music_count: 0,
           ai_thumbnails_count: 0,
           ai_scripts_count: 0,
+          ai_trends_count: 0,
+          ai_hashtags_count: 0,
+          ai_seo_count: 0,
         });
         return;
       }
@@ -109,6 +121,9 @@ export default function UsageStats() {
         ai_music_count: data.ai_music_count || 0,
         ai_thumbnails_count: data.ai_thumbnails_count || 0,
         ai_scripts_count: data.ai_scripts_count || 0,
+        ai_trends_count: data.ai_trends_count || 0,
+        ai_hashtags_count: data.ai_hashtags_count || 0,
+        ai_seo_count: data.ai_seo_count || 0,
       });
     } catch (error) {
       console.error("Error in fetchUsage:", error);
@@ -243,11 +258,32 @@ export default function UsageStats() {
           limit={limits.ai_music}
           color="text-pink-500"
         />
+        <UsageItem
+          icon={TrendingUp}
+          label="AI Trend Analyses (Daily)"
+          used={usage?.ai_trends_count || 0}
+          limit={limits.ai_trends}
+          color="text-orange-500"
+        />
+        <UsageItem
+          icon={Hash}
+          label="AI Hashtags (Daily)"
+          used={usage?.ai_hashtags_count || 0}
+          limit={limits.ai_hashtags}
+          color="text-indigo-500"
+        />
+        <UsageItem
+          icon={Search}
+          label="AI SEO (Daily)"
+          used={usage?.ai_seo_count || 0}
+          limit={limits.ai_seo}
+          color="text-green-500"
+        />
 
         {plan === "free" && (
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground text-center">
-              Want more? Upgrade to Pro for 10 thumbnails/day, unlimited scripts, 200 music/day, and unlimited uploads!
+              Free Plan: 4 uses per day for all features. Upgrade to Pro for more: 10 thumbnails/day, unlimited scripts/captions/uploads, 200 music/day, 20 trends/hashtags/SEO per day!
             </p>
           </div>
         )}

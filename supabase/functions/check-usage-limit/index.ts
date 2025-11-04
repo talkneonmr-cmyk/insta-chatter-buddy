@@ -19,15 +19,15 @@ interface UsageLimits {
 
 const PLAN_LIMITS = {
   free: {
-    videoUploads: 2,
-    aiCaptions: 2,
-    youtubeChannels: 1,
-    aiMusic: 5,
-    aiThumbnails: 2,  // 2 per day
-    aiScripts: 5,     // 5 per day
-    aiTrends: 5,      // 5 per day
-    aiSeo: 5,         // 5 per day
-    aiHashtags: 5,    // 5 per day
+    videoUploads: 4,       // 4 per day
+    aiCaptions: 4,         // 4 per day
+    youtubeChannels: 4,    // 4 channels
+    aiMusic: 4,            // 4 per day
+    aiThumbnails: 4,       // 4 per day
+    aiScripts: 4,          // 4 per day
+    aiTrends: 4,           // 4 per day
+    aiSeo: 4,              // 4 per day
+    aiHashtags: 4,         // 4 per day
   },
   pro: {
     videoUploads: -1, // unlimited
