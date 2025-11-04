@@ -63,32 +63,34 @@ serve(async (req) => {
     const audioBytes = new Uint8Array(audioBuffer);
     console.log('Audio file fetched, size:', audioBytes.byteLength);
 
-    // Step 2: Transcribe audio using Whisper (fallback to smaller models via router)
+    // Step 2: Transcribe audio using Whisper (fallback to smaller models via api-inference)
     console.log('Transcribing audio with Whisper...');
     
     try {
       const whisperModels = ['openai/whisper-small', 'openai/whisper-base'];
       let transcribedText = '';
+      let lastStatus = 0;
       let lastErrText = '';
 
       for (const model of whisperModels) {
-        const url = `https://router.huggingface.co/hf-inference/models/${model}`;
+        const url = `https://api-inference.huggingface.co/models/${model}`;
         console.log('Trying Whisper model:', model);
         const transcriptionResponse = await fetch(url, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${HF_TOKEN}`,
-            'Content-Type': 'application/octet-stream',
-            'Accept': 'application/json',
-            'X-Wait-For-Model': 'true',
-            'X-Use-Cache': 'false',
+            'authorization': `Bearer ${HF_TOKEN}`,
+            'content-type': 'application/octet-stream',
+            'accept': 'application/json',
+            'x-wait-for-model': 'true',
+            'x-use-cache': 'false',
           },
           body: audioBytes,
         });
 
         if (!transcriptionResponse.ok) {
+          lastStatus = transcriptionResponse.status;
           lastErrText = await transcriptionResponse.text();
-          console.error('Whisper API error:', model, transcriptionResponse.status, lastErrText);
+          console.error('Whisper API error:', model, lastStatus, lastErrText);
           continue; // try next model
         }
 
@@ -101,7 +103,7 @@ serve(async (req) => {
       }
 
       if (!transcribedText) {
-        throw new Error(`No transcription text received. ${lastErrText ? 'Last error: ' + lastErrText : ''}`);
+        throw new Error(`Whisper API returned ${lastStatus}. ${lastErrText ? 'Details: ' + lastErrText : ''}`);
       }
 
     // Step 3: Translate text using NLLB-200 (direct API call)
