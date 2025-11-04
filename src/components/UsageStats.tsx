@@ -21,7 +21,7 @@ interface UsageData {
 
 const PLAN_LIMITS = {
   free: {
-    video_uploads: 4,      // 4 per day
+    video_uploads: 3,      // 3 per day
     ai_captions: 4,        // 4 per day
     youtube_channels: 4,   // 4 channels
     ai_music: 4,           // 4 per day
@@ -204,7 +204,7 @@ export default function UsageStats() {
               {plan === "pro" && <Crown className="h-4 w-4 text-yellow-500" />}
             </CardTitle>
             <CardDescription>
-              {plan === "free" ? "Free Plan" : "Pro Plan"} - Current month usage
+              {plan === "free" ? "Free Plan - Daily limits reset every 24 hours" : "Pro Plan - Daily usage"}
             </CardDescription>
           </div>
           {plan === "free" && (
@@ -218,14 +218,14 @@ export default function UsageStats() {
       <CardContent className="space-y-6">
         <UsageItem
           icon={Video}
-          label="Video Uploads"
+          label="Video Uploads (Daily)"
           used={usage?.video_uploads_count || 0}
           limit={limits.video_uploads}
           color="text-red-500"
         />
         <UsageItem
           icon={Sparkles}
-          label="AI Captions"
+          label="AI Captions (Daily)"
           used={usage?.ai_captions_count || 0}
           limit={limits.ai_captions}
           color="text-primary"
@@ -283,7 +283,7 @@ export default function UsageStats() {
         {plan === "free" && (
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground text-center">
-              Free Plan: 4 uses per day for all features. Upgrade to Pro for more: 10 thumbnails/day, unlimited scripts/captions/uploads, 200 music/day, 20 trends/hashtags/SEO per day!
+              Free Plan: Daily limits reset every 24 hours automatically. Upgrade to Pro for more: 10 thumbnails/day, unlimited scripts/captions/uploads, 200 music/day, 20 trends/hashtags/SEO per day!
             </p>
           </div>
         )}

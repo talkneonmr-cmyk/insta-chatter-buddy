@@ -19,7 +19,7 @@ interface UsageLimits {
 
 const PLAN_LIMITS = {
   free: {
-    videoUploads: 4,       // 4 per day
+    videoUploads: 3,       // 3 per day
     aiCaptions: 4,         // 4 per day
     youtubeChannels: 4,    // 4 channels
     aiMusic: 4,            // 4 per day
@@ -83,9 +83,67 @@ Deno.serve(async (req) => {
 
     // Create usage tracking if it doesn't exist
     if (!usage) {
+      const { data: newUsage } = await supabase
+        .from('usage_tracking')
+        .insert({ user_id: user.id })
+        .select()
+        .single();
+      
+      // Use the newly created usage record
+      const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS];
+      return new Response(
+        JSON.stringify({ 
+          canUse: true, 
+          message: 'New usage tracking created',
+          currentUsage: 0,
+          limit: limits.videoUploads,
+          plan 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if 24 hours have passed since last reset
+    const resetAt = new Date(usage.reset_at);
+    const now = new Date();
+    const hoursSinceReset = (now.getTime() - resetAt.getTime()) / (1000 * 60 * 60);
+
+    // Reset daily counts if 24 hours have passed
+    if (hoursSinceReset >= 24) {
       await supabase
         .from('usage_tracking')
-        .insert({ user_id: user.id });
+        .update({
+          video_uploads_count: 0,
+          ai_captions_count: 0,
+          ai_music_count: 0,
+          ai_thumbnails_count: 0,
+          ai_scripts_count: 0,
+          ai_trends_count: 0,
+          ai_seo_count: 0,
+          ai_hashtags_count: 0,
+          reset_at: now.toISOString(),
+        })
+        .eq('user_id', user.id);
+
+      // Fetch the updated usage
+      const { data: resetUsage } = await supabase
+        .from('usage_tracking')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      // Continue with reset usage data
+      const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS];
+      return new Response(
+        JSON.stringify({ 
+          canUse: true, 
+          message: 'Daily limits reset. You have full quota available.',
+          currentUsage: 0,
+          limit: limits.videoUploads,
+          plan 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS];
