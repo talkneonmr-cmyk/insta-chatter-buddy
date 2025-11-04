@@ -48,6 +48,11 @@ export default function PaymentSuccess() {
           setVerifiedSuccess(true);
           // Clear the stored payment link ID
           localStorage.removeItem('razorpay_payment_link_id');
+          
+          // Force a page reload after 1 second to refresh subscription status
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1000);
         } else {
           console.log('Payment not yet completed:', data?.paymentStatus);
         }
