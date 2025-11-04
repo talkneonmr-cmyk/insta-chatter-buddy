@@ -67,76 +67,94 @@ serve(async (req) => {
     console.log('Transcribing audio with Whisper...');
     const hf = new HfInference(HF_TOKEN);
     
-    const transcriptionResult = await hf.automaticSpeechRecognition({
-      data: audioBlob,
-      model: 'openai/whisper-large-v3',
-    });
+    try {
+      const transcriptionResult = await hf.automaticSpeechRecognition({
+        data: audioBlob,
+        model: 'openai/whisper-large-v3-turbo',
+      });
 
-    const transcribedText = transcriptionResult.text;
-    console.log('Transcription complete:', transcribedText);
-    
-    if (!transcribedText) {
-      throw new Error('No transcription text received');
-    }
+      const transcribedText = transcriptionResult.text;
+      console.log('Transcription complete:', transcribedText);
+      
+      if (!transcribedText) {
+        throw new Error('No transcription text received');
+      }
 
     // Step 3: Translate text using NLLB-200
     console.log('Translating text...');
-    const translationResult = await hf.translation({
-      model: 'facebook/nllb-200-distilled-600M',
-      inputs: transcribedText,
-    });
+    try {
+      const translationResult = await hf.translation({
+        model: 'facebook/nllb-200-distilled-600M',
+        inputs: transcribedText,
+      });
 
-    const translatedText = translationResult.translation_text || transcribedText;
-    console.log('Translation complete:', translatedText);
+      const translatedText = translationResult.translation_text || transcribedText;
+      console.log('Translation complete:', translatedText);
 
     // Step 4: Generate speech using HuggingFace TTS
     console.log('Generating speech with HuggingFace TTS...');
     
-    const ttsResult = await hf.textToSpeech({
-      model: 'facebook/mms-tts-eng',
-      inputs: translatedText,
-    });
-
-    const audioArrayBuffer = await ttsResult.arrayBuffer();
-    console.log('Speech generation complete, size:', audioArrayBuffer.byteLength);
-
-    // Step 5: Upload to Supabase Storage
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    const fileName = `dubbed-audio-${Date.now()}.mp3`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('voice-samples')
-      .upload(fileName, new Uint8Array(audioArrayBuffer), {
-        contentType: 'audio/mpeg',
-        upsert: true,
+    try {
+      const ttsResult = await hf.textToSpeech({
+        model: 'facebook/mms-tts-eng',
+        inputs: translatedText,
       });
 
-    if (uploadError) {
-      console.error('Upload error:', uploadError);
-      throw new Error('Failed to upload dubbed audio');
-    }
+      const audioArrayBuffer = await ttsResult.arrayBuffer();
+      console.log('Speech generation complete, size:', audioArrayBuffer.byteLength);
 
-    const { data: urlData } = supabase.storage
-      .from('voice-samples')
-      .getPublicUrl(fileName);
+      // Step 5: Upload to Supabase Storage
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
 
-    console.log('Dubbing complete! Audio URL:', urlData.publicUrl);
+      const fileName = `dubbed-audio-${Date.now()}.mp3`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('voice-samples')
+        .upload(fileName, new Uint8Array(audioArrayBuffer), {
+          contentType: 'audio/mpeg',
+          upsert: true,
+        });
 
-    return new Response(
-      JSON.stringify({ 
-        audioUrl: urlData.publicUrl,
-        message: 'Dubbing completed successfully!',
-        status: 'completed',
-        transcript: transcribedText,
-        translation: translatedText,
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw new Error('Failed to upload dubbed audio');
       }
-    );
+
+      const { data: urlData } = supabase.storage
+        .from('voice-samples')
+        .getPublicUrl(fileName);
+
+      console.log('Dubbing complete! Audio URL:', urlData.publicUrl);
+
+      return new Response(
+        JSON.stringify({ 
+          audioUrl: urlData.publicUrl,
+          message: 'Dubbing completed successfully!',
+          status: 'completed',
+          transcript: transcribedText,
+          translation: translatedText,
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    } catch (ttsError) {
+      console.error('TTS error:', ttsError);
+      const errorMsg = ttsError instanceof Error ? ttsError.message : String(ttsError);
+      throw new Error(`Failed to generate speech: ${errorMsg}`);
+    }
+    } catch (translationError) {
+      console.error('Translation error:', translationError);
+      const errorMsg = translationError instanceof Error ? translationError.message : String(translationError);
+      throw new Error(`Failed to translate text: ${errorMsg}`);
+    }
+    } catch (transcriptionError) {
+      console.error('Transcription error:', transcriptionError);
+      const errorMsg = transcriptionError instanceof Error ? transcriptionError.message : String(transcriptionError);
+      throw new Error(`Failed to transcribe audio: ${errorMsg}`);
+    }
   } catch (error) {
     console.error('Error in dub-audio function:', error);
     return new Response(
