@@ -106,6 +106,37 @@ Deno.serve(async (req) => {
           })
           .eq('user_id', userId);
 
+        // Reset usage tracking for new pro user
+        const { data: existingUsage } = await supabase
+          .from('usage_tracking')
+          .select('id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (existingUsage) {
+          await supabase
+            .from('usage_tracking')
+            .update({
+              video_uploads_count: 0,
+              ai_captions_count: 0,
+              ai_music_count: 0,
+              ai_thumbnails_count: 0,
+              ai_scripts_count: 0,
+              ai_trends_count: 0,
+              ai_seo_count: 0,
+              ai_hashtags_count: 0,
+              reset_at: new Date().toISOString(),
+            })
+            .eq('user_id', userId);
+        } else {
+          await supabase
+            .from('usage_tracking')
+            .insert({
+              user_id: userId,
+              reset_at: new Date().toISOString(),
+            });
+        }
+
         console.log('User upgraded to Pro:', userId);
         break;
       }
@@ -130,6 +161,37 @@ Deno.serve(async (req) => {
             current_period_end: new Date(subscription.current_end * 1000).toISOString(),
           })
           .eq('user_id', userId);
+
+        // Reset usage tracking for billing cycle
+        const { data: existingUsage } = await supabase
+          .from('usage_tracking')
+          .select('id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (existingUsage) {
+          await supabase
+            .from('usage_tracking')
+            .update({
+              video_uploads_count: 0,
+              ai_captions_count: 0,
+              ai_music_count: 0,
+              ai_thumbnails_count: 0,
+              ai_scripts_count: 0,
+              ai_trends_count: 0,
+              ai_seo_count: 0,
+              ai_hashtags_count: 0,
+              reset_at: new Date().toISOString(),
+            })
+            .eq('user_id', userId);
+        } else {
+          await supabase
+            .from('usage_tracking')
+            .insert({
+              user_id: userId,
+              reset_at: new Date().toISOString(),
+            });
+        }
 
         console.log('Subscription activated for user:', userId);
         break;

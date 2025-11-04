@@ -124,16 +124,21 @@ export default function PaymentSuccess() {
           </div>
 
           {isSuccess && (
-            <div className="bg-primary/10 p-4 rounded-lg">
-              <h4 className="font-semibold mb-2 text-sm">What's included:</h4>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                <li>✓ Unlimited video uploads</li>
-                <li>✓ Unlimited AI captions</li>
-                <li>✓ Unlimited AI music generation</li>
-                <li>✓ Up to 3 YouTube channels</li>
-                <li>✓ Priority support</li>
-              </ul>
-            </div>
+          <div className="bg-primary/10 p-4 rounded-lg">
+            <h4 className="font-semibold mb-2 text-sm">What's included in Pro:</h4>
+            <ul className="space-y-1 text-sm text-muted-foreground">
+              <li>✓ Unlimited video uploads</li>
+              <li>✓ Unlimited AI captions</li>
+              <li>✓ Unlimited AI scripts</li>
+              <li>✓ 10 AI thumbnails per day</li>
+              <li>✓ 200 AI music tracks per day</li>
+              <li>✓ 20 AI trend analyses per day</li>
+              <li>✓ 20 AI hashtags per day</li>
+              <li>✓ 20 AI SEO optimizations per day</li>
+              <li>✓ Unlimited YouTube channels</li>
+              <li>✓ Priority support</li>
+            </ul>
+          </div>
           )}
 
           <div className="flex flex-col gap-2">

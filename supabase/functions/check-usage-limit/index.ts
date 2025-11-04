@@ -68,11 +68,12 @@ Deno.serve(async (req) => {
     // Get user subscription
     const { data: subscription } = await supabase
       .from('user_subscriptions')
-      .select('plan')
+      .select('plan, current_period_end')
       .eq('user_id', user.id)
       .maybeSingle();
 
     const plan = subscription?.plan || 'free';
+    const currentPeriodEnd = subscription?.current_period_end;
 
     // Get usage tracking
     const { data: usage } = await supabase
@@ -108,8 +109,25 @@ Deno.serve(async (req) => {
     const now = new Date();
     const hoursSinceReset = (now.getTime() - resetAt.getTime()) / (1000 * 60 * 60);
 
-    // Reset daily counts if 24 hours have passed
-    if (hoursSinceReset >= 24) {
+    // For free users: reset every 24 hours
+    // For pro users: reset based on billing cycle
+    let shouldReset = false;
+    
+    if (plan === 'free') {
+      shouldReset = hoursSinceReset >= 24;
+    } else if (plan === 'pro' && currentPeriodEnd) {
+      // For pro users, check if we're in a new billing period
+      const periodEnd = new Date(currentPeriodEnd);
+      if (now > periodEnd) {
+        shouldReset = true;
+      } else if (hoursSinceReset >= 24) {
+        // Also reset daily for pro users every 24 hours
+        shouldReset = true;
+      }
+    }
+
+    // Reset daily counts if needed
+    if (shouldReset) {
       await supabase
         .from('usage_tracking')
         .update({
@@ -137,7 +155,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           canUse: true, 
-          message: 'Daily limits reset. You have full quota available.',
+          message: plan === 'free' ? 'Daily limits reset. You have full quota available.' : 'Limits reset. You have your quota available.',
           currentUsage: 0,
           limit: limits.videoUploads,
           plan 

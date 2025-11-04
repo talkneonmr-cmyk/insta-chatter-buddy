@@ -100,6 +100,37 @@ Deno.serve(async (req) => {
           })
           .eq('user_id', user.id);
         if (updateError) throw updateError;
+
+        // Reset usage tracking
+        const { data: existingUsage } = await supabase
+          .from('usage_tracking')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (existingUsage) {
+          await supabase
+            .from('usage_tracking')
+            .update({
+              video_uploads_count: 0,
+              ai_captions_count: 0,
+              ai_music_count: 0,
+              ai_thumbnails_count: 0,
+              ai_scripts_count: 0,
+              ai_trends_count: 0,
+              ai_seo_count: 0,
+              ai_hashtags_count: 0,
+              reset_at: now.toISOString(),
+            })
+            .eq('user_id', user.id);
+        } else {
+          await supabase
+            .from('usage_tracking')
+            .insert({
+              user_id: user.id,
+              reset_at: now.toISOString(),
+            });
+        }
       } else {
         const { error: insertError } = await supabase
           .from('user_subscriptions')

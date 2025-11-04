@@ -73,6 +73,8 @@ export default function Pricing() {
     "20 AI Hashtags per day",
     "20 AI SEO Optimizations per day",
     "Unlimited YouTube Channels",
+    "Limits reset daily at 24-hour intervals",
+    "New billing cycle resets all limits",
     "Priority Processing",
     "Premium Support"
   ];
