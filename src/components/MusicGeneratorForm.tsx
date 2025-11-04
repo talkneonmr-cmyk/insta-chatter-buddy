@@ -38,7 +38,7 @@ export default function MusicGeneratorForm() {
   const { plan } = useSubscription();
   const navigate = useNavigate();
   const [formData, setFormData] = useState(() => {
-    const base = { title: "", prompt: "", lyrics: "", tags: [], instrumental: false, numSongs: 1, outputFormat: "mp3", bpm: 120, vocalistGender: "female" };
+    const base = { title: "", prompt: "", lyrics: "", tags: [], instrumental: false, numSongs: 1, outputFormat: "mp3", bpm: null, vocalistGender: null };
     const saved = localStorage.getItem(DRAFT_KEY);
     if (saved) {
       try {
@@ -237,7 +237,7 @@ export default function MusicGeneratorForm() {
             Custom Configuration
           </h3>
           {(formData.title || formData.prompt) && (
-            <Button variant="outline" onClick={() => { localStorage.removeItem(DRAFT_KEY); updateFormData({ title: "", prompt: "", lyrics: "", tags: [], bpm: 120 }); }} className="gap-2">
+            <Button variant="outline" onClick={() => { localStorage.removeItem(DRAFT_KEY); updateFormData({ title: "", prompt: "", lyrics: "", tags: [], bpm: null, vocalistGender: null }); }} className="gap-2">
               <RotateCcw className="h-4 w-4" /> Clear
             </Button>
           )}
@@ -248,8 +248,9 @@ export default function MusicGeneratorForm() {
             <Input value={formData.title} onChange={(e) => updateFormData({ title: e.target.value })} className="h-14" required />
           </div>
           <div>
-            <Label>BPM: {formData.bpm}</Label>
-            <Slider min={60} max={180} value={[formData.bpm]} onValueChange={(v) => updateFormData({ bpm: v[0] })} />
+            <Label>BPM: {formData.bpm || 'Auto'}</Label>
+            <Slider min={60} max={180} value={[formData.bpm || 120]} onValueChange={(v) => updateFormData({ bpm: v[0] })} />
+            <Button type="button" variant="ghost" size="sm" onClick={() => updateFormData({ bpm: null })} className="mt-2">Reset to Auto</Button>
           </div>
           <div>
             <Label>Prompt</Label>
@@ -274,11 +275,12 @@ export default function MusicGeneratorForm() {
           </div>
           <div>
             <Label>Vocalist Gender</Label>
-            <Select value={formData.vocalistGender} onValueChange={(v) => updateFormData({ vocalistGender: v })} disabled={formData.instrumental}>
+            <Select value={formData.vocalistGender || "auto"} onValueChange={(v) => updateFormData({ vocalistGender: v === "auto" ? null : v })} disabled={formData.instrumental}>
               <SelectTrigger className="h-12">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="auto">Auto (Recommended)</SelectItem>
                 <SelectItem value="female">Female Vocalist</SelectItem>
                 <SelectItem value="male">Male Vocalist</SelectItem>
               </SelectContent>

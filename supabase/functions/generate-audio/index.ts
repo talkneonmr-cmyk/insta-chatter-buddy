@@ -66,7 +66,7 @@ serve(async (req) => {
       num_songs = 1,
       output_format = 'mp3',
       bpm = null,
-      vocalist_gender = 'female'
+      vocalist_gender = null
     } = requestBody;
 
     // At least one of prompt, tags, or lyrics must be provided
@@ -98,9 +98,15 @@ serve(async (req) => {
       instrumental,
       num_songs,
       output_format,
-      bpm,
-      vocalist_gender,
     };
+
+    // Only add optional parameters if they have values (let Sonauto auto-decide otherwise)
+    if (bpm !== null && bpm !== undefined) {
+      payload.bpm = bpm;
+    }
+    if (vocalist_gender !== null && vocalist_gender !== undefined) {
+      payload.vocalist_gender = vocalist_gender;
+    }
 
     if (lyrics) {
       payload.lyrics = lyrics;
