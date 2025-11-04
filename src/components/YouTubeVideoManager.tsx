@@ -37,6 +37,11 @@ const YouTubeVideoManager = () => {
   }, []);
 
   const fetchVideos = async () => {
+    const timeout = setTimeout(() => {
+      setLoading(false);
+      toast.error('Request timed out. Please try again.');
+    }, 10000);
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -44,8 +49,11 @@ const YouTubeVideoManager = () => {
       const { data, error } = await supabase.functions.invoke('youtube-list-videos');
       
       if (error) throw error;
+      
+      clearTimeout(timeout);
       setVideos(data.videos || []);
     } catch (error: any) {
+      clearTimeout(timeout);
       console.error('Error fetching videos:', error);
       toast.error('Failed to load videos');
     } finally {

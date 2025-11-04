@@ -36,6 +36,11 @@ const YouTubePlaylistManager = () => {
   }, []);
 
   const fetchPlaylists = async () => {
+    const timeout = setTimeout(() => {
+      setLoading(false);
+      toast.error('Request timed out. Please try again.');
+    }, 10000);
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -43,8 +48,11 @@ const YouTubePlaylistManager = () => {
       const { data, error } = await supabase.functions.invoke('youtube-list-playlists');
       
       if (error) throw error;
+      
+      clearTimeout(timeout);
       setPlaylists(data.playlists || []);
     } catch (error: any) {
+      clearTimeout(timeout);
       console.error('Error fetching playlists:', error);
       toast.error('Failed to load playlists');
     } finally {

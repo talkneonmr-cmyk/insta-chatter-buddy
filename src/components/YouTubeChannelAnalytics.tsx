@@ -22,6 +22,11 @@ const YouTubeChannelAnalytics = () => {
   }, []);
 
   const fetchChannelAnalytics = async () => {
+    const timeout = setTimeout(() => {
+      setLoading(false);
+      toast.error('Request timed out. Please try again.');
+    }, 10000);
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -37,15 +42,16 @@ const YouTubeChannelAnalytics = () => {
         return;
       }
 
-      // Call edge function to get analytics
       const { data, error } = await supabase.functions.invoke('youtube-analytics', {
         body: { channelId: account.channel_id }
       });
 
       if (error) throw error;
       
+      clearTimeout(timeout);
       setStats(data);
     } catch (error: any) {
+      clearTimeout(timeout);
       console.error('Error fetching analytics:', error);
       toast.error('Failed to load channel analytics');
     } finally {
