@@ -27,6 +27,7 @@ import VoiceCloning from "./pages/VoiceCloning";
 import TextToSpeech from "./pages/TextToSpeech";
 import Dubbing from "./pages/Dubbing";
 import AIAgents from "./pages/AIAgents";
+import CreatorHelperBot from "./pages/CreatorHelperBot";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
           <Route path="/text-to-speech" element={<Layout><TextToSpeech /></Layout>} />
           <Route path="/dubbing" element={<Layout><Dubbing /></Layout>} />
           <Route path="/ai-agents" element={<Layout><AIAgents /></Layout>} />
+          <Route path="/creator-helper-bot" element={<Layout><CreatorHelperBot /></Layout>} />
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/payment-success" element={<Layout><PaymentSuccess /></Layout>} />
           <Route path="/admin" element={<Layout><Admin /></Layout>} />

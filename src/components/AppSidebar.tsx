@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, FileCheck, Wand2, Volume2, MessageSquareText, Radio, Languages, Bot } from "lucide-react";
+import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, FileCheck, Wand2, Volume2, MessageSquareText, Radio, Languages, Bot, HelpCircle } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -40,6 +40,7 @@ const aiTools = [
   { title: "Text to Speech", url: "/text-to-speech", icon: MessageSquareText },
   { title: "AI Dubbing", url: "/dubbing", icon: Languages },
   { title: "AI Agents", url: "/ai-agents", icon: Bot },
+  { title: "Creator Helper Bot", url: "/creator-helper-bot", icon: HelpCircle },
 ];
 
 export function AppSidebar() {

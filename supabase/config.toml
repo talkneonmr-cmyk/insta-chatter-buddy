@@ -99,3 +99,6 @@ verify_jwt = true
 
 [functions.remove-background]
 verify_jwt = false
+
+[functions.creator-helper-bot]
+verify_jwt = true
