@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, FileCheck, Wand2, Volume2, MessageSquareText, Radio, Languages, Bot, HelpCircle } from "lucide-react";
+import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, FileCheck, Wand2, Volume2, MessageSquareText, Radio, Languages, Bot, HelpCircle, Video } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -33,6 +33,7 @@ const aiTools = [
   { title: "Trend Analyzer", url: "/trend-analyzer", icon: TrendingUp },
   { title: "SEO Optimizer", url: "/seo-optimizer", icon: Search },
   { title: "Hashtag Generator", url: "/hashtag-generator", icon: Hash },
+  { title: "Video Analyzer", url: "/video-analyzer", icon: Video },
   { title: "Background Removal", url: "/background-removal", icon: Scissors },
   { title: "Speech-to-Text", url: "/speech-to-text", icon: Mic },
   { title: "Text Summarizer", url: "/text-summarizer", icon: FileCheck },

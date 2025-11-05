@@ -953,6 +953,36 @@ export type Database = {
         }
         Relationships: []
       }
+      video_analyses: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+          video_id: string
+          video_title: string | null
+          video_url: string
+          viral_moments: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+          video_id: string
+          video_title?: string | null
+          video_url: string
+          viral_moments: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+          video_id?: string
+          video_title?: string | null
+          video_url?: string
+          viral_moments?: Json
+        }
+        Relationships: []
+      }
       video_uploads_history: {
         Row: {
           created_at: string | null

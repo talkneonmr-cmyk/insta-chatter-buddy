@@ -28,6 +28,7 @@ import TextToSpeech from "./pages/TextToSpeech";
 import Dubbing from "./pages/Dubbing";
 import AIAgents from "./pages/AIAgents";
 import CreatorHelperBot from "./pages/CreatorHelperBot";
+import VideoAnalyzer from "./pages/VideoAnalyzer";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
           <Route path="/trend-analyzer" element={<Layout><TrendAnalyzer /></Layout>} />
           <Route path="/seo-optimizer" element={<Layout><SEOOptimizer /></Layout>} />
           <Route path="/hashtag-generator" element={<Layout><HashtagGenerator /></Layout>} />
+          <Route path="/video-analyzer" element={<Layout><VideoAnalyzer /></Layout>} />
           <Route path="/background-removal" element={<Layout><BackgroundRemoval /></Layout>} />
           <Route path="/speech-to-text" element={<Layout><SpeechToText /></Layout>} />
           <Route path="/text-summarizer" element={<Layout><TextSummarizer /></Layout>} />
