@@ -125,11 +125,18 @@ Focus on these basics first, then create 3-5 videos per day. The more you post, 
     }
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content;
+    let reply = data.choices?.[0]?.message?.content;
 
     if (!reply) {
       throw new Error('No response from AI');
     }
+
+    // Remove all markdown formatting
+    reply = reply
+      .replace(/\*\*/g, '')  // Remove bold
+      .replace(/\*/g, '')    // Remove italic/asterisks
+      .replace(/_/g, '')     // Remove underscores
+      .replace(/`/g, '');    // Remove code formatting
 
     return new Response(
       JSON.stringify({ reply }),
