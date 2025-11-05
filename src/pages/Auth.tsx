@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, AlertCircle, Sparkles, Lock } from "lucide-react";
+import { Loader2, Mail, AlertCircle, Sparkles, Lock, ArrowLeft, KeyRound } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -22,19 +22,29 @@ const Auth = () => {
   const [showDisabledAlert, setShowDisabledAlert] = useState(false);
   const [isTesterLogin, setIsTesterLogin] = useState(false);
   const [testerKey, setTesterKey] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
+    // Check if this is a password reset callback
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('reset') === 'true') {
+      setShowForgotPassword(true);
+    }
 
     // Then check regular auth
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+      if (session && !urlParams.get('reset')) {
         navigate('/');
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
+      if (event === 'PASSWORD_RECOVERY') {
+        setShowForgotPassword(true);
+      } else if (session && !urlParams.get('reset')) {
         navigate('/');
       }
     });
@@ -237,6 +247,66 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+
+      if (error) throw error;
+
+      setResetSent(true);
+      toast({
+        title: "Check your email!",
+        description: "We've sent you a password reset link",
+      });
+    } catch (error: any) {
+      console.error('Error sending reset email:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset email",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Your password has been updated",
+      });
+
+      // Clear the reset parameter and navigate to login
+      window.history.replaceState({}, '', '/auth');
+      setShowForgotPassword(false);
+      navigate('/');
+    } catch (error: any) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reset password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
       {/* Animated gradient background */}
@@ -354,7 +424,9 @@ const Auth = () => {
                 <div className="relative group/icon">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-full blur-xl opacity-75 group-hover/icon:opacity-100 transition-opacity animate-pulse" />
                   <div className="relative p-5 rounded-full bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 backdrop-blur-md border border-primary/30 group-hover/icon:scale-110 transition-transform duration-300 shadow-lg">
-                    {showOtpInput ? (
+                    {showForgotPassword ? (
+                      <KeyRound className="w-8 h-8 text-primary animate-pulse" />
+                    ) : showOtpInput ? (
                       <Mail className="w-8 h-8 text-primary animate-pulse" />
                     ) : isTesterLogin ? (
                       <Lock className="w-8 h-8 text-accent animate-pulse" />
@@ -366,14 +438,23 @@ const Auth = () => {
               </div>
               <div className="space-y-2">
                 <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                  {showOtpInput ? "Verify Your Email" : isTesterLogin ? "Tester Access" : (isSignUp ? "Create Account" : "Welcome Back")}
+                  {showForgotPassword 
+                    ? (resetSent ? "Email Sent" : window.location.search.includes('reset=true') ? "Set New Password" : "Reset Password")
+                    : showOtpInput 
+                      ? "Verify Your Email" 
+                      : isTesterLogin 
+                        ? "Tester Access" 
+                        : (isSignUp ? "Create Account" : "Welcome Back")
+                  }
                 </CardTitle>
                 <CardDescription className="text-base">
-                  {showOtpInput 
-                    ? "Enter the 6-digit code sent to your email"
-                    : isTesterLogin 
-                      ? "Enter your tester access key"
-                      : (isSignUp ? "Sign up to get started" : "Sign in to your account")
+                  {showForgotPassword
+                    ? (resetSent ? "Check your inbox for the reset link" : window.location.search.includes('reset=true') ? "Enter your new password" : "We'll send you a reset link")
+                    : showOtpInput 
+                      ? "Enter the 6-digit code sent to your email"
+                      : isTesterLogin 
+                        ? "Enter your tester access key"
+                        : (isSignUp ? "Sign up to get started" : "Sign in to your account")
                   }
                 </CardDescription>
               </div>
@@ -388,8 +469,130 @@ const Auth = () => {
                   </AlertDescription>
                 </Alert>
               )}
-          
-              {!showOtpInput && !isTesterLogin ? (
+              
+              {showForgotPassword ? (
+                // Password Reset Flow
+                resetSent ? (
+                  <div className="text-center space-y-4 animate-fade-in py-8">
+                    <div className="flex justify-center mb-4">
+                      <div className="p-4 rounded-full bg-green-500/10">
+                        <Mail className="w-12 h-12 text-green-500" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-semibold">Check your email</h3>
+                      <p className="text-muted-foreground">
+                        We've sent a password reset link to<br />
+                        <span className="font-medium text-foreground">{resetEmail}</span>
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setShowForgotPassword(false);
+                        setResetSent(false);
+                        setResetEmail("");
+                      }}
+                      className="mt-4"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back to login
+                    </Button>
+                  </div>
+                ) : window.location.search.includes('reset=true') ? (
+                  // New Password Form
+                  <form onSubmit={handleResetPassword} className="space-y-5 animate-fade-in">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password" className="text-sm font-medium">New Password</Label>
+                      <div className="relative group">
+                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300 group-focus-within:scale-110" />
+                        <Input
+                          id="new-password"
+                          type="password"
+                          placeholder="Enter new password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          disabled={isLoading}
+                          minLength={6}
+                          className="pl-10 h-12 bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary focus:bg-background/80 focus:shadow-lg focus:shadow-primary/20 transition-all duration-300"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Must be at least 6 characters</p>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-primary/50 relative overflow-hidden group"
+                      disabled={isLoading}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Updating password...
+                        </>
+                      ) : (
+                        <>
+                          <KeyRound className="mr-2 h-5 w-5" />
+                          Update Password
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                ) : (
+                  // Request Reset Form
+                  <form onSubmit={handleForgotPassword} className="space-y-5 animate-fade-in">
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email" className="text-sm font-medium">Email Address</Label>
+                      <div className="relative group">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300 group-focus-within:scale-110" />
+                        <Input
+                          id="reset-email"
+                          type="email"
+                          placeholder="you@example.com"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                          required
+                          disabled={isLoading}
+                          className="pl-10 h-12 bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary focus:bg-background/80 focus:shadow-lg focus:shadow-primary/20 transition-all duration-300"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">We'll send you a reset link</p>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-primary/50 relative overflow-hidden group"
+                      disabled={isLoading}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="mr-2 h-5 w-5" />
+                          Send Reset Link
+                        </>
+                      )}
+                    </Button>
+                    <div className="text-center">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowForgotPassword(false)}
+                        disabled={isLoading}
+                        className="text-sm hover:text-primary transition-colors"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to login
+                      </Button>
+                    </div>
+                  </form>
+                )
+              ) : !showOtpInput && !isTesterLogin ? (
                 <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-5 animate-fade-in">
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
@@ -443,13 +646,28 @@ const Auth = () => {
                     )}
                   </Button>
                   <div className="text-center space-y-2 pt-2">
+                    {!isSignUp && (
+                      <Button
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        onClick={() => {
+                          setShowForgotPassword(true);
+                          setResetEmail(email);
+                        }}
+                        disabled={isLoading}
+                        className="text-sm text-primary hover:text-primary/80 p-0 h-auto font-medium"
+                      >
+                        Forgot password?
+                      </Button>
+                    )}
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsSignUp(!isSignUp)}
                       disabled={isLoading}
-                      className="text-sm hover:text-primary transition-colors"
+                      className="text-sm hover:text-primary transition-colors block mx-auto"
                     >
                       {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
                     </Button>
