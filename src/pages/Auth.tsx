@@ -238,44 +238,52 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 bg-mesh relative overflow-hidden">
-      {/* Animated background elements */}
+    <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-mesh opacity-50" />
+      
+      {/* Animated floating orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl float-animation" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl float-animation" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent/20 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary/30 via-secondary/20 to-transparent rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-accent/30 via-primary/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '1s', animationDuration: '8s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-secondary/30 via-accent/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '2s', animationDuration: '10s' }} />
+        <div className="absolute top-40 right-1/4 w-48 h-48 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '3s', animationDuration: '12s' }} />
+        <div className="absolute bottom-40 left-1/4 w-56 h-56 bg-gradient-to-br from-accent/20 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '4s', animationDuration: '9s' }} />
       </div>
+      
+      {/* Animated grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)] opacity-20" />
 
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
         {/* Left Side - Branding & Hero */}
-        <div className="hidden lg:block space-y-8 slide-in">
+        <div className="hidden lg:block space-y-8 animate-fade-in">
           <div className="space-y-6">
             {/* Logo/Brand */}
-            <div className="flex items-center gap-3 group cursor-pointer">
+            <div className="flex items-center gap-3 group cursor-pointer animate-scale-in">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity" />
-                <div className="relative bg-gradient-to-br from-primary to-secondary p-4 rounded-2xl shadow-xl">
-                  <Sparkles className="w-10 h-10 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition-all duration-500 animate-pulse" />
+                <div className="relative bg-gradient-to-br from-primary via-secondary to-accent p-4 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-transform duration-300">
+                  <Sparkles className="w-10 h-10 text-white animate-pulse" />
                 </div>
               </div>
               <div>
-                <h1 className="text-4xl font-bold gradient-text">Fabuos</h1>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Fabuos</h1>
                 <p className="text-sm text-muted-foreground">AI-Powered Content Studio</p>
               </div>
             </div>
 
             {/* Hero Content */}
-            <div className="space-y-4">
+            <div className="space-y-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <h2 className="text-5xl font-bold leading-tight">
-                Create Amazing <span className="gradient-text">Content</span> in Minutes
+                Create Amazing <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-pulse">Content</span> in Minutes
               </h2>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg text-muted-foreground leading-relaxed">
                 Transform your ideas into professional content with AI-powered tools. Generate scripts, thumbnails, music, and more - all in one place.
               </p>
             </div>
 
             {/* Features List */}
-            <div className="space-y-4 pt-4">
+            <div className="space-y-3 pt-4">
               {[
                 { icon: "✨", title: "AI Script Writer", desc: "Generate engaging scripts instantly" },
                 { icon: "🎵", title: "Music Generator", desc: "Create custom background music" },
@@ -284,12 +292,12 @@ const Auth = () => {
               ].map((feature, i) => (
                 <div 
                   key={i} 
-                  className="flex items-start gap-4 p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all hover:translate-x-2"
-                  style={{ animationDelay: `${i * 0.1}s` }}
+                  className="group flex items-start gap-4 p-5 rounded-xl bg-gradient-to-br from-background/80 to-background/40 backdrop-blur-md border border-border/50 hover:border-primary/50 transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-primary/20 animate-fade-in cursor-pointer"
+                  style={{ animationDelay: `${0.4 + i * 0.1}s` }}
                 >
-                  <div className="text-3xl">{feature.icon}</div>
+                  <div className="text-3xl group-hover:scale-110 transition-transform duration-300">{feature.icon}</div>
                   <div>
-                    <h3 className="font-semibold text-foreground">{feature.title}</h3>
+                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{feature.title}</h3>
                     <p className="text-sm text-muted-foreground">{feature.desc}</p>
                   </div>
                 </div>
@@ -297,14 +305,14 @@ const Auth = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 pt-6">
+            <div className="grid grid-cols-3 gap-4 pt-6 animate-fade-in" style={{ animationDelay: '0.8s' }}>
               {[
                 { value: "10K+", label: "Active Users" },
                 { value: "50K+", label: "Content Created" },
                 { value: "4.9/5", label: "User Rating" },
               ].map((stat, i) => (
-                <div key={i} className="text-center p-4 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20">
-                  <div className="text-2xl font-bold gradient-text">{stat.value}</div>
+                <div key={i} className="group text-center p-4 rounded-xl bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 border border-primary/20 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:scale-105 cursor-pointer">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent group-hover:scale-110 transition-transform">{stat.value}</div>
                   <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
                 </div>
               ))}
@@ -313,267 +321,279 @@ const Auth = () => {
         </div>
 
         {/* Right Side - Auth Form */}
-        <Card className="w-full card-glass border-border/50 scale-in overflow-hidden shadow-2xl">
-          {/* Mobile Logo */}
-          <div className="lg:hidden p-6 pb-0">
-            <div className="flex items-center gap-3 justify-center mb-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-xl blur-md opacity-75" />
-                <div className="relative bg-gradient-to-br from-primary to-secondary p-3 rounded-xl shadow-xl">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold gradient-text">Fabuos</h1>
-                <p className="text-xs text-muted-foreground">AI Content Studio</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Decorative top gradient bar */}
-          <div className="h-1 w-full bg-gradient-to-r from-primary via-secondary to-accent" />
-        
-        <CardHeader className="space-y-4 text-center pb-6">
-          <div className="flex justify-center mb-2">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-full blur-md opacity-75 animate-pulse" />
-              <div className="relative p-4 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 backdrop-blur-sm border border-primary/30">
-                {showOtpInput ? (
-                  <Mail className="w-8 h-8 text-primary" />
-                ) : isTesterLogin ? (
-                  <Lock className="w-8 h-8 text-accent" />
-                ) : (
-                  <Sparkles className="w-8 h-8 text-primary" />
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <CardTitle className="text-3xl font-bold gradient-text">
-              {showOtpInput ? "Verify Your Email" : isTesterLogin ? "Tester Access" : (isSignUp ? "Create Account" : "Welcome Back")}
-            </CardTitle>
-            <CardDescription className="text-base">
-              {showOtpInput 
-                ? "Enter the 6-digit code sent to your email"
-                : isTesterLogin 
-                  ? "Enter your tester access key"
-                  : (isSignUp ? "Sign up to get started" : "Sign in to your account")
-              }
-            </CardDescription>
-          </div>
-        </CardHeader>
-        
-        <CardContent className="pb-8">
-          {showDisabledAlert && (
-            <Alert variant="info" className="mb-6 animate-fade-in border-destructive/50 bg-destructive/5">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Acc disabled please appeal
-              </AlertDescription>
-            </Alert>
-          )}
+        <Card className="w-full card-glass border-border/50 overflow-hidden shadow-2xl backdrop-blur-xl animate-scale-in relative group">
+          {/* Animated gradient border */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent opacity-20 animate-pulse" />
+          <div className="absolute inset-[1px] bg-background/95 backdrop-blur-xl rounded-lg" />
           
-          {!showOtpInput && !isTesterLogin ? (
-            <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-5 slide-in">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
-                <div className="relative group">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    className="pl-10 h-12 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                <div className="relative group">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    minLength={6}
-                    className="pl-10 h-12 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all"
-                  />
-                </div>
-              </div>
-              <Button
-                type="submit"
-                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-xl btn-3d"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    {isSignUp ? "Creating account..." : "Signing in..."}
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    {isSignUp ? "Create Account" : "Sign In"}
-                  </>
-                )}
-              </Button>
-              <div className="text-center space-y-2 pt-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  disabled={isLoading}
-                  className="text-sm hover:text-primary transition-colors"
-                >
-                  {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
-                </Button>
-              </div>
-            </form>
-          ) : isTesterLogin ? (
-            <form onSubmit={handleTesterLogin} className="space-y-5 slide-in">
-              <div className="space-y-2">
-                <Label htmlFor="testerKey" className="text-sm font-medium">Tester Access Key</Label>
-                <div className="relative group">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
-                  <Input
-                    id="testerKey"
-                    type="text"
-                    placeholder="Enter your tester key"
-                    value={testerKey}
-                    onChange={(e) => setTesterKey(e.target.value.trim())}
-                    required
-                    disabled={isLoading}
-                    className="pl-10 h-12 font-mono bg-background/50 border-border/50 focus:border-accent/50 focus:bg-background transition-all"
-                  />
-                </div>
-              </div>
-              <Button
-                type="submit"
-                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-accent to-accent-glow hover:opacity-90 transition-all shadow-lg hover:shadow-xl btn-3d"
-                disabled={isLoading || !testerKey}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Validating...
-                  </>
-                ) : (
-                  <>
-                    <Lock className="mr-2 h-5 w-5" />
-                    Access as Tester
-                  </>
-                )}
-              </Button>
-              <div className="text-center pt-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setIsTesterLogin(false);
-                    setTesterKey("");
-                  }}
-                  disabled={isLoading}
-                  className="text-sm hover:text-accent transition-colors"
-                >
-                  Back to regular login
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyOTP} className="space-y-5 slide-in">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+          {/* Content container */}
+          <div className="relative z-10">
+            {/* Mobile Logo */}
+            <div className="lg:hidden p-6 pb-0 animate-fade-in">
+              <div className="flex items-center gap-3 justify-center mb-4">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    disabled
-                    className="pl-10 h-12 bg-muted/50 border-border/50"
-                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-xl blur-lg opacity-75 animate-pulse" />
+                  <div className="relative bg-gradient-to-br from-primary via-secondary to-accent p-3 rounded-xl shadow-xl">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Fabuos</h1>
+                  <p className="text-xs text-muted-foreground">AI Content Studio</p>
                 </div>
               </div>
-              <div className="space-y-3">
-                <Label htmlFor="otp" className="text-sm font-medium">Verification Code</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  placeholder="000000"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  required
-                  disabled={isLoading}
-                  maxLength={6}
-                  className="text-center text-3xl tracking-widest font-mono h-14 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all"
-                />
-                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
-                  <AlertCircle className="w-3 h-3" />
-                  Code expires in 10 minutes
-                </p>
+            </div>
+
+            {/* Decorative top gradient bar */}
+            <div className="h-1 w-full bg-gradient-to-r from-primary via-secondary to-accent relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[slide-in-right_2s_ease-in-out_infinite]" />
+            </div>
+        
+            <CardHeader className="space-y-4 text-center pb-6 animate-fade-in">
+              <div className="flex justify-center mb-2">
+                <div className="relative group/icon">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-full blur-xl opacity-75 group-hover/icon:opacity-100 transition-opacity animate-pulse" />
+                  <div className="relative p-5 rounded-full bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 backdrop-blur-md border border-primary/30 group-hover/icon:scale-110 transition-transform duration-300 shadow-lg">
+                    {showOtpInput ? (
+                      <Mail className="w-8 h-8 text-primary animate-pulse" />
+                    ) : isTesterLogin ? (
+                      <Lock className="w-8 h-8 text-accent animate-pulse" />
+                    ) : (
+                      <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+                    )}
+                  </div>
+                </div>
               </div>
-              <Button
-                type="submit"
-                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-xl btn-3d"
-                disabled={isLoading || otp.length !== 6}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    Verify & Sign In
-                  </>
-                )}
-              </Button>
-              <div className="text-center space-y-3 pt-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setShowOtpInput(false);
-                    setOtp("");
-                  }}
-                  disabled={isLoading}
-                  className="text-sm hover:text-primary transition-colors"
-                >
-                  Change email
-                </Button>
-                <div className="text-sm">
-                  {resendTimer > 0 ? (
-                    <span className="text-muted-foreground">Resend code in <span className="font-semibold text-primary">{resendTimer}s</span></span>
-                  ) : (
+              <div className="space-y-2">
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                  {showOtpInput ? "Verify Your Email" : isTesterLogin ? "Tester Access" : (isSignUp ? "Create Account" : "Welcome Back")}
+                </CardTitle>
+                <CardDescription className="text-base">
+                  {showOtpInput 
+                    ? "Enter the 6-digit code sent to your email"
+                    : isTesterLogin 
+                      ? "Enter your tester access key"
+                      : (isSignUp ? "Sign up to get started" : "Sign in to your account")
+                  }
+                </CardDescription>
+              </div>
+            </CardHeader>
+        
+            <CardContent className="pb-8">
+              {showDisabledAlert && (
+                <Alert variant="info" className="mb-6 animate-fade-in border-destructive/50 bg-destructive/10 backdrop-blur-sm">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Acc disabled please appeal
+                  </AlertDescription>
+                </Alert>
+              )}
+          
+              {!showOtpInput && !isTesterLogin ? (
+                <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-5 animate-fade-in">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                    <div className="relative group">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300 group-focus-within:scale-110" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        className="pl-10 h-12 bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary focus:bg-background/80 focus:shadow-lg focus:shadow-primary/20 transition-all duration-300"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                    <div className="relative group">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300 group-focus-within:scale-110" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        minLength={6}
+                        className="pl-10 h-12 bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary focus:bg-background/80 focus:shadow-lg focus:shadow-primary/20 transition-all duration-300"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-primary/50 relative overflow-hidden group"
+                    disabled={isLoading}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        {isSignUp ? "Creating account..." : "Signing in..."}
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-5 w-5" />
+                        {isSignUp ? "Create Account" : "Sign In"}
+                      </>
+                    )}
+                  </Button>
+                  <div className="text-center space-y-2 pt-2">
                     <Button
                       type="button"
-                      variant="link"
+                      variant="ghost"
                       size="sm"
-                      onClick={handleResendOTP}
+                      onClick={() => setIsSignUp(!isSignUp)}
                       disabled={isLoading}
-                      className="p-0 h-auto text-primary hover:text-primary/80 font-medium"
+                      className="text-sm hover:text-primary transition-colors"
                     >
-                      Resend verification code
+                      {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
                     </Button>
-                  )}
-                </div>
-              </div>
-            </form>
-          )}
-        </CardContent>
-      </Card>
+                  </div>
+                </form>
+              ) : isTesterLogin ? (
+                <form onSubmit={handleTesterLogin} className="space-y-5 animate-fade-in">
+                  <div className="space-y-2">
+                    <Label htmlFor="testerKey" className="text-sm font-medium">Tester Access Key</Label>
+                    <div className="relative group">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-accent transition-all duration-300 group-focus-within:scale-110" />
+                      <Input
+                        id="testerKey"
+                        type="text"
+                        placeholder="Enter your tester key"
+                        value={testerKey}
+                        onChange={(e) => setTesterKey(e.target.value.trim())}
+                        required
+                        disabled={isLoading}
+                        className="pl-10 h-12 font-mono bg-background/50 backdrop-blur-sm border-border/50 focus:border-accent focus:bg-background/80 focus:shadow-lg focus:shadow-accent/20 transition-all duration-300"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-accent via-accent to-accent-glow hover:opacity-90 hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-accent/50 relative overflow-hidden group"
+                    disabled={isLoading || !testerKey}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Validating...
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="mr-2 h-5 w-5" />
+                        Access as Tester
+                      </>
+                    )}
+                  </Button>
+                  <div className="text-center pt-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setIsTesterLogin(false);
+                        setTesterKey("");
+                      }}
+                      disabled={isLoading}
+                      className="text-sm hover:text-accent transition-colors"
+                    >
+                      Back to regular login
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyOTP} className="space-y-5 animate-fade-in">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        disabled
+                        className="pl-10 h-12 bg-muted/50 border-border/50"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Label htmlFor="otp" className="text-sm font-medium">Verification Code</Label>
+                    <Input
+                      id="otp"
+                      type="text"
+                      placeholder="000000"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      required
+                      disabled={isLoading}
+                      maxLength={6}
+                      className="text-center text-3xl tracking-widest font-mono h-14 bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary focus:bg-background/80 focus:shadow-lg focus:shadow-primary/20 transition-all duration-300"
+                    />
+                    <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      Code expires in 10 minutes
+                    </p>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-primary/50 relative overflow-hidden group"
+                    disabled={isLoading || otp.length !== 6}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Verifying...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-5 w-5" />
+                        Verify & Sign In
+                      </>
+                    )}
+                  </Button>
+                  <div className="text-center space-y-3 pt-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setShowOtpInput(false);
+                        setOtp("");
+                      }}
+                      disabled={isLoading}
+                      className="text-sm hover:text-primary transition-colors"
+                    >
+                      Change email
+                    </Button>
+                    <div className="text-sm">
+                      {resendTimer > 0 ? (
+                        <span className="text-muted-foreground">Resend code in <span className="font-semibold text-primary">{resendTimer}s</span></span>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="link"
+                          size="sm"
+                          onClick={handleResendOTP}
+                          disabled={isLoading}
+                          className="p-0 h-auto text-primary hover:text-primary/80 font-medium"
+                        >
+                          Resend verification code
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </form>
+              )}
+            </CardContent>
+          </div>
+        </Card>
       </div>
     </div>
   );
