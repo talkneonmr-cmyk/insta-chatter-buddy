@@ -107,6 +107,10 @@ export default {
         "shimmer": {
           "100%": { transform: "translateX(100%)" },
         },
+        "gradient-shift": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -116,6 +120,7 @@ export default {
         "slide-in": "slide-in 0.5s ease-out",
         "scale-in": "scale-in 0.3s ease-out",
         "fade-in": "fade-in 0.5s ease-out",
+        "gradient-shift": "gradient-shift 8s ease infinite",
       },
     },
   },
