@@ -8,6 +8,7 @@ import { Sparkles, Youtube, Music, Video, TrendingUp, Zap, Crown, ArrowRight, Ac
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import UsageStats from "./UsageStats";
+import DashboardSkeleton from "./DashboardSkeleton";
 
 interface DashboardStats {
   totalUploads: number;
@@ -81,14 +82,7 @@ const Dashboard = () => {
   };
 
   if (loading || subscriptionLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Sparkles className="w-12 h-12 text-primary animate-pulse mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   const getGreeting = () => {
