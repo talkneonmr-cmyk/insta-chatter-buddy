@@ -362,15 +362,21 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-500 to-pink-500 [background-size:200%_200%] animate-gradient-shift">
-      {/* Subtle animated gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-600/20 to-orange-500/20 animate-pulse" style={{ animationDuration: '8s' }} />
+    <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-mesh opacity-50" />
       
-      {/* Simplified floating orbs - cleaner design */}
+      {/* Animated floating orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 left-20 w-80 h-80 bg-pink-400/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s', animationDuration: '10s' }} />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary/30 via-secondary/20 to-transparent rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-accent/30 via-primary/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '1s', animationDuration: '8s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-secondary/30 via-accent/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '2s', animationDuration: '10s' }} />
+        <div className="absolute top-40 right-1/4 w-48 h-48 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '3s', animationDuration: '12s' }} />
+        <div className="absolute bottom-40 left-1/4 w-56 h-56 bg-gradient-to-br from-accent/20 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '4s', animationDuration: '9s' }} />
       </div>
+      
+      {/* Animated grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)] opacity-20" />
 
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
         {/* Left Side - Branding & Hero */}
@@ -379,23 +385,23 @@ const Auth = () => {
             {/* Logo/Brand */}
             <div className="flex items-center gap-3 group cursor-pointer animate-scale-in">
               <div className="relative">
-                <div className="absolute inset-0 bg-white/30 rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition-all duration-500 animate-pulse" />
-                <div className="relative bg-white/10 backdrop-blur-md p-4 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-transform duration-300 border border-white/20">
-                  <Sparkles className="w-10 h-10 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition-all duration-500 animate-pulse" />
+                <div className="relative bg-gradient-to-br from-primary via-secondary to-accent p-4 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-transform duration-300">
+                  <Sparkles className="w-10 h-10 text-white animate-pulse" />
                 </div>
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white drop-shadow-lg">Fabuos</h1>
-                <p className="text-sm text-white/80">AI-Powered Content Studio</p>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Fabuos</h1>
+                <p className="text-sm text-muted-foreground">AI-Powered Content Studio</p>
               </div>
             </div>
 
             {/* Hero Content */}
             <div className="space-y-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <h2 className="text-5xl font-bold leading-tight text-white drop-shadow-lg">
-                Create Amazing <span className="text-yellow-300 animate-pulse drop-shadow-lg">Content</span> in Minutes
+              <h2 className="text-5xl font-bold leading-tight">
+                Create Amazing <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-pulse">Content</span> in Minutes
               </h2>
-              <p className="text-lg text-white/90 leading-relaxed drop-shadow-md">
+              <p className="text-lg text-muted-foreground leading-relaxed">
                 Transform your ideas into professional content with AI-powered tools. Generate scripts, thumbnails, music, and more - all in one place.
               </p>
             </div>
@@ -410,13 +416,13 @@ const Auth = () => {
               ].map((feature, i) => (
                 <div 
                   key={i} 
-                  className="group flex items-start gap-4 p-5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:border-white/40 transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-white/20 animate-fade-in cursor-pointer"
+                  className="group flex items-start gap-4 p-5 rounded-xl bg-gradient-to-br from-background/80 to-background/40 backdrop-blur-md border border-border/50 hover:border-primary/50 transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-primary/20 animate-fade-in cursor-pointer"
                   style={{ animationDelay: `${0.4 + i * 0.1}s` }}
                 >
                   <div className="text-3xl group-hover:scale-110 transition-transform duration-300">{feature.icon}</div>
                   <div>
-                    <h3 className="font-semibold text-white group-hover:text-yellow-300 transition-colors">{feature.title}</h3>
-                    <p className="text-sm text-white/80">{feature.desc}</p>
+                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.desc}</p>
                   </div>
                 </div>
               ))}
@@ -429,9 +435,9 @@ const Auth = () => {
                 { value: "50K+", label: "Content Created" },
                 { value: "4.9/5", label: "User Rating" },
               ].map((stat, i) => (
-                <div key={i} className="group text-center p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:border-white/40 hover:shadow-lg hover:shadow-white/20 transition-all duration-300 hover:scale-105 cursor-pointer">
-                  <div className="text-2xl font-bold text-white group-hover:scale-110 transition-transform drop-shadow-lg">{stat.value}</div>
-                  <div className="text-xs text-white/80 mt-1">{stat.label}</div>
+                <div key={i} className="group text-center p-4 rounded-xl bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 border border-primary/20 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:scale-105 cursor-pointer">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent group-hover:scale-110 transition-transform">{stat.value}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -439,10 +445,10 @@ const Auth = () => {
         </div>
 
         {/* Right Side - Auth Form */}
-        <Card className="w-full overflow-hidden shadow-2xl backdrop-blur-xl animate-scale-in relative group border-0">
-          {/* Premium gradient border effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/20 to-white/10 rounded-xl" />
-          <div className="absolute inset-[2px] bg-black/40 backdrop-blur-2xl rounded-xl" />
+        <Card className="w-full card-glass border-border/50 overflow-hidden shadow-2xl backdrop-blur-xl animate-scale-in relative group">
+          {/* Animated gradient border */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent opacity-20 animate-pulse" />
+          <div className="absolute inset-[1px] bg-background/95 backdrop-blur-xl rounded-lg" />
           
           {/* Content container */}
           <div className="relative z-10">
@@ -450,42 +456,42 @@ const Auth = () => {
             <div className="lg:hidden p-6 pb-0 animate-fade-in">
               <div className="flex items-center gap-3 justify-center mb-4">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-xl blur-lg opacity-75 animate-pulse" />
-                  <div className="relative bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-3 rounded-xl shadow-xl">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-xl blur-lg opacity-75 animate-pulse" />
+                  <div className="relative bg-gradient-to-br from-primary via-secondary to-accent p-3 rounded-xl shadow-xl">
                     <Sparkles className="w-6 h-6 text-white" />
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white drop-shadow-lg">Fabuos</h1>
-                  <p className="text-xs text-white/90">AI Content Studio</p>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Fabuos</h1>
+                  <p className="text-xs text-muted-foreground">AI Content Studio</p>
                 </div>
               </div>
             </div>
 
             {/* Decorative top gradient bar */}
-            <div className="h-1 w-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 relative overflow-hidden">
+            <div className="h-1 w-full bg-gradient-to-r from-primary via-secondary to-accent relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[slide-in-right_2s_ease-in-out_infinite]" />
             </div>
         
             <CardHeader className="space-y-4 text-center pb-6 animate-fade-in">
               <div className="flex justify-center mb-2">
                 <div className="relative group/icon">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-full blur-xl opacity-75 group-hover/icon:opacity-100 transition-opacity animate-pulse" />
-                  <div className="relative p-5 rounded-full bg-white/10 backdrop-blur-md border border-white/30 group-hover/icon:scale-110 transition-transform duration-300 shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-full blur-xl opacity-75 group-hover/icon:opacity-100 transition-opacity animate-pulse" />
+                  <div className="relative p-5 rounded-full bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 backdrop-blur-md border border-primary/30 group-hover/icon:scale-110 transition-transform duration-300 shadow-lg">
                     {showForgotPassword ? (
-                      <KeyRound className="w-8 h-8 text-white animate-pulse" />
+                      <KeyRound className="w-8 h-8 text-primary animate-pulse" />
                     ) : showOtpInput ? (
-                      <Mail className="w-8 h-8 text-white animate-pulse" />
+                      <Mail className="w-8 h-8 text-primary animate-pulse" />
                     ) : isTesterLogin ? (
-                      <Lock className="w-8 h-8 text-white animate-pulse" />
+                      <Lock className="w-8 h-8 text-accent animate-pulse" />
                     ) : (
-                      <Sparkles className="w-8 h-8 text-white animate-pulse" />
+                      <Sparkles className="w-8 h-8 text-primary animate-pulse" />
                     )}
                   </div>
                 </div>
               </div>
               <div className="space-y-2">
-                <CardTitle className="text-3xl font-bold text-white drop-shadow-lg">
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
                   {showForgotPassword 
                     ? (resetSent ? "Email Sent" : window.location.search.includes('reset=true') ? "Set New Password" : "Reset Password")
                     : showOtpInput 
@@ -495,7 +501,7 @@ const Auth = () => {
                         : (isSignUp ? "Create Account" : "Welcome Back")
                   }
                 </CardTitle>
-                <CardDescription className="text-base text-white/80">
+                <CardDescription className="text-base">
                   {showForgotPassword
                     ? (resetSent ? "Check your inbox for the reset link" : window.location.search.includes('reset=true') ? "Enter your new password" : "We'll send you a reset link")
                     : showOtpInput 
