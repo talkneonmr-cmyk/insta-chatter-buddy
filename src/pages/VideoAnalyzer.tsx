@@ -27,16 +27,15 @@ interface Analysis {
 export default function VideoAnalyzer() {
   const [videoUrl, setVideoUrl] = useState("");
   const [transcript, setTranscript] = useState("");
-  const [mode, setMode] = useState<"auto" | "manual">("manual");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const { toast } = useToast();
 
   const handleAnalyze = async () => {
-    if (!videoUrl) {
+    if (!videoUrl || !transcript) {
       toast({
         title: "Error",
-        description: "Please enter a YouTube video URL",
+        description: "Please enter both a YouTube video URL and transcript",
         variant: "destructive",
       });
       return;
@@ -62,7 +61,7 @@ export default function VideoAnalyzer() {
         {
           body: { 
             videoUrl,
-            transcript: mode === "manual" && transcript ? transcript : undefined
+            transcript
           },
         }
       );
@@ -133,88 +132,45 @@ export default function VideoAnalyzer() {
           {/* Input Section */}
           <Card className="p-6">
             <div className="space-y-4">
-              {/* Mode Toggle */}
-              <div className="flex gap-2 p-1 bg-accent/20 rounded-lg w-fit">
-                <Button
-                  variant={mode === "manual" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setMode("manual")}
-                >
-                  Manual Transcript
-                </Button>
-                <Button
-                  variant={mode === "auto" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setMode("auto")}
-                >
-                  Auto (Title-Based)
-                </Button>
-              </div>
-
               {/* Video URL Input */}
-              <div className="flex gap-4">
-                <Input
-                  placeholder="Paste YouTube video URL here..."
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && mode === "auto" && handleAnalyze()}
-                  className="flex-1"
-                />
-                {mode === "auto" && (
-                  <Button
-                    onClick={handleAnalyze}
-                    disabled={isAnalyzing || !videoUrl}
-                    className="min-w-[140px]"
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <TrendingUp className="mr-2 h-4 w-4" />
-                        Analyze
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
+              <Input
+                placeholder="Paste YouTube video URL here..."
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                className="w-full"
+              />
 
-              {/* Manual Transcript Input */}
-              {mode === "manual" && (
-                <>
-                  <textarea
-                    placeholder="Paste video transcript here... (Get it from YouTube: ⋮ → Show transcript → Copy)"
-                    value={transcript}
-                    onChange={(e) => setTranscript(e.target.value)}
-                    className="w-full min-h-[120px] p-3 border rounded-md bg-background resize-y"
-                  />
-                  <Button
-                    onClick={handleAnalyze}
-                    disabled={isAnalyzing || !videoUrl || !transcript}
-                    className="w-full"
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Analyzing Transcript...
-                      </>
-                    ) : (
-                      <>
-                        <TrendingUp className="mr-2 h-4 w-4" />
-                        Analyze with Transcript
-                      </>
-                    )}
-                  </Button>
-                </>
-              )}
+              {/* Transcript Input */}
+              <textarea
+                placeholder="Paste video transcript here... (Get it from YouTube: ⋮ → Show transcript → Copy)"
+                value={transcript}
+                onChange={(e) => setTranscript(e.target.value)}
+                className="w-full min-h-[120px] p-3 border rounded-md bg-background resize-y"
+              />
+              
+              <Button
+                onClick={handleAnalyze}
+                disabled={isAnalyzing || !videoUrl || !transcript}
+                className="w-full"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing Transcript...
+                  </>
+                ) : (
+                  <>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Analyze Video
+                  </>
+                )}
+              </Button>
 
               <div className="flex items-start gap-2 text-sm text-muted-foreground">
                 <div className="text-lg">💡</div>
                 <div>
-                  <strong>Manual mode (recommended):</strong> Paste the video transcript for accurate timestamp analysis.<br/>
-                  <strong>Auto mode:</strong> Generates suggestions based on video title only (no actual timestamps).
+                  Paste the video transcript from YouTube for accurate timestamp analysis. 
+                  (Click ⋮ → Show transcript → Copy on any YouTube video)
                 </div>
               </div>
             </div>
