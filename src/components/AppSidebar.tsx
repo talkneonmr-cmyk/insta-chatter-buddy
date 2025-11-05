@@ -26,6 +26,7 @@ const mainItems = [
 
 const aiTools = [
   { title: "Caption Generator", url: "/caption-generator", icon: Sparkles },
+  { title: "Creator Helper Bot", url: "/creator-helper-bot", icon: HelpCircle },
   { title: "Thumbnail Generator", url: "/thumbnail-generator", icon: Image },
   { title: "Script Writer", url: "/script-writer", icon: FileText },
   { title: "Music Generator", url: "/music-generator", icon: Music },
@@ -40,7 +41,6 @@ const aiTools = [
   { title: "Text to Speech", url: "/text-to-speech", icon: MessageSquareText },
   { title: "AI Dubbing", url: "/dubbing", icon: Languages },
   { title: "AI Agents", url: "/ai-agents", icon: Bot },
-  { title: "Creator Helper Bot", url: "/creator-helper-bot", icon: HelpCircle },
 ];
 
 export function AppSidebar() {
