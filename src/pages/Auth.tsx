@@ -309,7 +309,8 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      setIsLoading(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/`,
@@ -317,10 +318,37 @@ const Auth = () => {
             access_type: 'offline',
             prompt: 'consent',
           },
+          skipBrowserRedirect: true,
         },
       });
 
       if (error) throw error;
+
+      if (data?.url) {
+        try {
+          if (window.top && window.top !== window) {
+            (window.top as Window).location.href = data.url;
+            return;
+          }
+          window.location.assign(data.url);
+        } catch (navErr) {
+          const popup = window.open(data.url, '_blank', 'noopener,noreferrer');
+          if (!popup) {
+            try {
+              await navigator.clipboard.writeText(data.url);
+              toast({
+                title: 'Open Google sign-in',
+                description: 'Popup blocked. Sign-in link copied—paste it in a new tab.',
+              });
+            } catch {
+              toast({
+                title: 'Open Google sign-in',
+                description: 'Popup blocked. Please allow popups or open the link manually.',
+              });
+            }
+          }
+        }
+      }
     } catch (error: any) {
       console.error('Error signing in with Google:', error);
       toast({
@@ -328,6 +356,8 @@ const Auth = () => {
         description: error.message || "Failed to sign in with Google",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
