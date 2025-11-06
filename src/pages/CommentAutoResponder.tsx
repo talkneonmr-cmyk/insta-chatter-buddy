@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowLeft, Video, Trash2 } from "lucide-react";
+import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowLeft, Video, Trash2, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Select,
@@ -47,6 +47,7 @@ export default function CommentAutoResponder() {
   const [monitoredVideos, setMonitoredVideos] = useState<any[]>([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
+  const [checkingVideo, setCheckingVideo] = useState<string | null>(null);
 
   useEffect(() => {
     loadSettings();
@@ -295,6 +296,32 @@ export default function CommentAutoResponder() {
     setSelectedVideos(newSelection);
   };
 
+  const manualCheckVideo = async (videoId: string) => {
+    setCheckingVideo(videoId);
+    try {
+      const { data, error } = await supabase.functions.invoke('manual-check-comments', {
+        body: { videoId }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Check Complete",
+        description: `Replied: ${data.replied}, Skipped: ${data.skipped}`,
+      });
+      await loadLogs();
+    } catch (error: any) {
+      console.error('Error checking video:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || 'Failed to check video',
+      });
+    } finally {
+      setCheckingVideo(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -464,13 +491,33 @@ export default function CommentAutoResponder() {
                     <p className="font-medium truncate">{video.video_title}</p>
                     <p className="text-sm text-muted-foreground">Video ID: {video.video_id}</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeMonitoredVideo(video.video_id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => manualCheckVideo(video.video_id)}
+                      disabled={checkingVideo === video.video_id}
+                    >
+                      {checkingVideo === video.video_id ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Checking...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4 mr-2" />
+                          Check Now
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeMonitoredVideo(video.video_id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
