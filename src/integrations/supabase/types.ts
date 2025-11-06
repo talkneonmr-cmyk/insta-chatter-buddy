@@ -1136,6 +1136,33 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_monitored_videos: {
+        Row: {
+          created_at: string | null
+          id: string
+          thumbnail_url: string | null
+          user_id: string
+          video_id: string
+          video_title: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          thumbnail_url?: string | null
+          user_id: string
+          video_id: string
+          video_title: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          thumbnail_url?: string | null
+          user_id?: string
+          video_id?: string
+          video_title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

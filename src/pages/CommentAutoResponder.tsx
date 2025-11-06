@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowLeft } from "lucide-react";
+import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowLeft, Video, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -43,10 +44,15 @@ export default function CommentAutoResponder() {
   const [newKeyword, setNewKeyword] = useState("");
   const [logs, setLogs] = useState<any[]>([]);
   const [stats, setStats] = useState({ total: 0, replied: 0, skipped: 0, failed: 0 });
+  const [videos, setVideos] = useState<any[]>([]);
+  const [monitoredVideos, setMonitoredVideos] = useState<any[]>([]);
+  const [loadingVideos, setLoadingVideos] = useState(false);
+  const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadSettings();
     loadLogs();
+    loadMonitoredVideos();
   }, []);
 
   const loadSettings = async () => {
@@ -158,6 +164,134 @@ export default function CommentAutoResponder() {
       ...settings,
       blacklist_keywords: settings.blacklist_keywords.filter(k => k !== keyword),
     });
+  };
+
+  const loadMonitoredVideos = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('youtube_monitored_videos')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setMonitoredVideos(data || []);
+    } catch (error) {
+      console.error('Error loading monitored videos:', error);
+    }
+  };
+
+  const fetchVideos = async () => {
+    setLoadingVideos(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('youtube-list-videos');
+
+      if (error) throw error;
+
+      setVideos(data || []);
+      toast({
+        title: "Success",
+        description: "Videos loaded successfully",
+      });
+    } catch (error) {
+      console.error('Error fetching videos:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load videos",
+      });
+    } finally {
+      setLoadingVideos(false);
+    }
+  };
+
+  const addMonitoredVideo = async () => {
+    if (selectedVideos.size === 0) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select at least one video",
+      });
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const videosToAdd = videos
+        .filter(v => selectedVideos.has(v.id))
+        .map(v => ({
+          user_id: user.id,
+          video_id: v.id,
+          video_title: v.title,
+          thumbnail_url: v.thumbnailUrl,
+        }));
+
+      const { error } = await supabase
+        .from('youtube_monitored_videos')
+        .insert(videosToAdd);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Added ${videosToAdd.length} video(s) to monitoring`,
+      });
+
+      setSelectedVideos(new Set());
+      setVideos([]);
+      loadMonitoredVideos();
+    } catch (error) {
+      console.error('Error adding monitored videos:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add videos",
+      });
+    }
+  };
+
+  const removeMonitoredVideo = async (videoId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('youtube_monitored_videos')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('video_id', videoId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Video removed from monitoring",
+      });
+
+      loadMonitoredVideos();
+    } catch (error) {
+      console.error('Error removing monitored video:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to remove video",
+      });
+    }
+  };
+
+  const toggleVideoSelection = (videoId: string) => {
+    const newSelection = new Set(selectedVideos);
+    if (newSelection.has(videoId)) {
+      newSelection.delete(videoId);
+    } else {
+      newSelection.add(videoId);
+    }
+    setSelectedVideos(newSelection);
   };
 
   if (loading) {
@@ -305,6 +439,83 @@ export default function CommentAutoResponder() {
               "Save Settings"
             )}
           </Button>
+        </div>
+      </Card>
+
+      {/* Video Selection */}
+      <Card className="p-6 mb-6">
+        <h2 className="text-2xl font-bold mb-4">Monitored Videos</h2>
+        <p className="text-muted-foreground mb-4">
+          Select specific videos to monitor for comments. If no videos are selected, the system will monitor your 5 most recent videos.
+        </p>
+
+        {/* Currently Monitored Videos */}
+        {monitoredVideos.length > 0 && (
+          <div className="mb-6">
+            <h3 className="font-semibold mb-2">Currently Monitoring ({monitoredVideos.length} videos):</h3>
+            <div className="space-y-2">
+              {monitoredVideos.map((video) => (
+                <div key={video.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                  {video.thumbnail_url && (
+                    <img src={video.thumbnail_url} alt={video.video_title} className="w-20 h-14 object-cover rounded" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{video.video_title}</p>
+                    <p className="text-sm text-muted-foreground">Video ID: {video.video_id}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeMonitoredVideo(video.video_id)}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Add New Videos */}
+        <div className="space-y-4">
+          <Button onClick={fetchVideos} disabled={loadingVideos}>
+            {loadingVideos ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading Videos...
+              </>
+            ) : (
+              <>
+                <Video className="mr-2 h-4 w-4" />
+                Load My Videos
+              </>
+            )}
+          </Button>
+
+          {videos.length > 0 && (
+            <div className="space-y-4">
+              <div className="space-y-2 max-h-96 overflow-y-auto border rounded-lg p-4">
+                {videos.map((video) => (
+                  <div key={video.id} className="flex items-start gap-3 p-2 hover:bg-muted rounded-lg">
+                    <Checkbox
+                      checked={selectedVideos.has(video.id)}
+                      onCheckedChange={() => toggleVideoSelection(video.id)}
+                    />
+                    {video.thumbnailUrl && (
+                      <img src={video.thumbnailUrl} alt={video.title} className="w-20 h-14 object-cover rounded" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium">{video.title}</p>
+                      <p className="text-sm text-muted-foreground">{video.viewCount} views</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Button onClick={addMonitoredVideo} disabled={selectedVideos.size === 0}>
+                Add Selected Videos ({selectedVideos.size})
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
 

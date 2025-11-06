@@ -92,27 +92,44 @@ async function processUserComments(supabaseClient: any, setting: any) {
         .eq('id', account.id);
     }
 
-    // Fetch recent videos
-    const videosResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?part=snippet&forMine=true&type=video&maxResults=5&order=date`,
-      {
-        headers: { 'Authorization': `Bearer ${accessToken}` },
-      }
-    );
+    // Check for monitored videos first
+    const { data: monitoredVideos, error: monitoredError } = await supabaseClient
+      .from('youtube_monitored_videos')
+      .select('video_id')
+      .eq('user_id', user_id);
 
-    const videosData = await videosResponse.json();
-    
-    if (!videosData.items || videosData.items.length === 0) {
-      console.log(`No videos found for user ${user_id}`);
-      return;
+    let videoIds: string[] = [];
+
+    if (monitoredVideos && monitoredVideos.length > 0) {
+      // Use monitored videos if they exist
+      videoIds = monitoredVideos.map((v: any) => v.video_id);
+      console.log(`Processing ${videoIds.length} monitored videos for user ${user_id}`);
+    } else {
+      // Fall back to latest 5 videos if no monitored videos
+      const videosResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&forMine=true&type=video&maxResults=5&order=date`,
+        {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+        }
+      );
+
+      const videosData = await videosResponse.json();
+      
+      if (!videosData.items || videosData.items.length === 0) {
+        console.log(`No videos found for user ${user_id}`);
+        return;
+      }
+
+      videoIds = videosData.items.map((video: any) => video.id.videoId);
+      console.log(`Processing ${videoIds.length} recent videos for user ${user_id}`);
     }
 
     // Process comments for each video
-    for (const video of videosData.items) {
+    for (const videoId of videoIds) {
       await processVideoComments(
         supabaseClient,
         user_id,
-        video.id.videoId,
+        videoId,
         accessToken,
         setting
       );
