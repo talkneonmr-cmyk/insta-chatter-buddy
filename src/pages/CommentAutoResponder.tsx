@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowLeft, Video, Trash2, Play } from "lucide-react";
+import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowLeft, Video, Trash2, Play, Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Select,
@@ -25,6 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Alert } from "@/components/ui/alert";
 import { formatDistanceToNow } from "date-fns";
 
 export default function CommentAutoResponder() {
@@ -48,11 +49,14 @@ export default function CommentAutoResponder() {
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
   const [checkingVideo, setCheckingVideo] = useState<string | null>(null);
+  const [youtubeConnected, setYoutubeConnected] = useState(false);
+  const [reconnecting, setReconnecting] = useState(false);
 
   useEffect(() => {
     loadSettings();
     loadLogs();
     loadMonitoredVideos();
+    checkYouTubeConnection();
   }, []);
 
   const loadSettings = async () => {
@@ -322,6 +326,59 @@ export default function CommentAutoResponder() {
     }
   };
 
+  const checkYouTubeConnection = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('youtube_accounts')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      setYoutubeConnected(!!data);
+    } catch (error) {
+      console.error('Error checking YouTube connection:', error);
+    }
+  };
+
+  const handleReconnectYouTube = async () => {
+    try {
+      setReconnecting(true);
+      
+      const { data: authData, error: authError } = await supabase.functions.invoke('youtube-oauth/auth-url');
+      
+      if (authError) throw authError;
+
+      try {
+        if (window.top && window.top !== window) {
+          (window.top as Window).location.href = authData.authUrl;
+          return;
+        }
+        window.location.assign(authData.authUrl);
+      } catch (navErr) {
+        const popup = window.open(authData.authUrl, '_blank', 'noopener,noreferrer');
+        if (!popup) {
+          toast({
+            title: 'Reconnect YouTube',
+            description: 'Please allow popups to reconnect YouTube with comment permissions.',
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Reconnect error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to reconnect YouTube",
+      });
+    } finally {
+      setReconnecting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -346,6 +403,22 @@ export default function CommentAutoResponder() {
           Automatically respond to YouTube comments with AI-powered replies
         </p>
       </div>
+
+      {/* YouTube Connection Alert */}
+      {!youtubeConnected && (
+        <Alert className="border-red-500/20 bg-red-500/10 mb-6">
+          <AlertCircle className="h-4 w-4 text-red-500" />
+          <div className="flex items-center justify-between flex-1 ml-2">
+            <div>
+              <p className="font-medium">YouTube Not Connected</p>
+              <p className="text-sm text-muted-foreground">Connect YouTube account to enable comment auto-responder</p>
+            </div>
+            <Button onClick={() => navigate('/youtube-manager')} size="sm">
+              Connect YouTube
+            </Button>
+          </div>
+        </Alert>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
