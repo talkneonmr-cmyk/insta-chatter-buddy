@@ -1058,6 +1058,84 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_comment_logs: {
+        Row: {
+          comment_id: string
+          comment_text: string
+          created_at: string | null
+          id: string
+          replied_at: string | null
+          reply_text: string | null
+          skip_reason: string | null
+          status: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          comment_id: string
+          comment_text: string
+          created_at?: string | null
+          id?: string
+          replied_at?: string | null
+          reply_text?: string | null
+          skip_reason?: string | null
+          status: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          comment_id?: string
+          comment_text?: string
+          created_at?: string | null
+          id?: string
+          replied_at?: string | null
+          reply_text?: string | null
+          skip_reason?: string | null
+          status?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: []
+      }
+      youtube_comment_settings: {
+        Row: {
+          blacklist_keywords: string[] | null
+          created_at: string | null
+          custom_instructions: string | null
+          enabled: boolean | null
+          id: string
+          min_comment_length: number | null
+          reply_delay_minutes: number | null
+          response_style: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          blacklist_keywords?: string[] | null
+          created_at?: string | null
+          custom_instructions?: string | null
+          enabled?: boolean | null
+          id?: string
+          min_comment_length?: number | null
+          reply_delay_minutes?: number | null
+          response_style?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          blacklist_keywords?: string[] | null
+          created_at?: string | null
+          custom_instructions?: string | null
+          enabled?: boolean | null
+          id?: string
+          min_comment_length?: number | null
+          reply_delay_minutes?: number | null
+          response_style?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
