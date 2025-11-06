@@ -10,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowLeft, Video, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -496,10 +495,13 @@ export default function CommentAutoResponder() {
             <div className="space-y-4">
               <div className="space-y-2 max-h-96 overflow-y-auto border rounded-lg p-4">
                 {videos.map((video) => (
-                  <div key={video.id} className="flex items-start gap-3 p-2 hover:bg-muted rounded-lg">
-                    <Checkbox
+                  <div key={video.id} className="flex items-start gap-3 p-2 hover:bg-muted rounded-lg cursor-pointer" onClick={() => toggleVideoSelection(video.id)}>
+                    <input
+                      type="checkbox"
                       checked={selectedVideos.has(video.id)}
-                      onCheckedChange={() => toggleVideoSelection(video.id)}
+                      onChange={() => toggleVideoSelection(video.id)}
+                      className="mt-1 h-4 w-4 rounded border-primary"
+                      onClick={(e) => e.stopPropagation()}
                     />
                     {video.thumbnailUrl && (
                       <img src={video.thumbnailUrl} alt={video.title} className="w-20 h-14 object-cover rounded" />
