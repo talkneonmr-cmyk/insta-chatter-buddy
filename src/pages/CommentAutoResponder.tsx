@@ -190,7 +190,7 @@ export default function CommentAutoResponder() {
 
       if (error) throw error;
 
-      setVideos(data || []);
+      setVideos(data?.videos || []);
       toast({
         title: "Success",
         description: "Videos loaded successfully",
