@@ -148,6 +148,8 @@ async function processVideoComments(
   setting: any
 ) {
   try {
+    console.log(`Fetching comments for video ${videoId}`);
+    
     // Fetch comments
     const commentsResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&maxResults=20&order=time`,
@@ -157,10 +159,15 @@ async function processVideoComments(
     );
 
     const commentsData = await commentsResponse.json();
+    
+    console.log(`YouTube API response for ${videoId}:`, JSON.stringify(commentsData).substring(0, 200));
 
-    if (!commentsData.items) {
+    if (!commentsData.items || commentsData.items.length === 0) {
+      console.log(`No comments found for video ${videoId}`);
       return;
     }
+    
+    console.log(`Found ${commentsData.items.length} comments for video ${videoId}`);
 
     for (const item of commentsData.items) {
       const comment = item.snippet.topLevelComment.snippet;
