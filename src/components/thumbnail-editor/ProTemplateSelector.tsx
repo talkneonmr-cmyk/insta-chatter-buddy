@@ -69,6 +69,7 @@ const TEMPLATES: Template[] = [
 export const ProTemplateSelector = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [customPrompt, setCustomPrompt] = useState("");
+  const [thumbnailText, setThumbnailText] = useState("");
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
@@ -82,18 +83,35 @@ export const ProTemplateSelector = () => {
     setGeneratedImage(null);
 
     try {
-      const finalPrompt = `${selectedTemplate.basePrompt}
+      let finalPrompt = `${selectedTemplate.basePrompt}
 
-SPECIFIC CONTENT: ${customPrompt}
+SPECIFIC CONTENT: ${customPrompt}`;
 
-CRITICAL QUALITY REQUIREMENTS:
-- Ultra high resolution 1280x720 pixels perfect for YouTube
-- Professional studio lighting
-- Vibrant saturated colors
-- Sharp focus
-- Dramatic composition
-- Eye-catching and clickable
-- Space for text overlay if needed`;
+      // Add text overlay instructions if user provided text
+      if (thumbnailText.trim()) {
+        finalPrompt += `
+
+TEXT OVERLAY REQUIREMENTS:
+- Include bold, high-contrast text that says: "${thumbnailText}"
+- Use thick white text with black stroke outline for maximum readability
+- Position text in top third or center for maximum impact
+- Make text large and impossible to miss (40-50% of thumbnail height)
+- Use bold sans-serif font (Impact or Arial Black style)
+- Add subtle shadow or glow effect behind text
+- Ensure text has perfect contrast against background
+- Text should be the MAIN focal point`;
+      }
+
+      finalPrompt += `
+
+CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
+- EXACTLY 1280x720 pixels (16:9 aspect ratio)
+- Ultra high resolution and sharp
+- Professional studio lighting with dramatic shadows
+- Maximum color saturation and contrast
+- Eye-catching composition that stops scrolling
+- Professional YouTube thumbnail quality
+- Optimized for small preview size`;
 
       const { data, error } = await supabase.functions.invoke("generate-thumbnail", {
         body: {
@@ -107,7 +125,7 @@ CRITICAL QUALITY REQUIREMENTS:
       if (data?.error) throw new Error(data.error);
 
       setGeneratedImage(data.thumbnail.thumbnail_url);
-      toast.success("🔥 Pro thumbnail created!");
+      toast.success("🔥 Pro YouTube thumbnail created!");
       
       // Increment usage
       await supabase.functions.invoke("increment-usage", {
@@ -133,6 +151,7 @@ CRITICAL QUALITY REQUIREMENTS:
   const resetAndGenerate = () => {
     setGeneratedImage(null);
     setCustomPrompt("");
+    setThumbnailText("");
     setSelectedTemplate(null);
   };
 
@@ -197,18 +216,35 @@ CRITICAL QUALITY REQUIREMENTS:
                 placeholder={selectedTemplate.placeholder}
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                rows={4}
+                rows={3}
                 className="resize-none text-base"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Add Text Overlay (Optional)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g., 'I SPENT $100,000' or 'YOU WON'T BELIEVE THIS'"
+                value={thumbnailText}
+                onChange={(e) => setThumbnailText(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-input bg-background text-base font-bold placeholder:font-normal"
+                maxLength={50}
+              />
+              <p className="text-xs text-muted-foreground">
+                AI will automatically style and position your text for maximum impact
+              </p>
             </div>
 
             <div className="bg-muted/50 p-4 rounded-lg space-y-2">
               <p className="text-sm font-medium">💡 Pro Tips:</p>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• Be specific about what you want to see</li>
-                <li>• Mention colors if you have a preference</li>
-                <li>• Include any text you want visible</li>
-                <li>• Keep it simple - AI does the magic</li>
+                <li>• Describe the main visual you want</li>
+                <li>• Add text for viral titles like MrBeast</li>
+                <li>• Keep descriptions simple and clear</li>
+                <li>• Text works best with 2-6 words in ALL CAPS</li>
               </ul>
             </div>
 
@@ -221,12 +257,12 @@ CRITICAL QUALITY REQUIREMENTS:
               {loading ? (
                 <>
                   <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Creating Your Viral Thumbnail...
+                  Creating 1280x720 Thumbnail...
                 </>
               ) : (
                 <>
                   <Zap className="h-5 w-5 mr-2" />
-                  Generate Pro Thumbnail
+                  Generate YouTube Thumbnail
                 </>
               )}
             </Button>
@@ -267,9 +303,14 @@ CRITICAL QUALITY REQUIREMENTS:
               </Button>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <Sparkles className="h-4 w-4" />
-              <span>Perfect for YouTube • 1280x720 • Pro Quality</span>
+            <div className="text-center space-y-1">
+              <div className="flex items-center justify-center gap-2 text-sm font-medium text-green-600">
+                <Check className="h-4 w-4" />
+                <span>YouTube Perfect • 1280x720 pixels</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Ready to upload - Optimized for maximum clicks
+              </p>
             </div>
           </CardContent>
         </Card>
