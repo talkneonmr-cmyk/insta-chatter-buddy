@@ -41,13 +41,13 @@ CRITICAL REQUIREMENTS:
       });
 
       if (error) {
-        console.error("Supabase function error:", error);
-        toast.error(error.message || "Failed to generate");
+        console.warn("Supabase function warning:", error);
+        toast.error(error.message || "Hey there! Your daily limit is reached. Please check back tomorrow!");
         return;
       }
       
       if (data?.error) {
-        console.error("Backend error:", data.error);
+        console.warn("Backend warning:", data.error);
         toast.error(data.error);
         return;
       }
@@ -61,7 +61,7 @@ CRITICAL REQUIREMENTS:
       
       toast.success("Professional thumbnail generated!");
     } catch (error: any) {
-      console.error("Generation error:", error);
+      console.warn("Generation warning:", error);
       toast.error(error.message || "Failed to generate");
     } finally {
       setLoading(false);

@@ -161,13 +161,13 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
       });
 
       if (error) {
-        console.error("Supabase function error:", error);
-        toast.error(error.message || "Failed to generate thumbnail");
+        console.warn("Supabase function warning:", error);
+        toast.error(error.message || "Hey there! Your daily limit is reached. Please check back tomorrow!");
         return;
       }
       
       if (data?.error) {
-        console.error("Backend error:", data.error);
+        console.warn("Backend warning:", data.error);
         toast.error(data.error);
         return;
       }
@@ -175,7 +175,7 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
       setGeneratedImage(data.thumbnail.thumbnail_url);
       toast.success("🔥 Pro YouTube thumbnail created!");
     } catch (error: any) {
-      console.error("Generation error:", error);
+      console.warn("Generation warning:", error);
       toast.error(error.message || "Failed to generate thumbnail");
     } finally {
       setLoading(false);
