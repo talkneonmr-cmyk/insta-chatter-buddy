@@ -165,11 +165,6 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
 
       setGeneratedImage(data.thumbnail.thumbnail_url);
       toast.success("🔥 Pro YouTube thumbnail created!");
-      
-      // Increment usage
-      await supabase.functions.invoke("increment-usage", {
-        body: { usageType: "ai_thumbnails" },
-      });
     } catch (error: any) {
       console.error("Generation error:", error);
       toast.error(error.message || "Failed to generate thumbnail");

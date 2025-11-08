@@ -48,11 +48,6 @@ export default function TrendAnalyzer() {
       if (data.analysis) {
         setAnalysis(data.analysis);
         
-        // Increment usage
-        await supabase.functions.invoke('increment-usage', {
-          body: { usageType: 'ai_trend_analysis' }
-        });
-        
         toast({
           title: "Trend Analysis Complete!",
           description: "Your trend analysis is ready.",
