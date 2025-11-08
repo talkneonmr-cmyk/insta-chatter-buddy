@@ -194,11 +194,6 @@ const VideoUploadForm = () => {
 
       if (insertError) throw insertError;
 
-      // Increment usage
-      await supabase.functions.invoke('increment-usage', {
-        body: { usageType: 'video_uploads' }
-      });
-
       toast({
         title: "Success",
         description: "Video scheduled successfully!",

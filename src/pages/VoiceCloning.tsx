@@ -61,11 +61,6 @@ const VoiceCloning = () => {
 
       setGeneratedAudio(data.audioUrl);
       
-      // Increment usage
-      await supabase.functions.invoke('increment-usage', {
-        body: { usageType: 'ai_voice_cloning' }
-      });
-      
       toast({
         title: "Success!",
         description: "Voice cloned successfully",

@@ -53,11 +53,6 @@ const TextSummarizer = () => {
 
       setSummary(data.summary);
       
-      // Increment usage
-      await supabase.functions.invoke('increment-usage', {
-        body: { usageType: 'ai_text_summary' }
-      });
-      
       toast({
         title: "Summary complete!",
         description: "Your text has been summarized"
