@@ -297,7 +297,7 @@ export default function Admin() {
     try {
       setUpdating(userId);
 
-      // Set limits based on plan
+      // Set limits based on plan - these match the limits in check-usage-limit
       const limits = userPlan === 'pro' ? {
         video_uploads_count: 50,
         ai_captions_count: 30,
@@ -316,6 +316,9 @@ export default function Admin() {
         ai_text_summarizer_count: 30,
         ai_shorts_packages_count: 5,
         youtube_operations_count: 100,
+        youtube_channels_count: 5,
+        updated_at: new Date().toISOString(),
+        // Keep reset_at as is - don't update it to prevent automatic resets
       } : {
         video_uploads_count: 5,
         ai_captions_count: 2,
@@ -334,6 +337,9 @@ export default function Admin() {
         ai_text_summarizer_count: 2,
         ai_shorts_packages_count: 1,
         youtube_operations_count: 10,
+        youtube_channels_count: 1,
+        updated_at: new Date().toISOString(),
+        // Keep reset_at as is - don't update it to prevent automatic resets
       };
 
       const { error } = await supabase
@@ -341,19 +347,22 @@ export default function Admin() {
         .update(limits)
         .eq("user_id", userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error maxing out usage:", error);
+        throw error;
+      }
 
       toast({
         title: "Success 🔥",
-        description: `All limits set to MAXIMUM for ${userPlan} plan - Can now test limit behavior!`,
+        description: `All ${Object.keys(limits).length - 1} usage limits set to MAXIMUM for ${userPlan} plan!`,
       });
 
-      fetchUsers();
-    } catch (error) {
+      await fetchUsers();
+    } catch (error: any) {
       console.error("Error maxing out usage:", error);
       toast({
         title: "Error",
-        description: "Failed to set usage limits to max",
+        description: error.message || "Failed to set usage limits to max",
         variant: "destructive",
       });
     } finally {
