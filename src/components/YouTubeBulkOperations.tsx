@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Loader2, Play, Eye, Search } from "lucide-react";
+import { Loader2, Play, Eye, Search, Youtube } from "lucide-react";
 
 interface Video {
   id: string;
@@ -29,6 +29,7 @@ const YouTubeBulkOperations = () => {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
+  const [noAccount, setNoAccount] = useState(false);
 
   // Operation states
   const [operationType, setOperationType] = useState<string>("findReplace");
@@ -47,15 +48,26 @@ const YouTubeBulkOperations = () => {
 
   const fetchVideos = async () => {
     setLoading(true);
+    setNoAccount(false);
     try {
       const { data, error } = await supabase.functions.invoke('youtube-list-videos', {
         body: { maxResults: 50 }
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes('YouTube account not found')) {
+          setNoAccount(true);
+          return;
+        }
+        throw error;
+      }
       setVideos(data.videos || []);
     } catch (error: any) {
-      toast.error("Failed to fetch videos: " + error.message);
+      if (error.message?.includes('YouTube account not found')) {
+        setNoAccount(true);
+      } else {
+        toast.error("Failed to fetch videos: " + error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -182,6 +194,27 @@ const YouTubeBulkOperations = () => {
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
+    );
+  }
+
+  if (noAccount) {
+    return (
+      <Card className="p-8 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="p-4 bg-red-500/10 rounded-full">
+            <Youtube className="h-12 w-12 text-red-500" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">YouTube Account Not Connected</h3>
+            <p className="text-muted-foreground mb-4">
+              Please connect your YouTube account using the section above to access Bulk Operations.
+            </p>
+            <Button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              Go to Account Connection
+            </Button>
+          </div>
+        </div>
+      </Card>
     );
   }
 
