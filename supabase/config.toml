@@ -114,3 +114,6 @@ verify_jwt = true
 
 [functions.create-shorts-package]
 verify_jwt = true
+
+[functions.youtube-bulk-update]
+verify_jwt = true

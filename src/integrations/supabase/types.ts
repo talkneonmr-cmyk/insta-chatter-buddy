@@ -61,6 +61,39 @@ export type Database = {
           },
         ]
       }
+      bulk_operation_logs: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          failure_count: number
+          id: string
+          operation_type: string
+          success_count: number
+          user_id: string
+          videos_affected: number
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          failure_count?: number
+          id?: string
+          operation_type: string
+          success_count?: number
+          user_id: string
+          videos_affected: number
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          failure_count?: number
+          id?: string
+          operation_type?: string
+          success_count?: number
+          user_id?: string
+          videos_affected?: number
+        }
+        Relationships: []
+      }
       caption_templates: {
         Row: {
           category: string

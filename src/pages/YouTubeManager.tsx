@@ -11,6 +11,7 @@ import UploadHistory from "@/components/UploadHistory";
 import YouTubeChannelAnalytics from "@/components/YouTubeChannelAnalytics";
 import YouTubeVideoManager from "@/components/YouTubeVideoManager";
 import YouTubePlaylistManager from "@/components/YouTubePlaylistManager";
+import YouTubeBulkOperations from "@/components/YouTubeBulkOperations";
 
 const YouTubeManager = () => {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ const YouTubeManager = () => {
         {/* Main Content */}
         <Card className="p-3 md:p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-6 h-auto gap-1">
+            <TabsList className="grid w-full grid-cols-7 h-auto gap-1">
               <TabsTrigger value="upload" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">
                 <span className="truncate">Upload</span>
               </TabsTrigger>
@@ -56,6 +57,10 @@ const YouTubeManager = () => {
               </TabsTrigger>
               <TabsTrigger value="history" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">
                 <span className="truncate">History</span>
+              </TabsTrigger>
+              <TabsTrigger value="bulk" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">
+                <span className="truncate hidden xs:inline">Bulk Ops</span>
+                <span className="truncate xs:hidden">Bulk</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 py-2 min-w-0">
                 <span className="truncate hidden xs:inline">Analytics</span>
@@ -80,6 +85,10 @@ const YouTubeManager = () => {
 
             <TabsContent value="history" className="mt-4 md:mt-6">
               <UploadHistory />
+            </TabsContent>
+
+            <TabsContent value="bulk" className="mt-4 md:mt-6">
+              <YouTubeBulkOperations />
             </TabsContent>
 
             <TabsContent value="analytics" className="mt-4 md:mt-6">
