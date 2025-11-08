@@ -160,8 +160,17 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
         },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error) {
+        console.error("Supabase function error:", error);
+        toast.error(error.message || "Failed to generate thumbnail");
+        return;
+      }
+      
+      if (data?.error) {
+        console.error("Backend error:", data.error);
+        toast.error(data.error);
+        return;
+      }
 
       setGeneratedImage(data.thumbnail.thumbnail_url);
       toast.success("🔥 Pro YouTube thumbnail created!");

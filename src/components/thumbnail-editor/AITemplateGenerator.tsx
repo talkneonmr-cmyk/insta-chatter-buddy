@@ -40,8 +40,17 @@ CRITICAL REQUIREMENTS:
         },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error) {
+        console.error("Supabase function error:", error);
+        toast.error(error.message || "Failed to generate");
+        return;
+      }
+      
+      if (data?.error) {
+        console.error("Backend error:", data.error);
+        toast.error(data.error);
+        return;
+      }
 
       const imageUrl = data.thumbnail.thumbnail_url;
       setGeneratedImage(imageUrl);
