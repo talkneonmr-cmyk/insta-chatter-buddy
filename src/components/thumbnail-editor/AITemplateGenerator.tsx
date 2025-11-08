@@ -2,114 +2,139 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Loader2, Wand2 } from "lucide-react";
+import { Sparkles, Loader2, Wand2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export const AITemplateGenerator = () => {
+interface AITemplateGeneratorProps {
+  onImageGenerated?: (imageUrl: string) => void;
+}
+
+export const AITemplateGenerator = ({ onImageGenerated }: AITemplateGeneratorProps) => {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
-  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
-
-  const quickPrompts = [
-    "Dramatic gaming setup with RGB lights, 16:9 aspect ratio",
-    "Tech product showcase on gradient background with floating elements",
-    "Fitness motivation with energetic colors and dynamic pose",
-    "Cooking scene with food ingredients arranged artistically",
-    "Educational content with clean minimalist design and icons",
-  ];
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
   const generateWithAI = async (promptText: string) => {
     setLoading(true);
+    setGeneratedImage(null);
+    
     try {
+      const enhancedPrompt = `${promptText}
+
+CRITICAL REQUIREMENTS:
+- Ultra high resolution, 1280x720 pixels perfect for YouTube thumbnail
+- Professional studio lighting with dramatic shadows
+- High contrast, vibrant saturated colors
+- Sharp focus on main subject
+- Cinematic composition
+- Text-ready space for overlay
+- Professional thumbnail quality
+- Eye-catching and clickable design`;
+
       const { data, error } = await supabase.functions.invoke("generate-thumbnail", {
         body: {
-          prompt: promptText + " Ultra high quality YouTube thumbnail, professional, eye-catching",
+          prompt: enhancedPrompt,
           style: "professional",
-          title: "AI Generated Template",
+          title: "AI Generated Pro Thumbnail",
         },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      setGeneratedImages((prev) => [data.thumbnail.thumbnail_url, ...prev].slice(0, 6));
-      toast.success("Template generated!");
+      const imageUrl = data.thumbnail.thumbnail_url;
+      setGeneratedImage(imageUrl);
+      
+      if (onImageGenerated) {
+        onImageGenerated(imageUrl);
+      }
+      
+      toast.success("Professional thumbnail generated!");
     } catch (error: any) {
+      console.error("Generation error:", error);
       toast.error(error.message || "Failed to generate");
     } finally {
       setLoading(false);
     }
   };
 
+  const downloadImage = () => {
+    if (!generatedImage) return;
+    
+    const link = document.createElement("a");
+    link.download = `thumbnail-${Date.now()}.png`;
+    link.href = generatedImage;
+    link.click();
+    toast.success("Downloaded!");
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5" />
-          AI Template Generator
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Textarea
-          placeholder="Describe your thumbnail idea..."
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          rows={3}
-        />
-        <Button
-          onClick={() => generateWithAI(prompt)}
-          disabled={loading || !prompt.trim()}
-          className="w-full"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Wand2 className="h-4 w-4 mr-2" />
-              Generate Template
-            </>
-          )}
-        </Button>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            Custom AI Generation
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Describe your perfect thumbnail in detail
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Textarea
+            placeholder="Example: Person with shocked expression holding phone, bright yellow background, dramatic lighting, money flying through air, high energy viral style..."
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows={4}
+            className="resize-none"
+          />
+          <Button
+            onClick={() => generateWithAI(prompt)}
+            disabled={loading || !prompt.trim()}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                Creating Magic...
+              </>
+            ) : (
+              <>
+                <Wand2 className="h-5 w-5 mr-2" />
+                Generate Pro Thumbnail
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
 
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Quick Prompts:</p>
-          <div className="flex flex-wrap gap-2">
-            {quickPrompts.map((qp, idx) => (
-              <Button
-                key={idx}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setPrompt(qp);
-                  generateWithAI(qp);
-                }}
-                disabled={loading}
-                className="text-xs"
-              >
-                {qp.split(",")[0]}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {generatedImages.length > 0 && (
-          <div className="grid grid-cols-2 gap-2">
-            {generatedImages.map((img, idx) => (
+      {generatedImage && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Generated Result</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="relative rounded-lg overflow-hidden border-2 border-primary/20">
               <img
-                key={idx}
-                src={img}
-                alt={`Generated ${idx}`}
-                className="w-full rounded-lg border border-border cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => window.open(img, "_blank")}
+                src={generatedImage}
+                alt="Generated thumbnail"
+                className="w-full h-auto"
               />
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button onClick={downloadImage} variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+              <Button onClick={() => window.open(generatedImage, "_blank")}>
+                Open Full Size
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
