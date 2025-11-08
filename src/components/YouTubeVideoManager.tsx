@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Search, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Search, Edit, Trash2, Copy } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -146,9 +146,12 @@ const YouTubeVideoManager = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open(`https://youtube.com/watch?v=${video.id}`, '_blank')}
+                  onClick={() => {
+                    navigator.clipboard.writeText(`https://youtube.com/watch?v=${video.id}`);
+                    toast.success("Video link copied to clipboard");
+                  }}
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <Copy className="h-4 w-4" />
                 </Button>
               </div>
             </div>

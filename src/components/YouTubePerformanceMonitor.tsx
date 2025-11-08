@@ -20,7 +20,8 @@ import {
   Youtube,
   RefreshCw,
   Zap,
-  Settings
+  Settings,
+  Copy
 } from "lucide-react";
 import AutoPilotSettings from "./AutoPilotSettings";
 
@@ -378,9 +379,12 @@ const YouTubePerformanceMonitor = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://youtube.com/watch?v=${video.videoId}`);
+                      toast.success("Video link copied to clipboard");
+                    }}
                   >
-                    View
+                    <Copy className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -444,9 +448,12 @@ const YouTubePerformanceMonitor = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://youtube.com/watch?v=${video.videoId}`);
+                      toast.success("Video link copied to clipboard");
+                    }}
                   >
-                    View
+                    <Copy className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

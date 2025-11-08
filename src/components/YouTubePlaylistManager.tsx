@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, List, ExternalLink } from "lucide-react";
+import { Plus, List, Copy } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -127,9 +127,12 @@ const YouTubePlaylistManager = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open(`https://youtube.com/playlist?list=${playlist.id}`, '_blank')}
+                onClick={() => {
+                  navigator.clipboard.writeText(`https://youtube.com/playlist?list=${playlist.id}`);
+                  toast.success("Playlist link copied to clipboard");
+                }}
               >
-                <ExternalLink className="h-4 w-4" />
+                <Copy className="h-4 w-4" />
               </Button>
             </div>
           </Card>
