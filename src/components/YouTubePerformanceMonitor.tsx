@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { 
   Loader2, 
@@ -17,8 +18,11 @@ import {
   CheckCircle,
   Clock,
   Youtube,
-  RefreshCw
+  RefreshCw,
+  Zap,
+  Settings
 } from "lucide-react";
+import AutoPilotSettings from "./AutoPilotSettings";
 
 interface VideoPerformance {
   videoId: string;
@@ -53,9 +57,51 @@ const YouTubePerformanceMonitor = () => {
   const [optimizations, setOptimizations] = useState<Optimization[]>([]);
   const [showOptimizations, setShowOptimizations] = useState(false);
 
+  const [autoPilotEnabled, setAutoPilotEnabled] = useState(false);
+  const [runningAutoPilot, setRunningAutoPilot] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
   useEffect(() => {
     analyzePerformance();
+    loadAutoPilotSettings();
   }, []);
+
+  const loadAutoPilotSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('auto_pilot_settings')
+        .select('enabled')
+        .single();
+
+      if (data) {
+        setAutoPilotEnabled(data.enabled);
+      }
+    } catch (error) {
+      // Settings don't exist yet, that's okay
+    }
+  };
+
+  const runAutoPilot = async () => {
+    setRunningAutoPilot(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('run-auto-pilot', {
+        body: {}
+      });
+
+      if (error) throw error;
+
+      if (data.videosProcessed > 0) {
+        toast.success(`Auto-pilot processed ${data.videosProcessed} videos!`);
+        await analyzePerformance(); // Refresh data
+      } else {
+        toast.info(data.message || "No videos to process");
+      }
+    } catch (error: any) {
+      toast.error("Auto-pilot failed: " + error.message);
+    } finally {
+      setRunningAutoPilot(false);
+    }
+  };
 
   const analyzePerformance = async () => {
     setLoading(true);
@@ -179,15 +225,57 @@ const YouTubePerformanceMonitor = () => {
           <h2 className="text-2xl font-bold">Performance Monitor</h2>
           <p className="text-muted-foreground">AI-powered video performance analysis</p>
         </div>
-        <Button onClick={analyzePerformance} disabled={analyzing}>
-          {analyzing ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
-          )}
-          Refresh Analysis
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowSettings(true)}>
+            <Settings className="h-4 w-4 mr-2" />
+            Auto-Pilot Settings
+          </Button>
+          <Button onClick={analyzePerformance} disabled={analyzing}>
+            {analyzing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Refresh Analysis
+          </Button>
+        </div>
       </div>
+
+      {/* Auto-Pilot Status Bar */}
+      {autoPilotEnabled && (
+        <Card className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/20 rounded-full">
+                <Zap className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold">Auto-Pilot Enabled</p>
+                <p className="text-sm text-muted-foreground">
+                  Automatically optimizing underperforming videos
+                </p>
+              </div>
+            </div>
+            <Button 
+              onClick={runAutoPilot} 
+              disabled={runningAutoPilot}
+              variant="outline"
+            >
+              {runningAutoPilot ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Running...
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4 mr-2" />
+                  Run Now
+                </>
+              )}
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Dashboard Overview */}
       <div className="grid md:grid-cols-3 gap-4">
@@ -435,6 +523,13 @@ const YouTubePerformanceMonitor = () => {
           </div>
         </Card>
       )}
+
+      {/* Settings Dialog */}
+      <AutoPilotSettings 
+        open={showSettings}
+        onOpenChange={setShowSettings}
+        onSettingsUpdate={loadAutoPilotSettings}
+      />
     </div>
   );
 };

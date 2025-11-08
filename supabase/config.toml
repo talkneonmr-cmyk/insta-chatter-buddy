@@ -123,3 +123,6 @@ verify_jwt = true
 
 [functions.auto-optimize-video]
 verify_jwt = true
+
+[functions.run-auto-pilot]
+verify_jwt = true

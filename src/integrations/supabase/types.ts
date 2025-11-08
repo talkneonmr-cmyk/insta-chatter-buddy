@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      auto_pilot_settings: {
+        Row: {
+          auto_apply: boolean
+          check_frequency_hours: number
+          created_at: string | null
+          enabled: boolean
+          id: string
+          last_run_at: string | null
+          performance_threshold: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_apply?: boolean
+          check_frequency_hours?: number
+          created_at?: string | null
+          enabled?: boolean
+          id?: string
+          last_run_at?: string | null
+          performance_threshold?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_apply?: boolean
+          check_frequency_hours?: number
+          created_at?: string | null
+          enabled?: boolean
+          id?: string
+          last_run_at?: string | null
+          performance_threshold?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       automation_rules: {
         Row: {
           created_at: string | null
