@@ -189,15 +189,21 @@ Provide optimized versions with reasoning for each change.`
 
     // Apply changes if requested
     if (applyChanges) {
-      const snippet = { ...video.snippet };
+      // Only include updatable fields to avoid YouTube API errors
+      const updatedSnippet: any = {
+        title: video.snippet.title,
+        description: video.snippet.description,
+        tags: video.snippet.tags || [],
+        categoryId: video.snippet.categoryId, // Required by YouTube API
+      };
       
       for (const opt of optimizations) {
         if (opt.type === 'title') {
-          snippet.title = opt.optimized;
+          updatedSnippet.title = opt.optimized;
         } else if (opt.type === 'description') {
-          snippet.description = opt.optimized;
+          updatedSnippet.description = opt.optimized;
         } else if (opt.type === 'tags') {
-          snippet.tags = opt.optimized.split(',').map((t: string) => t.trim());
+          updatedSnippet.tags = opt.optimized.split(',').map((t: string) => t.trim());
         }
       }
 
@@ -211,13 +217,15 @@ Provide optimized versions with reasoning for each change.`
           },
           body: JSON.stringify({
             id: videoId,
-            snippet,
+            snippet: updatedSnippet,
           }),
         }
       );
 
       if (!updateResponse.ok) {
-        throw new Error('Failed to apply optimizations to video');
+        const errorData = await updateResponse.json();
+        console.error('YouTube API error:', JSON.stringify(errorData, null, 2));
+        throw new Error(`Failed to apply optimizations: ${errorData.error?.message || 'Unknown error'}`);
       }
 
       // Update performance tracking
