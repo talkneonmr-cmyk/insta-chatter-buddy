@@ -269,22 +269,15 @@ export default function Admin() {
     try {
       setUpdating(userId);
 
-      const { error } = await supabase
-        .from("usage_tracking")
-        .update({
-          video_uploads_count: 0,
-          ai_captions_count: 0,
-          youtube_channels_count: 0,
-          ai_music_count: 0,
-          reset_at: new Date().toISOString(),
-        })
-        .eq("user_id", userId);
+      const { data, error } = await supabase.rpc('manual_reset_user_usage', {
+        target_user_id: userId
+      });
 
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Usage limits reset successfully",
+        title: "Success ✅",
+        description: "All usage limits reset to 0 - User can now test all features!",
       });
 
       fetchUsers();
