@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw, Users, Activity, Mail, CheckCircle, XCircle, Key, Copy, Trash2 } from "lucide-react";
+import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw, Users, Activity, Mail, CheckCircle, XCircle, Key, Copy, Trash2, Gauge } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ActivityLogs from "@/components/ActivityLogs";
@@ -286,6 +286,74 @@ export default function Admin() {
       toast({
         title: "Error",
         description: "Failed to reset usage limits",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const maxOutUsage = async (userId: string, userPlan: string) => {
+    try {
+      setUpdating(userId);
+
+      // Set limits based on plan
+      const limits = userPlan === 'pro' ? {
+        video_uploads_count: 50,
+        ai_captions_count: 30,
+        ai_music_count: 20,
+        ai_thumbnails_count: 10,
+        ai_scripts_count: 25,
+        ai_trends_count: 15,
+        ai_seo_count: 20,
+        ai_hashtags_count: 30,
+        ai_speech_to_text_count: 15,
+        ai_text_to_speech_count: 15,
+        ai_voice_cloning_count: 10,
+        ai_dubbing_count: 10,
+        ai_background_removal_count: 25,
+        ai_image_enhancement_count: 25,
+        ai_text_summarizer_count: 30,
+        ai_shorts_packages_count: 5,
+        youtube_operations_count: 100,
+      } : {
+        video_uploads_count: 5,
+        ai_captions_count: 2,
+        ai_music_count: 2,
+        ai_thumbnails_count: 2,
+        ai_scripts_count: 2,
+        ai_trends_count: 2,
+        ai_seo_count: 2,
+        ai_hashtags_count: 2,
+        ai_speech_to_text_count: 2,
+        ai_text_to_speech_count: 2,
+        ai_voice_cloning_count: 2,
+        ai_dubbing_count: 2,
+        ai_background_removal_count: 2,
+        ai_image_enhancement_count: 2,
+        ai_text_summarizer_count: 2,
+        ai_shorts_packages_count: 1,
+        youtube_operations_count: 10,
+      };
+
+      const { error } = await supabase
+        .from("usage_tracking")
+        .update(limits)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success 🔥",
+        description: `All limits set to MAXIMUM for ${userPlan} plan - Can now test limit behavior!`,
+      });
+
+      fetchUsers();
+    } catch (error) {
+      console.error("Error maxing out usage:", error);
+      toast({
+        title: "Error",
+        description: "Failed to set usage limits to max",
         variant: "destructive",
       });
     } finally {
@@ -726,12 +794,26 @@ export default function Admin() {
                                   variant="outline"
                                   onClick={() => resetUsage(user.id)}
                                   disabled={updating === user.id}
-                                  title="Reset usage limits"
+                                  title="Reset usage limits to 0"
                                 >
                                   {updating === user.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
                                     <RotateCcw className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-red-500 text-red-500 hover:bg-red-500/10"
+                                  onClick={() => maxOutUsage(user.id, user.plan)}
+                                  disabled={updating === user.id}
+                                  title="Set ALL usage to MAXIMUM (for testing limits)"
+                                >
+                                  {updating === user.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Gauge className="h-4 w-4" />
                                   )}
                                 </Button>
                                 <Button
