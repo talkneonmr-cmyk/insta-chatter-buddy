@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
 
     if (!limitCheck?.canUse) {
       return new Response(
-        JSON.stringify({ error: 'Daily limit reached. Free: 2/day, Pro: 10/day. Upgrade for more!' }),
+        JSON.stringify({ error: limitCheck?.message || 'Hey there! Your daily limit is reached. Please check back tomorrow!' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
