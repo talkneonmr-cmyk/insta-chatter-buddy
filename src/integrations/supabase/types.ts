@@ -603,6 +603,42 @@ export type Database = {
         }
         Relationships: []
       }
+      optimization_suggestions: {
+        Row: {
+          ai_reasoning: string | null
+          created_at: string | null
+          id: string
+          original_content: string | null
+          status: string
+          suggested_content: string
+          suggestion_type: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          ai_reasoning?: string | null
+          created_at?: string | null
+          id?: string
+          original_content?: string | null
+          status?: string
+          suggested_content: string
+          suggestion_type: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          ai_reasoning?: string | null
+          created_at?: string | null
+          id?: string
+          original_content?: string | null
+          status?: string
+          suggested_content?: string
+          suggestion_type?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -1016,6 +1052,51 @@ export type Database = {
           video_title?: string | null
           video_url?: string
           viral_moments?: Json
+        }
+        Relationships: []
+      }
+      video_performance_tracking: {
+        Row: {
+          comments: number
+          created_at: string | null
+          id: string
+          last_checked: string
+          likes: number
+          optimization_applied: boolean
+          optimization_suggested: boolean
+          performance_score: number
+          user_id: string
+          video_id: string
+          video_title: string
+          views: number
+        }
+        Insert: {
+          comments?: number
+          created_at?: string | null
+          id?: string
+          last_checked?: string
+          likes?: number
+          optimization_applied?: boolean
+          optimization_suggested?: boolean
+          performance_score?: number
+          user_id: string
+          video_id: string
+          video_title: string
+          views?: number
+        }
+        Update: {
+          comments?: number
+          created_at?: string | null
+          id?: string
+          last_checked?: string
+          likes?: number
+          optimization_applied?: boolean
+          optimization_suggested?: boolean
+          performance_score?: number
+          user_id?: string
+          video_id?: string
+          video_title?: string
+          views?: number
         }
         Relationships: []
       }
