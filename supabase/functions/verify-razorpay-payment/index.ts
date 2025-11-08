@@ -124,10 +124,10 @@ Deno.serve(async (req) => {
               ai_text_to_speech_count: 0,
               ai_voice_cloning_count: 0,
               ai_dubbing_count: 0,
-              ai_voice_isolation_count: 0,
               ai_background_removal_count: 0,
               ai_image_enhancement_count: 0,
               ai_text_summarizer_count: 0,
+              ai_shorts_packages_count: 0,
               reset_at: now.toISOString(),
             })
             .eq('user_id', user.id);

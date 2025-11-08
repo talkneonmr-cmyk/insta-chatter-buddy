@@ -113,6 +113,9 @@ Deno.serve(async (req) => {
       case 'ai_background_removal':
         updateData = { ai_background_removal_count: usage.ai_background_removal_count + 1 };
         break;
+      case 'ai_voice_isolation':
+        throw new Error('Voice isolation feature is not available');
+        break;
       case 'ai_image_enhancement':
         updateData = { ai_image_enhancement_count: usage.ai_image_enhancement_count + 1 };
         break;

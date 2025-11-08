@@ -904,7 +904,6 @@ export type Database = {
           ai_thumbnails_count: number
           ai_trends_count: number | null
           ai_voice_cloning_count: number
-          ai_voice_isolation_count: number
           created_at: string
           id: string
           reset_at: string
@@ -930,7 +929,6 @@ export type Database = {
           ai_thumbnails_count?: number
           ai_trends_count?: number | null
           ai_voice_cloning_count?: number
-          ai_voice_isolation_count?: number
           created_at?: string
           id?: string
           reset_at?: string
@@ -956,7 +954,6 @@ export type Database = {
           ai_thumbnails_count?: number
           ai_trends_count?: number | null
           ai_voice_cloning_count?: number
-          ai_voice_isolation_count?: number
           created_at?: string
           id?: string
           reset_at?: string

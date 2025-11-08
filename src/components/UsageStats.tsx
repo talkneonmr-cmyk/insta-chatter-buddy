@@ -22,10 +22,10 @@ interface UsageData {
   ai_text_to_speech_count: number;
   ai_voice_cloning_count: number;
   ai_dubbing_count: number;
-  ai_voice_isolation_count: number;
   ai_background_removal_count: number;
   ai_image_enhancement_count: number;
   ai_text_summarizer_count: number;
+  ai_shorts_packages_count: number;
 }
 
 const PLAN_LIMITS = {
@@ -44,10 +44,10 @@ const PLAN_LIMITS = {
     ai_text_to_speech: 4,
     ai_voice_cloning: 4,
     ai_dubbing: 4,
-    ai_voice_isolation: 4,
     ai_background_removal: 4,
     ai_image_enhancement: 4,
     ai_text_summarizer: 4,
+    ai_shorts_packages: 4,
   },
   pro: {
     video_uploads: -1,
@@ -64,10 +64,10 @@ const PLAN_LIMITS = {
     ai_text_to_speech: 20,
     ai_voice_cloning: 20,
     ai_dubbing: 20,
-    ai_voice_isolation: 20,
     ai_background_removal: 20,
     ai_image_enhancement: 20,
     ai_text_summarizer: 20,
+    ai_shorts_packages: 20,
   },
 };
 
@@ -108,7 +108,7 @@ export default function UsageStats() {
 
       const { data, error } = await supabase
         .from("usage_tracking")
-        .select("video_uploads_count, ai_captions_count, youtube_channels_count, youtube_operations_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count, ai_speech_to_text_count, ai_text_to_speech_count, ai_voice_cloning_count, ai_dubbing_count, ai_voice_isolation_count, ai_background_removal_count, ai_image_enhancement_count, ai_text_summarizer_count")
+        .select("video_uploads_count, ai_captions_count, youtube_channels_count, youtube_operations_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count, ai_speech_to_text_count, ai_text_to_speech_count, ai_voice_cloning_count, ai_dubbing_count, ai_background_removal_count, ai_image_enhancement_count, ai_text_summarizer_count, ai_shorts_packages_count")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -142,10 +142,10 @@ export default function UsageStats() {
           ai_text_to_speech_count: 0,
           ai_voice_cloning_count: 0,
           ai_dubbing_count: 0,
-          ai_voice_isolation_count: 0,
           ai_background_removal_count: 0,
           ai_image_enhancement_count: 0,
           ai_text_summarizer_count: 0,
+          ai_shorts_packages_count: 0,
         });
         return;
       }
@@ -165,10 +165,10 @@ export default function UsageStats() {
         ai_text_to_speech_count: data.ai_text_to_speech_count || 0,
         ai_voice_cloning_count: data.ai_voice_cloning_count || 0,
         ai_dubbing_count: data.ai_dubbing_count || 0,
-        ai_voice_isolation_count: data.ai_voice_isolation_count || 0,
         ai_background_removal_count: data.ai_background_removal_count || 0,
         ai_image_enhancement_count: data.ai_image_enhancement_count || 0,
         ai_text_summarizer_count: data.ai_text_summarizer_count || 0,
+        ai_shorts_packages_count: data.ai_shorts_packages_count || 0,
       });
     } catch (error) {
       console.error("Error in fetchUsage:", error);
@@ -360,13 +360,6 @@ export default function UsageStats() {
           color="text-amber-500"
         />
         <UsageItem
-          icon={AudioLines}
-          label="AI Voice Isolation (Daily)"
-          used={usage?.ai_voice_isolation_count || 0}
-          limit={limits.ai_voice_isolation}
-          color="text-rose-500"
-        />
-        <UsageItem
           icon={Eraser}
           label="AI Background Removal (Daily)"
           used={usage?.ai_background_removal_count || 0}
@@ -386,6 +379,13 @@ export default function UsageStats() {
           used={usage?.ai_text_summarizer_count || 0}
           limit={limits.ai_text_summarizer}
           color="text-sky-500"
+        />
+        <UsageItem
+          icon={Sparkles}
+          label="AI Shorts Packages (Daily)"
+          used={usage?.ai_shorts_packages_count || 0}
+          limit={limits.ai_shorts_packages}
+          color="text-purple-500"
         />
 
         {plan === "free" && (

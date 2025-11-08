@@ -20,10 +20,10 @@ interface UsageLimits {
   aiTextToSpeech: number;
   aiVoiceCloning: number;
   aiDubbing: number;
-  aiVoiceIsolation: number;
   aiBackgroundRemoval: number;
   aiImageEnhancement: number;
   aiTextSummarizer: number;
+  aiShortsPackages: number;
 }
 
 const PLAN_LIMITS = {
@@ -42,10 +42,10 @@ const PLAN_LIMITS = {
     aiTextToSpeech: 4,
     aiVoiceCloning: 4,
     aiDubbing: 4,
-    aiVoiceIsolation: 4,
     aiBackgroundRemoval: 4,
     aiImageEnhancement: 4,
     aiTextSummarizer: 4,
+    aiShortsPackages: 4,
   },
   pro: {
     videoUploads: -1,
@@ -62,10 +62,10 @@ const PLAN_LIMITS = {
     aiTextToSpeech: 20,
     aiVoiceCloning: 20,
     aiDubbing: 20,
-    aiVoiceIsolation: 20,
     aiBackgroundRemoval: 20,
     aiImageEnhancement: 20,
     aiTextSummarizer: 20,
+    aiShortsPackages: 20,
   },
 };
 
@@ -170,10 +170,10 @@ Deno.serve(async (req) => {
           ai_text_to_speech_count: 0,
           ai_voice_cloning_count: 0,
           ai_dubbing_count: 0,
-          ai_voice_isolation_count: 0,
           ai_background_removal_count: 0,
           ai_image_enhancement_count: 0,
           ai_text_summarizer_count: 0,
+          ai_shorts_packages_count: 0,
           youtube_operations_count: 0,
           reset_at: now.toISOString(),
         })
@@ -327,14 +327,6 @@ Deno.serve(async (req) => {
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} dubbing generations remaining today`
           : `You've reached your daily limit of ${limit} dubbing generations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
-        break;
-      case 'ai_voice_isolation':
-        currentUsage = usage?.ai_voice_isolation_count || 0;
-        limit = limits.aiVoiceIsolation;
-        canUse = limit === -1 || currentUsage < limit;
-        message = canUse 
-          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} voice isolation processes remaining today`
-          : `You've reached your daily limit of ${limit} voice isolation processes. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
         break;
       case 'ai_background_removal':
         currentUsage = usage?.ai_background_removal_count || 0;
