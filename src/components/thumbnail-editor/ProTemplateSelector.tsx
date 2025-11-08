@@ -70,8 +70,34 @@ export const ProTemplateSelector = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [customPrompt, setCustomPrompt] = useState("");
   const [thumbnailText, setThumbnailText] = useState("");
+  const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+
+  const POPULAR_EMOJIS = [
+    { emoji: "🔥", label: "Fire" },
+    { emoji: "😱", label: "Shocked" },
+    { emoji: "💯", label: "100" },
+    { emoji: "⚡", label: "Lightning" },
+    { emoji: "💰", label: "Money" },
+    { emoji: "🎯", label: "Target" },
+    { emoji: "🚨", label: "Alert" },
+    { emoji: "💪", label: "Strong" },
+    { emoji: "🤯", label: "Mind Blown" },
+    { emoji: "😍", label: "Love" },
+    { emoji: "🎉", label: "Party" },
+    { emoji: "⭐", label: "Star" },
+    { emoji: "👑", label: "Crown" },
+    { emoji: "💎", label: "Diamond" },
+    { emoji: "🏆", label: "Trophy" },
+    { emoji: "❤️", label: "Heart" },
+  ];
+
+  const toggleEmoji = (emoji: string) => {
+    setSelectedEmojis((prev) =>
+      prev.includes(emoji) ? prev.filter((e) => e !== emoji) : [...prev, emoji]
+    );
+  };
 
   const generateThumbnail = async () => {
     if (!selectedTemplate || !customPrompt.trim()) {
@@ -100,6 +126,19 @@ TEXT OVERLAY REQUIREMENTS:
 - Add subtle shadow or glow effect behind text
 - Ensure text has perfect contrast against background
 - Text should be the MAIN focal point`;
+      }
+
+      // Add emoji instructions if user selected emojis
+      if (selectedEmojis.length > 0) {
+        finalPrompt += `
+
+EMOJI OVERLAY REQUIREMENTS:
+- Include these emojis prominently in the thumbnail: ${selectedEmojis.join(" ")}
+- Make emojis LARGE and clearly visible (10-15% of thumbnail size each)
+- Position emojis strategically to enhance emotion and draw attention
+- Use 3D rendered emoji style with slight shadow for depth
+- Place emojis near corners or alongside main subject
+- Ensure emojis complement the overall composition`;
       }
 
       finalPrompt += `
@@ -152,6 +191,7 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
     setGeneratedImage(null);
     setCustomPrompt("");
     setThumbnailText("");
+    setSelectedEmojis([]);
     setSelectedTemplate(null);
   };
 
@@ -238,12 +278,53 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
               </p>
             </div>
 
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Add Emojis (Optional)</label>
+              <div className="grid grid-cols-8 gap-2">
+                {POPULAR_EMOJIS.map((item) => (
+                  <button
+                    key={item.emoji}
+                    type="button"
+                    onClick={() => toggleEmoji(item.emoji)}
+                    className={`text-3xl p-3 rounded-lg border-2 transition-all hover:scale-110 ${
+                      selectedEmojis.includes(item.emoji)
+                        ? "border-primary bg-primary/10 scale-105"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                    title={item.label}
+                  >
+                    {item.emoji}
+                  </button>
+                ))}
+              </div>
+              {selectedEmojis.length > 0 && (
+                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">Selected:</span>
+                  <div className="flex gap-2 text-2xl">
+                    {selectedEmojis.map((emoji) => (
+                      <span key={emoji}>{emoji}</span>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedEmojis([])}
+                    className="ml-auto text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Clear all
+                  </button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Emojis will be rendered large and prominently for maximum engagement
+              </p>
+            </div>
+
             <div className="bg-muted/50 p-4 rounded-lg space-y-2">
               <p className="text-sm font-medium">💡 Pro Tips:</p>
               <ul className="text-xs text-muted-foreground space-y-1">
                 <li>• Describe the main visual you want</li>
                 <li>• Add text for viral titles like MrBeast</li>
-                <li>• Keep descriptions simple and clear</li>
+                <li>• Pick 1-3 emojis that match your emotion</li>
                 <li>• Text works best with 2-6 words in ALL CAPS</li>
               </ul>
             </div>
