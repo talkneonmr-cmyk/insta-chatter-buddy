@@ -5,12 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProTemplateSelector } from "@/components/thumbnail-editor/ProTemplateSelector";
 import { BackgroundRemover } from "@/components/thumbnail-editor/BackgroundRemover";
 import ThumbnailHistory from "@/components/ThumbnailHistory";
+import SubscriptionGuard from "@/components/SubscriptionGuard";
 
 const ThumbnailGenerator = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-4 md:p-8">
+    <SubscriptionGuard featureName="AI Thumbnail Generator">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-4 md:p-8">
       <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Dashboard
@@ -73,6 +75,7 @@ const ThumbnailGenerator = () => {
         </Tabs>
       </div>
     </div>
+    </SubscriptionGuard>
   );
 };
 
