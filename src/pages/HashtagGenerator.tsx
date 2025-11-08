@@ -63,6 +63,11 @@ export default function HashtagGenerator() {
       if (data.generation) {
         setGeneration(data.generation);
         
+        // Increment usage tracking
+        await supabase.functions.invoke('increment-usage', {
+          body: { usageType: 'ai_hashtags' }
+        });
+
         toast({
           title: "Hashtags Generated!",
           description: "Your strategic hashtag mix is ready.",

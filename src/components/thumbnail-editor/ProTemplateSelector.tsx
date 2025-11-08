@@ -173,6 +173,12 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
       }
 
       setGeneratedImage(data.thumbnail.thumbnail_url);
+      
+      // Increment usage tracking
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'ai_thumbnails' }
+      });
+
       toast.success("🔥 Pro YouTube thumbnail created!");
     } catch (error: any) {
       console.warn("Generation warning:", error);

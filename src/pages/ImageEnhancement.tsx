@@ -56,6 +56,11 @@ const ImageEnhancement = () => {
       setEnhancedImage(data.enhancedImage);
       setShowComparison(true);
       
+      // Increment usage tracking
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'ai_image_enhancement' }
+      });
+
       toast({
         title: "Success!",
         description: `Image enhanced ${scale[0]}x successfully`

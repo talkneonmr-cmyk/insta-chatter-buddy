@@ -196,6 +196,11 @@ export default function MusicGeneratorForm() {
             task_id: id,
             generation_time_ms: Date.now() - generationStartTime,
           });
+
+          // Increment usage tracking
+          await supabase.functions.invoke('increment-usage', {
+            body: { usageType: 'ai_music' }
+          });
         }
 
         toast({ title: "Success!", description: "Your music has been generated and saved" });

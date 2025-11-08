@@ -70,6 +70,11 @@ const ScriptWriter = () => {
       setGeneratedScript(data.script);
       setRefreshHistory(prev => prev + 1);
       
+      // Increment usage tracking
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'ai_scripts' }
+      });
+
       toast({
         title: "Script generated!",
         description: "Your AI script has been created successfully"

@@ -72,6 +72,11 @@ const BackgroundRemoval = () => {
 
       setProcessedImage(imgDataUrl);
       
+      // Increment usage tracking
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'ai_background_removal' }
+      });
+
       toast({ title: 'Success!', description: 'Background removed successfully' });
     } catch (error: any) {
       console.error('Background removal error:', error);

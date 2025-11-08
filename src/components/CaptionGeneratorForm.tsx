@@ -120,6 +120,11 @@ const CaptionGeneratorForm = ({ onCaptionGenerated, templateText }: CaptionGener
 
         if (dbError) console.error('Error saving caption:', dbError);
 
+        // Increment usage tracking
+        await supabase.functions.invoke('increment-usage', {
+          body: { usageType: 'ai_captions' }
+        });
+
         toast({
           title: "Caption Generated! ✨",
           description: `Created in ${data.data.metadata?.processingTime}ms`,
