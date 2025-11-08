@@ -51,6 +51,25 @@ serve(async (req) => {
 
     console.log('Found video:', video.title);
 
+    // Check usage limit for YouTube operations
+    const limitCheckRes = await fetch(`${supabaseUrl}/functions/v1/check-usage-limit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.headers.get('Authorization')!,
+      },
+      body: JSON.stringify({ limitType: 'youtube_operations' }),
+    });
+
+    const limitCheck = await limitCheckRes.json();
+    
+    if (!limitCheck.canUse) {
+      return new Response(
+        JSON.stringify({ error: limitCheck.message || 'YouTube operations limit reached' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Fetch YouTube account access token
     const { data: ytAccount, error: ytError } = await supabase
       .from('youtube_accounts')
@@ -236,6 +255,16 @@ serve(async (req) => {
         youtube_video_id: youtubeVideoId,
         status: 'uploaded'
       });
+
+    // Increment YouTube operations usage
+    await fetch(`${supabaseUrl}/functions/v1/increment-usage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.headers.get('Authorization')!,
+      },
+      body: JSON.stringify({ usageType: 'youtube_operations' }),
+    });
 
     return new Response(
       JSON.stringify({

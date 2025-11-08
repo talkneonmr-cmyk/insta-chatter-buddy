@@ -912,6 +912,7 @@ export type Database = {
           user_id: string
           video_uploads_count: number
           youtube_channels_count: number
+          youtube_operations_count: number
         }
         Insert: {
           ai_background_removal_count?: number
@@ -937,6 +938,7 @@ export type Database = {
           user_id: string
           video_uploads_count?: number
           youtube_channels_count?: number
+          youtube_operations_count?: number
         }
         Update: {
           ai_background_removal_count?: number
@@ -962,6 +964,7 @@ export type Database = {
           user_id?: string
           video_uploads_count?: number
           youtube_channels_count?: number
+          youtube_operations_count?: number
         }
         Relationships: []
       }

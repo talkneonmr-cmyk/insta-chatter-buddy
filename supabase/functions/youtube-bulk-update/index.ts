@@ -28,6 +28,25 @@ serve(async (req) => {
     const { videoIds, operation } = await req.json();
     console.log(`Bulk operation: ${operation.type} for ${videoIds.length} videos`);
 
+    // Check usage limit for YouTube operations
+    const limitCheckRes = await fetch(`${supabaseUrl}/functions/v1/check-usage-limit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.headers.get('Authorization')!,
+      },
+      body: JSON.stringify({ limitType: 'youtube_operations' }),
+    });
+
+    const limitCheck = await limitCheckRes.json();
+    
+    if (!limitCheck.canUse) {
+      return new Response(
+        JSON.stringify({ error: limitCheck.message || 'YouTube operations limit reached' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Fetch YouTube account
     const { data: account, error: accountError } = await supabase
       .from('youtube_accounts')
@@ -213,6 +232,16 @@ serve(async (req) => {
       success_count: successCount,
       failure_count: failureCount,
       details: { operation, results },
+    });
+
+    // Increment YouTube operations usage
+    await fetch(`${supabaseUrl}/functions/v1/increment-usage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.headers.get('Authorization')!,
+      },
+      body: JSON.stringify({ usageType: 'youtube_operations' }),
     });
 
     return new Response(

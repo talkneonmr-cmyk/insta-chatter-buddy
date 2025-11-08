@@ -25,6 +25,26 @@ serve(async (req) => {
 
     const { channelId } = await req.json();
 
+    // Check usage limit for YouTube operations
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const limitCheckRes = await fetch(`${supabaseUrl}/functions/v1/check-usage-limit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.headers.get('Authorization')!,
+      },
+      body: JSON.stringify({ limitType: 'youtube_operations' }),
+    });
+
+    const limitCheck = await limitCheckRes.json();
+    
+    if (!limitCheck.canUse) {
+      return new Response(
+        JSON.stringify({ error: limitCheck.message || 'YouTube operations limit reached' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { data: account, error: accountError } = await supabaseClient
       .from('youtube_accounts')
       .select('*')
@@ -80,6 +100,16 @@ serve(async (req) => {
 
     const data = await response.json();
     const channel = data.items[0];
+
+    // Increment YouTube operations usage
+    await fetch(`${supabaseUrl}/functions/v1/increment-usage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.headers.get('Authorization')!,
+      },
+      body: JSON.stringify({ usageType: 'youtube_operations' }),
+    });
 
     return new Response(
       JSON.stringify({

@@ -11,6 +11,7 @@ interface UsageData {
   video_uploads_count: number;
   ai_captions_count: number;
   youtube_channels_count: number;
+  youtube_operations_count: number;
   ai_music_count: number;
   ai_thumbnails_count: number;
   ai_scripts_count: number;
@@ -32,6 +33,7 @@ const PLAN_LIMITS = {
     video_uploads: 3,
     ai_captions: 4,
     youtube_channels: 4,
+    youtube_operations: 20,
     ai_music: 4,
     ai_thumbnails: 4,
     ai_scripts: 4,
@@ -51,6 +53,7 @@ const PLAN_LIMITS = {
     video_uploads: -1,
     ai_captions: -1,
     youtube_channels: -1,
+    youtube_operations: -1,
     ai_music: 200,
     ai_thumbnails: 10,
     ai_scripts: -1,
@@ -105,7 +108,7 @@ export default function UsageStats() {
 
       const { data, error } = await supabase
         .from("usage_tracking")
-        .select("video_uploads_count, ai_captions_count, youtube_channels_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count, ai_speech_to_text_count, ai_text_to_speech_count, ai_voice_cloning_count, ai_dubbing_count, ai_voice_isolation_count, ai_background_removal_count, ai_image_enhancement_count, ai_text_summarizer_count")
+        .select("video_uploads_count, ai_captions_count, youtube_channels_count, youtube_operations_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count, ai_speech_to_text_count, ai_text_to_speech_count, ai_voice_cloning_count, ai_dubbing_count, ai_voice_isolation_count, ai_background_removal_count, ai_image_enhancement_count, ai_text_summarizer_count")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -128,6 +131,7 @@ export default function UsageStats() {
           video_uploads_count: 0,
           ai_captions_count: 0,
           youtube_channels_count: 0,
+          youtube_operations_count: 0,
           ai_music_count: 0,
           ai_thumbnails_count: 0,
           ai_scripts_count: 0,
@@ -150,6 +154,7 @@ export default function UsageStats() {
         video_uploads_count: data.video_uploads_count || 0,
         ai_captions_count: data.ai_captions_count || 0,
         youtube_channels_count: data.youtube_channels_count || 0,
+        youtube_operations_count: data.youtube_operations_count || 0,
         ai_music_count: data.ai_music_count || 0,
         ai_thumbnails_count: data.ai_thumbnails_count || 0,
         ai_scripts_count: data.ai_scripts_count || 0,
@@ -292,6 +297,13 @@ export default function UsageStats() {
           color="text-red-600"
         />
         <UsageItem
+          icon={Youtube}
+          label="YouTube Operations (Daily)"
+          used={usage?.youtube_operations_count || 0}
+          limit={limits.youtube_operations}
+          color="text-red-500"
+        />
+        <UsageItem
           icon={Music}
           label="AI Music (Daily)"
           used={usage?.ai_music_count || 0}
@@ -379,7 +391,7 @@ export default function UsageStats() {
         {plan === "free" && (
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground text-center">
-              Free Plan: Daily limits reset every 24 hours automatically. Upgrade to Pro for more: 10 thumbnails/day, unlimited scripts/captions/uploads, 200 music/day, 20 trends/hashtags/SEO per day!
+              Free Plan: Daily limits reset every 24 hours automatically. YouTube Operations include uploads, analytics, bulk updates, playlists, and video management. Upgrade to Pro for more: 10 thumbnails/day, unlimited scripts/captions/uploads/YouTube operations, 200 music/day, 20 trends/hashtags/SEO per day!
             </p>
           </div>
         )}

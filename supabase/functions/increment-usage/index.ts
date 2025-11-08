@@ -123,6 +123,15 @@ Deno.serve(async (req) => {
       case 'ai_shorts_packages':
         updateData = { ai_shorts_packages_count: usage.ai_shorts_packages_count + 1 };
         break;
+      case 'youtube_operations':
+      case 'youtube_operation':
+      case 'youtube_upload':
+      case 'youtube_analytics':
+      case 'youtube_bulk':
+      case 'youtube_playlist':
+      case 'youtube_video':
+        updateData = { youtube_operations_count: usage.youtube_operations_count + 1 };
+        break;
       default:
         throw new Error('Invalid usage type');
     }

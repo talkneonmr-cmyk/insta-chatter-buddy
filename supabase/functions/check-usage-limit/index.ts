@@ -9,6 +9,7 @@ interface UsageLimits {
   videoUploads: number;
   aiCaptions: number;
   youtubeChannels: number;
+  youtubeOperations: number;
   aiMusic: number;
   aiThumbnails: number;
   aiScripts: number;
@@ -30,6 +31,7 @@ const PLAN_LIMITS = {
     videoUploads: 3,
     aiCaptions: 4,
     youtubeChannels: 4,
+    youtubeOperations: 20,
     aiMusic: 4,
     aiThumbnails: 4,
     aiScripts: 4,
@@ -49,6 +51,7 @@ const PLAN_LIMITS = {
     videoUploads: -1,
     aiCaptions: -1,
     youtubeChannels: -1,
+    youtubeOperations: -1,
     aiMusic: 200,
     aiThumbnails: 10,
     aiScripts: -1,
@@ -171,6 +174,7 @@ Deno.serve(async (req) => {
           ai_background_removal_count: 0,
           ai_image_enhancement_count: 0,
           ai_text_summarizer_count: 0,
+          youtube_operations_count: 0,
           reset_at: now.toISOString(),
         })
         .eq('user_id', user.id);
@@ -229,6 +233,20 @@ Deno.serve(async (req) => {
         message = canUse 
           ? `You can add ${limit - currentUsage} more channel(s)`
           : `You've reached your limit of ${limit} channel(s). Upgrade to Pro for unlimited channels.`;
+        break;
+      case 'youtube_operations':
+      case 'youtube_operation':
+      case 'youtube_upload':
+      case 'youtube_analytics':
+      case 'youtube_bulk':
+      case 'youtube_playlist':
+      case 'youtube_video':
+        currentUsage = usage?.youtube_operations_count || 0;
+        limit = limits.youtubeOperations;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} YouTube operations remaining today`
+          : `You've reached your daily limit of ${limit} YouTube operations (uploads, analytics, bulk updates, etc.). ${plan === 'free' ? 'Upgrade to Pro for unlimited!' : 'Resets tomorrow!'}`;
         break;
       case 'ai_music':
         currentUsage = usage?.ai_music_count || 0;
