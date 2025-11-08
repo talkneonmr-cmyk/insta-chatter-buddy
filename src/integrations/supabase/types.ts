@@ -1339,6 +1339,11 @@ export type Database = {
         Args: { p_action: string; p_details?: Json }
         Returns: undefined
       }
+      manual_reset_user_usage: {
+        Args: { target_user_id: string }
+        Returns: Json
+      }
+      reset_daily_usage: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user" | "tester"
