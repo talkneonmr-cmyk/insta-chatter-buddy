@@ -792,6 +792,7 @@ export type Database = {
           ai_music_count: number
           ai_scripts_count: number
           ai_seo_count: number | null
+          ai_shorts_packages_count: number
           ai_speech_to_text_count: number
           ai_text_summarizer_count: number
           ai_text_to_speech_count: number
@@ -816,6 +817,7 @@ export type Database = {
           ai_music_count?: number
           ai_scripts_count?: number
           ai_seo_count?: number | null
+          ai_shorts_packages_count?: number
           ai_speech_to_text_count?: number
           ai_text_summarizer_count?: number
           ai_text_to_speech_count?: number
@@ -840,6 +842,7 @@ export type Database = {
           ai_music_count?: number
           ai_scripts_count?: number
           ai_seo_count?: number | null
+          ai_shorts_packages_count?: number
           ai_speech_to_text_count?: number
           ai_text_summarizer_count?: number
           ai_text_to_speech_count?: number

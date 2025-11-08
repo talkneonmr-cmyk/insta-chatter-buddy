@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Youtube, Music, Video, TrendingUp, Zap, Crown, ArrowRight, Activity, Image, FileText, Hash } from "lucide-react";
+import { Sparkles, Youtube, Music, Video, TrendingUp, Zap, Crown, ArrowRight, Activity, Image, FileText, Hash, Badge as BadgeIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
+import { Badge } from "@/components/ui/badge";
 import UsageStats from "./UsageStats";
 import DashboardSkeleton from "./DashboardSkeleton";
 
@@ -341,6 +342,31 @@ const Dashboard = () => {
                 <CardContent className="relative z-10">
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>{stats.totalHashtags} sets generated</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* AI Shorts Factory Card - NEW! */}
+              <Card className="card-3d border-2 overflow-hidden group hover:border-pink-500/30 cursor-pointer active:scale-[0.98] transition-transform relative" onClick={() => navigate("/shorts-factory")}>
+                <div className="absolute top-2 right-2 z-20">
+                  <Badge className="bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0">
+                    NEW 🔥
+                  </Badge>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <CardHeader className="relative z-10 pb-2 sm:pb-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-pink-500/10 to-purple-500/10 group-hover:from-pink-500/20 group-hover:to-purple-500/20 transition-all">
+                      <Sparkles className="w-5 h-5 text-pink-500" />
+                    </div>
+                    <CardTitle className="text-lg">AI Shorts Factory</CardTitle>
+                  </div>
+                  <CardDescription>Turn 1 video into 5 viral shorts automatically</CardDescription>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>Generate shorts packages</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </CardContent>

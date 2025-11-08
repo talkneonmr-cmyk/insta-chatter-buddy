@@ -111,3 +111,6 @@ verify_jwt = false
 
 [functions.manual-check-comments]
 verify_jwt = true
+
+[functions.create-shorts-package]
+verify_jwt = true

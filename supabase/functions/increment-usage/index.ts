@@ -120,6 +120,9 @@ Deno.serve(async (req) => {
       case 'ai_text_summarizer':
         updateData = { ai_text_summary_count: usage.ai_text_summary_count + 1 };
         break;
+      case 'ai_shorts_packages':
+        updateData = { ai_shorts_packages_count: usage.ai_shorts_packages_count + 1 };
+        break;
       default:
         throw new Error('Invalid usage type');
     }
