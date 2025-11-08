@@ -88,7 +88,7 @@ const YouTubeManager = () => {
             </TabsContent>
 
             <TabsContent value="bulk" className="mt-4 md:mt-6">
-              <YouTubeBulkOperations />
+              {activeTab === 'bulk' && <YouTubeBulkOperations />}
             </TabsContent>
 
             <TabsContent value="analytics" className="mt-4 md:mt-6">
@@ -96,11 +96,11 @@ const YouTubeManager = () => {
             </TabsContent>
 
             <TabsContent value="videos" className="mt-4 md:mt-6">
-              <YouTubeVideoManager />
+              {activeTab === 'videos' && <YouTubeVideoManager />}
             </TabsContent>
 
             <TabsContent value="playlists" className="mt-4 md:mt-6">
-              <YouTubePlaylistManager />
+              {activeTab === 'playlists' && <YouTubePlaylistManager />}
             </TabsContent>
           </Tabs>
         </Card>
