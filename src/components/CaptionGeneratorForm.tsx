@@ -72,7 +72,7 @@ const CaptionGeneratorForm = ({ onCaptionGenerated, templateText }: CaptionGener
       
       if (!limitCheck.canUse) {
         toast({
-          title: "Limit Reached",
+          title: "Daily Limit Reached 🎯",
           description: limitCheck.message,
           variant: "destructive",
         });

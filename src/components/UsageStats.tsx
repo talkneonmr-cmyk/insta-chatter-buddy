@@ -231,7 +231,7 @@ export default function UsageStats() {
           <div className="space-y-1">
             <Progress value={percentage} className="h-2" />
             {isAtLimit && (
-              <p className="text-xs text-destructive">Limit reached - Upgrade to continue</p>
+              <p className="text-xs text-destructive">Daily limit reached - Check back tomorrow!</p>
             )}
           </div>
         )}

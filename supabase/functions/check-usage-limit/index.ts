@@ -214,7 +214,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} video uploads remaining`
-          : `You've reached your limit of ${limit} video uploads. Upgrade to Pro for unlimited uploads.`;
+          : plan === 'free' 
+            ? `Hey there! Your daily limit of ${limit} video uploads is reached. Please check back tomorrow or upgrade to Pro for unlimited uploads!`
+            : `Hey there! Your daily limit of ${limit} video uploads is reached. Please check back tomorrow!`;
         break;
       case 'ai_captions':
       case 'ai_caption':
@@ -223,7 +225,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI captions remaining`
-          : `You've reached your limit of ${limit} AI captions. Upgrade to Pro for unlimited captions.`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} AI captions is reached. Please check back tomorrow or upgrade to Pro for unlimited captions!`
+            : `Hey there! Your daily limit of ${limit} AI captions is reached. Please check back tomorrow!`;
         break;
       case 'youtube_channels':
       case 'youtube_channel':
@@ -232,7 +236,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You can add ${limit - currentUsage} more channel(s)`
-          : `You've reached your limit of ${limit} channel(s). Upgrade to Pro for unlimited channels.`;
+          : plan === 'free'
+            ? `Hey there! Your limit of ${limit} YouTube channel(s) is reached. Please check back tomorrow or upgrade to Pro for unlimited channels!`
+            : `Hey there! Your limit of ${limit} YouTube channel(s) is reached. Please check back tomorrow!`;
         break;
       case 'youtube_operations':
       case 'youtube_operation':
@@ -246,7 +252,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} YouTube operations remaining today`
-          : `You've reached your daily limit of ${limit} YouTube operations (uploads, analytics, bulk updates, etc.). ${plan === 'free' ? 'Upgrade to Pro for unlimited!' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} YouTube operations is reached. Please check back tomorrow or upgrade to Pro for unlimited!`
+            : `Hey there! Your daily limit of ${limit} YouTube operations is reached. Please check back tomorrow!`;
         break;
       case 'ai_music':
         currentUsage = usage?.ai_music_count || 0;
@@ -254,7 +262,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI music generations remaining today`
-          : `You've reached your daily limit of ${limit} AI music generations. ${plan === 'free' ? 'Upgrade to Pro for 200 generations/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} AI music generations is reached. Please check back tomorrow or upgrade to Pro for 200/day!`
+            : `Hey there! Your daily limit of ${limit} AI music generations is reached. Please check back tomorrow!`;
         break;
       case 'ai_thumbnails':
         currentUsage = usage?.ai_thumbnails_count || 0;
@@ -262,7 +272,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI thumbnails remaining today`
-          : `You've reached your daily limit of ${limit} AI thumbnails. ${plan === 'free' ? 'Upgrade to Pro for 10 thumbnails/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} AI thumbnails is reached. Please check back tomorrow or upgrade to Pro for 10/day!`
+            : `Hey there! Your daily limit of ${limit} AI thumbnails is reached. Please check back tomorrow!`;
         break;
       case 'ai_scripts':
         currentUsage = usage?.ai_scripts_count || 0;
@@ -270,7 +282,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} AI scripts remaining today`
-          : `You've reached your daily limit of ${limit} AI scripts. ${plan === 'free' ? 'Upgrade to Pro for unlimited scripts.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} AI scripts is reached. Please check back tomorrow or upgrade to Pro for unlimited!`
+            : `Hey there! Your daily limit of ${limit} AI scripts is reached. Please check back tomorrow!`;
         break;
       case 'ai_trends':
         currentUsage = usage?.ai_trends_count || 0;
@@ -278,7 +292,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} trend analyses remaining today`
-          : `You've reached your daily limit of ${limit} trend analyses. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} trend analyses is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} trend analyses is reached. Please check back tomorrow!`;
         break;
       case 'ai_seo':
         currentUsage = usage?.ai_seo_count || 0;
@@ -286,7 +302,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} SEO optimizations remaining today`
-          : `You've reached your daily limit of ${limit} SEO optimizations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} SEO optimizations is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} SEO optimizations is reached. Please check back tomorrow!`;
         break;
       case 'ai_hashtags':
         currentUsage = usage?.ai_hashtags_count || 0;
@@ -294,7 +312,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} hashtag generations remaining today`
-          : `You've reached your daily limit of ${limit} hashtag generations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} hashtag generations is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} hashtag generations is reached. Please check back tomorrow!`;
         break;
       case 'ai_speech_to_text':
         currentUsage = usage?.ai_speech_to_text_count || 0;
@@ -302,7 +322,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} speech to text conversions remaining today`
-          : `You've reached your daily limit of ${limit} speech to text conversions. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} speech to text conversions is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} speech to text conversions is reached. Please check back tomorrow!`;
         break;
       case 'ai_text_to_speech':
         currentUsage = usage?.ai_text_to_speech_count || 0;
@@ -310,7 +332,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} text to speech conversions remaining today`
-          : `You've reached your daily limit of ${limit} text to speech conversions. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} text to speech conversions is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} text to speech conversions is reached. Please check back tomorrow!`;
         break;
       case 'ai_voice_cloning':
         currentUsage = usage?.ai_voice_cloning_count || 0;
@@ -318,7 +342,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} voice cloning generations remaining today`
-          : `You've reached your daily limit of ${limit} voice cloning generations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} voice cloning generations is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} voice cloning generations is reached. Please check back tomorrow!`;
         break;
       case 'ai_dubbing':
         currentUsage = usage?.ai_dubbing_count || 0;
@@ -326,7 +352,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} dubbing generations remaining today`
-          : `You've reached your daily limit of ${limit} dubbing generations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} dubbing generations is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} dubbing generations is reached. Please check back tomorrow!`;
         break;
       case 'ai_background_removal':
         currentUsage = usage?.ai_background_removal_count || 0;
@@ -334,7 +362,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} background removals remaining today`
-          : `You've reached your daily limit of ${limit} background removals. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} background removals is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} background removals is reached. Please check back tomorrow!`;
         break;
       case 'ai_image_enhancement':
         currentUsage = usage?.ai_image_enhancement_count || 0;
@@ -342,7 +372,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} image enhancements remaining today`
-          : `You've reached your daily limit of ${limit} image enhancements. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} image enhancements is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} image enhancements is reached. Please check back tomorrow!`;
         break;
       case 'ai_text_summarizer':
         currentUsage = usage?.ai_text_summarizer_count || 0;
@@ -350,7 +382,9 @@ Deno.serve(async (req) => {
         canUse = limit === -1 || currentUsage < limit;
         message = canUse 
           ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} text summarizations remaining today`
-          : `You've reached your daily limit of ${limit} text summarizations. ${plan === 'free' ? 'Upgrade to Pro for 20/day.' : 'Resets tomorrow!'}`;
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} text summarizations is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} text summarizations is reached. Please check back tomorrow!`;
         break;
     }
 

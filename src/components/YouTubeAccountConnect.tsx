@@ -96,7 +96,7 @@ const YouTubeAccountConnect = () => {
         // Check if it's a limit error
         if (authError.message && authError.message.includes('limit')) {
           toast({
-            title: "Limit Reached",
+            title: "Daily Limit Reached 🎯",
             description: authError.message,
             variant: "destructive",
           });

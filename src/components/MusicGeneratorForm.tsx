@@ -101,11 +101,13 @@ export default function MusicGeneratorForm() {
     if (limitError || !limitCheck?.canUse) {
       isSubmittingRef.current = false;
       toast({ 
-        title: "Limit Reached", 
-        description: limitCheck?.message || "You've reached your AI music generation limit. Upgrade to Pro for more!", 
+        title: "Daily Limit Reached 🎯", 
+        description: limitCheck?.message || "Hey there! Your AI music generation limit is reached. Please check back tomorrow or upgrade to Pro for more!", 
         variant: "destructive" 
       });
-      setTimeout(() => navigate('/pricing'), 2000);
+      if (plan === 'free') {
+        setTimeout(() => navigate('/pricing'), 2000);
+      }
       return;
     }
 
