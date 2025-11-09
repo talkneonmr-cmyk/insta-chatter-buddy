@@ -99,10 +99,6 @@ const ShortsFactory = () => {
       setPackages(data.packages);
       setVideoTitle(data.videoTitle);
 
-      // Increment usage tracking
-      await supabase.functions.invoke('increment-usage', {
-        body: { usageType: 'ai_shorts_packages' }
-      });
 
       toast({
         title: "Shorts packages created! 🎉",

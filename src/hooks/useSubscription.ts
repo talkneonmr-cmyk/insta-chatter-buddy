@@ -49,9 +49,9 @@ export function useSubscription() {
           return;
         }
 
-
+        const normalizedPlan = (data.plan === 'free_trial' ? 'free' : data.plan) as SubscriptionPlan;
         setSubscription({
-          plan: data.plan as SubscriptionPlan,
+          plan: normalizedPlan,
           status: data.status,
           isLoading: false,
         });

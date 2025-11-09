@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    const plan = subscription?.plan || 'free';
+    const plan = (subscription?.plan === 'free_trial' ? 'free' : subscription?.plan) || 'free';
     const currentPeriodEnd = subscription?.current_period_end;
 
     // Get usage tracking
