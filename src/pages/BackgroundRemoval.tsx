@@ -27,6 +27,29 @@ const BackgroundRemoval = () => {
   const handleRemoveBackground = async () => {
     if (!image) return;
 
+    // Check usage limit first
+    const { data: limitCheck, error: limitError } = await supabase.functions.invoke('check-usage-limit', {
+      body: { limitType: 'ai_background_removal' }
+    });
+
+    if (limitError) {
+      toast({
+        title: "Error",
+        description: "Failed to check usage limit",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!limitCheck.canUse) {
+      toast({
+        title: "Daily limit reached",
+        description: limitCheck.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Downscale and compress before sending to reduce payload size and avoid timeouts
     const compressDataUrl = (dataUrl: string, maxDim = 2000, quality = 0.9) =>
       new Promise<string>((resolve, reject) => {

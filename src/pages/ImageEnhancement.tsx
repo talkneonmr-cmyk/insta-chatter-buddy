@@ -31,6 +31,29 @@ const ImageEnhancement = () => {
   const handleEnhance = async () => {
     if (!image) return;
 
+    // Check usage limit first
+    const { data: limitCheck, error: limitError } = await supabase.functions.invoke('check-usage-limit', {
+      body: { limitType: 'ai_image_enhancement' }
+    });
+
+    if (limitError) {
+      toast({
+        title: "Error",
+        description: "Failed to check usage limit",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!limitCheck.canUse) {
+      toast({
+        title: "Daily limit reached",
+        description: limitCheck.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsProcessing(true);
     toast({
       title: "Enhancing image...",

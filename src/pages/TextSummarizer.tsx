@@ -29,6 +29,29 @@ const TextSummarizer = () => {
       return;
     }
 
+    // Check usage limit first
+    const { data: limitCheck, error: limitError } = await supabase.functions.invoke('check-usage-limit', {
+      body: { limitType: 'ai_text_summarizer' }
+    });
+
+    if (limitError) {
+      toast({
+        title: "Error",
+        description: "Failed to check usage limit",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!limitCheck.canUse) {
+      toast({
+        title: "Daily limit reached",
+        description: limitCheck.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setProcessing(true);
     toast({
       title: "Summarizing...",
