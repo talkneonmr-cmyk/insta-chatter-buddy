@@ -91,6 +91,11 @@ const YouTubePerformanceMonitor = () => {
 
       if (error) throw error;
 
+      // Increment YouTube operations usage
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'youtube_operations' }
+      });
+
       if (data.videosProcessed > 0) {
         toast.success(`Auto-pilot processed ${data.videosProcessed} videos!`);
         await analyzePerformance(); // Refresh data
@@ -163,6 +168,11 @@ const YouTubePerformanceMonitor = () => {
 
       setOptimizations(data.optimizations);
       setShowOptimizations(true);
+      
+      // Increment YouTube operations usage
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'youtube_operations' }
+      });
       
       if (applyChanges) {
         toast.success("Optimizations applied successfully!");

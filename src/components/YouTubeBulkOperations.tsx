@@ -142,6 +142,12 @@ const YouTubeBulkOperations = () => {
       if (error) throw error;
 
       setProgress(100);
+      
+      // Increment YouTube operations usage
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'youtube_operations' }
+      });
+      
       toast.success(`Bulk operation completed! ${data.successCount} successful, ${data.failureCount} failed`);
       
       // Refresh videos

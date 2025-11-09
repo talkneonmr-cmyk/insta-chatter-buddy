@@ -77,6 +77,11 @@ const YouTubePlaylistManager = () => {
 
       if (error) throw error;
       
+      // Increment YouTube operations usage
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'youtube_operations' }
+      });
+      
       toast.success('Playlist created successfully');
       setShowCreate(false);
       setNewTitle("");

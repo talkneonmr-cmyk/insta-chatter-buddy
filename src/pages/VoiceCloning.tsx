@@ -35,6 +35,22 @@ const VoiceCloning = () => {
 
     setIsProcessing(true);
     try {
+      // Check usage limit
+      const { data: limitCheck, error: limitError } = await supabase.functions.invoke('check-usage-limit', {
+        body: { limitType: 'ai_voice_cloning' }
+      });
+
+      if (limitError) throw limitError;
+      
+      if (!limitCheck.canUse) {
+        toast({
+          title: "Daily Limit Reached",
+          description: limitCheck.message,
+          variant: "destructive",
+        });
+        setIsProcessing(false);
+        return;
+      }
       // Upload audio file to Supabase storage
       const fileExt = audioFile.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
