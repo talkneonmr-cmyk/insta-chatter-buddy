@@ -35,9 +35,9 @@ export default function UsageResetCountdown({ resetAt, className = "" }: UsageRe
   }, [resetAt]);
 
   return (
-    <div className={`inline-flex items-center gap-1.5 text-sm text-muted-foreground ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 text-sm text-muted-foreground ${className}`}>
       <Clock className="h-3.5 w-3.5" />
       <span>Resets in {timeLeft}</span>
-    </div>
+    </span>
   );
 }

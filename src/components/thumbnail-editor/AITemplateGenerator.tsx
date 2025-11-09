@@ -20,6 +20,21 @@ export const AITemplateGenerator = ({ onImageGenerated }: AITemplateGeneratorPro
     setGeneratedImage(null);
     
     try {
+      // Check usage limit first
+      const { data: limitCheck, error: limitError } = await supabase.functions.invoke('check-usage-limit', {
+        body: { limitType: 'ai_thumbnails' }
+      });
+
+      if (limitError) {
+        toast.error("Error checking usage limit");
+        return;
+      }
+      
+      if (!limitCheck.canUse) {
+        toast.error(limitCheck.message || "Daily limit reached");
+        return;
+      }
+
       const enhancedPrompt = `${promptText}
 
 CRITICAL REQUIREMENTS:
@@ -54,6 +69,11 @@ CRITICAL REQUIREMENTS:
 
       const imageUrl = data.thumbnail.thumbnail_url;
       setGeneratedImage(imageUrl);
+      
+      // Increment usage tracking
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'ai_thumbnails' }
+      });
       
       if (onImageGenerated) {
         onImageGenerated(imageUrl);

@@ -94,6 +94,10 @@ export default function SEOOptimizer() {
       if (data.optimization) {
         setOptimization(data.optimization);
         
+        // Increment usage tracking
+        await supabase.functions.invoke('increment-usage', {
+          body: { usageType: 'ai_seo' }
+        });
 
         toast({
           title: "SEO Optimization Complete!",
