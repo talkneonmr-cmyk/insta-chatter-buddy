@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Sparkles, Zap } from "lucide-react";
+import { Check, Sparkles, Zap, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export default function Pricing() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const subscription = useSubscription();
 
   const handleSubscribe = async () => {
     try {
@@ -93,7 +95,15 @@ export default function Pricing() {
 
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* Free Plan */}
-          <Card className="relative scale-in">
+          <Card className={`relative scale-in ${subscription.plan === 'free' ? 'border-primary' : ''}`}>
+            {subscription.plan === 'free' && (
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                <span className="bg-primary text-primary-foreground text-sm font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                  <Crown className="h-4 w-4" />
+                  Current Plan
+                </span>
+              </div>
+            )}
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 float-animation" />
@@ -116,21 +126,38 @@ export default function Pricing() {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => navigate('/auth')}
-              >
-                Get Started
-              </Button>
+              {subscription.plan === 'free' ? (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  disabled
+                >
+                  Current Plan
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => navigate('/auth')}
+                >
+                  Get Started
+                </Button>
+              )}
             </CardFooter>
           </Card>
 
           {/* Pro Plan */}
-          <Card className="relative border-primary shadow-lg scale-in glow-effect">
+          <Card className={`relative shadow-lg scale-in glow-effect ${subscription.plan === 'pro' ? 'border-primary' : 'border-primary/50'}`}>
             <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-              <span className="bg-primary text-primary-foreground text-sm font-medium px-3 py-1 rounded-full">
-                Most Popular
+              <span className="bg-primary text-primary-foreground text-sm font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                {subscription.plan === 'pro' ? (
+                  <>
+                    <Crown className="h-4 w-4" />
+                    Current Plan
+                  </>
+                ) : (
+                  'Most Popular'
+                )}
               </span>
             </div>
             <CardHeader>
@@ -155,14 +182,24 @@ export default function Pricing() {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button
-                variant="gradient"
-                className="w-full"
-                onClick={handleSubscribe}
-                disabled={loading}
-              >
-                {loading ? "Processing..." : "Upgrade to Pro"}
-              </Button>
+              {subscription.plan === 'pro' ? (
+                <Button
+                  variant="gradient"
+                  className="w-full"
+                  disabled
+                >
+                  Current Plan
+                </Button>
+              ) : (
+                <Button
+                  variant="gradient"
+                  className="w-full"
+                  onClick={handleSubscribe}
+                  disabled={loading}
+                >
+                  {loading ? "Processing..." : "Upgrade to Pro"}
+                </Button>
+              )}
             </CardFooter>
           </Card>
         </div>
