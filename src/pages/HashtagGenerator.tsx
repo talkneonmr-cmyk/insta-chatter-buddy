@@ -54,11 +54,45 @@ export default function HashtagGenerator() {
         return;
       }
 
+      // Pre-check usage to provide friendly messaging before hitting AI
+      const { data: limitCheck } = await supabase.functions.invoke('check-usage-limit', {
+        body: { limitType: 'ai_hashtags' }
+      });
+
+      if (limitCheck && limitCheck.canUse === false) {
+        toast({
+          title: "Daily limit reached",
+          description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+          action: (
+            <Button variant="default" onClick={() => navigate('/pricing')}>
+              Upgrade
+            </Button>
+          ),
+        });
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('generate-hashtags', {
         body: { topic, niche, platform }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle 403 from backend gracefully
+        // @ts-ignore status may be present on the error
+        if (error.status === 403 || (typeof error.message === 'string' && error.message.toLowerCase().includes('daily limit'))) {
+          toast({
+            title: "Daily limit reached",
+            description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+            action: (
+              <Button variant="default" onClick={() => navigate('/pricing')}>
+                Upgrade
+              </Button>
+            ),
+          });
+          return;
+        }
+        throw error;
+      }
 
       if (data.generation) {
         setGeneration(data.generation);
@@ -71,11 +105,24 @@ export default function HashtagGenerator() {
       }
     } catch (error: any) {
       console.error('Error generating hashtags:', error);
-      toast({
-        title: "Generation Failed",
-        description: error.message || "Failed to generate hashtags",
-        variant: "destructive",
-      });
+      const msg = (typeof (error as any)?.message === 'string' ? (error as any).message : '') as string;
+      if ((error as any)?.status === 403 || msg.toLowerCase().includes('daily limit')) {
+        toast({
+          title: "Daily limit reached",
+          description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+          action: (
+            <Button variant="default" onClick={() => navigate('/pricing')}>
+              Upgrade
+            </Button>
+          ),
+        });
+      } else {
+        toast({
+          title: "Generation Failed",
+          description: msg || "Failed to generate hashtags",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
