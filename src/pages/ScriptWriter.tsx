@@ -51,6 +51,24 @@ const ScriptWriter = () => {
         return;
       }
 
+      // Pre-check usage to provide friendly messaging before hitting AI
+      const { data: limitCheck } = await supabase.functions.invoke('check-usage-limit', {
+        body: { limitType: 'ai_scripts' }
+      });
+
+      if (limitCheck && limitCheck.canUse === false) {
+        toast({
+          title: "Daily limit reached",
+          description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+          action: (
+            <Button variant="default" onClick={() => navigate('/pricing')}>
+              Upgrade
+            </Button>
+          ),
+        });
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('generate-script', {
         body: { 
           videoTopic: videoTopic.trim(),
@@ -61,7 +79,23 @@ const ScriptWriter = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle 403 from backend gracefully
+        // @ts-ignore
+        if (error.status === 403 || (typeof error.message === 'string' && error.message.toLowerCase().includes('daily limit'))) {
+          toast({
+            title: "Daily limit reached",
+            description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+            action: (
+              <Button variant="default" onClick={() => navigate('/pricing')}>
+                Upgrade
+              </Button>
+            ),
+          });
+          return;
+        }
+        throw error;
+      }
 
       if (data?.error) {
         throw new Error(data.error);
@@ -82,11 +116,24 @@ const ScriptWriter = () => {
       setTargetAudience("");
     } catch (error: any) {
       console.error('Generation error:', error);
-      toast({
-        title: "Generation failed",
-        description: error.message || "Failed to generate script. Please try again.",
-        variant: "destructive"
-      });
+      const msg = (typeof (error as any)?.message === 'string' ? (error as any).message : '') as string;
+      if ((error as any)?.status === 403 || msg.toLowerCase().includes('daily limit')) {
+        toast({
+          title: "Daily limit reached",
+          description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+          action: (
+            <Button variant="default" onClick={() => navigate('/pricing')}>
+              Upgrade
+            </Button>
+          ),
+        });
+      } else {
+        toast({
+          title: "Generation failed",
+          description: msg || "Failed to generate script. Please try again.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }

@@ -109,6 +109,16 @@ export const ProTemplateSelector = () => {
     setGeneratedImage(null);
 
     try {
+      // Pre-check usage to provide friendly messaging before hitting AI
+      const { data: limitCheck } = await supabase.functions.invoke('check-usage-limit', {
+        body: { limitType: 'ai_thumbnails' }
+      });
+
+      if (limitCheck && limitCheck.canUse === false) {
+        toast.error("Daily limit reached. Free: 5/day. Upgrade to Pro for 20/day or check back after reset.");
+        return;
+      }
+
       let finalPrompt = `${selectedTemplate.basePrompt}
 
 SPECIFIC CONTENT: ${customPrompt}`;
@@ -162,7 +172,12 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
 
       if (error) {
         console.warn("Supabase function warning:", error);
-        toast.error(error.message || "Hey there! Your daily limit is reached. Please check back tomorrow!");
+        // @ts-ignore
+        if (error.status === 403 || (typeof error.message === 'string' && error.message.toLowerCase().includes('daily limit'))) {
+          toast.error("Daily limit reached. Free: 5/day. Upgrade to Pro for 20/day or check back after reset.");
+        } else {
+          toast.error(error.message || "Hey there! Your daily limit is reached. Please check back tomorrow!");
+        }
         return;
       }
       
@@ -178,7 +193,12 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
       toast.success("🔥 Pro YouTube thumbnail created!");
     } catch (error: any) {
       console.warn("Generation warning:", error);
-      toast.error(error.message || "Failed to generate thumbnail");
+      const msg = (typeof (error as any)?.message === 'string' ? (error as any).message : '') as string;
+      if ((error as any)?.status === 403 || msg.toLowerCase().includes('daily limit')) {
+        toast.error("Daily limit reached. Free: 5/day. Upgrade to Pro for 20/day or check back after reset.");
+      } else {
+        toast.error(msg || "Failed to generate thumbnail");
+      }
     } finally {
       setLoading(false);
     }

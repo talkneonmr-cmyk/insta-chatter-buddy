@@ -51,11 +51,45 @@ export default function SEOOptimizer() {
         return;
       }
 
+      // Pre-check usage to provide friendly messaging before hitting AI
+      const { data: limitCheck } = await supabase.functions.invoke('check-usage-limit', {
+        body: { limitType: 'ai_seo' }
+      });
+
+      if (limitCheck && limitCheck.canUse === false) {
+        toast({
+          title: "Daily limit reached",
+          description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+          action: (
+            <Button variant="default" onClick={() => navigate('/pricing')}>
+              Upgrade
+            </Button>
+          ),
+        });
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('optimize-seo', {
         body: { title, description, niche }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle 403 from backend gracefully
+        // @ts-ignore
+        if (error.status === 403 || (typeof error.message === 'string' && error.message.toLowerCase().includes('daily limit'))) {
+          toast({
+            title: "Daily limit reached",
+            description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+            action: (
+              <Button variant="default" onClick={() => navigate('/pricing')}>
+                Upgrade
+              </Button>
+            ),
+          });
+          return;
+        }
+        throw error;
+      }
 
       if (data.optimization) {
         setOptimization(data.optimization);
@@ -68,11 +102,24 @@ export default function SEOOptimizer() {
       }
     } catch (error: any) {
       console.error('Error optimizing SEO:', error);
-      toast({
-        title: "Optimization Failed",
-        description: error.message || "Failed to optimize SEO",
-        variant: "destructive",
-      });
+      const msg = (typeof (error as any)?.message === 'string' ? (error as any).message : '') as string;
+      if ((error as any)?.status === 403 || msg.toLowerCase().includes('daily limit')) {
+        toast({
+          title: "Daily limit reached",
+          description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+          action: (
+            <Button variant="default" onClick={() => navigate('/pricing')}>
+              Upgrade
+            </Button>
+          ),
+        });
+      } else {
+        toast({
+          title: "Optimization Failed",
+          description: msg || "Failed to optimize SEO",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }

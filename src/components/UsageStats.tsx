@@ -6,6 +6,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { Video, Sparkles, Youtube, Music, Crown, Image, FileText, TrendingUp, Hash, Search, Mic, Volume2, UserCircle, Languages, AudioLines, Eraser, Wand2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import UsageResetCountdown from "@/components/UsageResetCountdown";
 
 interface UsageData {
   video_uploads_count: number;
@@ -75,6 +76,7 @@ export default function UsageStats() {
   const { plan, isLoading: planLoading } = useSubscription();
   const navigate = useNavigate();
   const [usage, setUsage] = useState<UsageData | null>(null);
+  const [resetAt, setResetAt] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -108,7 +110,7 @@ export default function UsageStats() {
 
       const { data, error } = await supabase
         .from("usage_tracking")
-        .select("video_uploads_count, ai_captions_count, youtube_channels_count, youtube_operations_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count, ai_speech_to_text_count, ai_text_to_speech_count, ai_voice_cloning_count, ai_dubbing_count, ai_background_removal_count, ai_image_enhancement_count, ai_text_summarizer_count, ai_shorts_packages_count")
+        .select("video_uploads_count, ai_captions_count, youtube_channels_count, youtube_operations_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count, ai_speech_to_text_count, ai_text_to_speech_count, ai_voice_cloning_count, ai_dubbing_count, ai_background_removal_count, ai_image_enhancement_count, ai_text_summarizer_count, ai_shorts_packages_count, reset_at")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -170,6 +172,7 @@ export default function UsageStats() {
         ai_text_summarizer_count: data.ai_text_summarizer_count || 0,
         ai_shorts_packages_count: data.ai_shorts_packages_count || 0,
       });
+      setResetAt(data.reset_at || "");
     } catch (error) {
       console.error("Error in fetchUsage:", error);
     } finally {
@@ -250,6 +253,11 @@ export default function UsageStats() {
             </CardTitle>
             <CardDescription>
               {plan === "free" ? "Free Plan - Daily limits reset every 24 hours" : "Pro Plan - Daily usage"}
+              {resetAt && (
+                <div className="mt-1">
+                  <UsageResetCountdown resetAt={resetAt} />
+                </div>
+              )}
             </CardDescription>
           </div>
           {plan === "free" && (

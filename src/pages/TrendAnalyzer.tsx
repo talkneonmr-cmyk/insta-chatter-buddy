@@ -39,11 +39,45 @@ export default function TrendAnalyzer() {
         return;
       }
 
+      // Pre-check usage to provide friendly messaging before hitting AI
+      const { data: limitCheck } = await supabase.functions.invoke('check-usage-limit', {
+        body: { limitType: 'ai_trends' }
+      });
+
+      if (limitCheck && limitCheck.canUse === false) {
+        toast({
+          title: "Daily limit reached",
+          description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+          action: (
+            <Button variant="default" onClick={() => navigate('/pricing')}>
+              Upgrade
+            </Button>
+          ),
+        });
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('analyze-trends', {
         body: { niche, platform }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle 403 from backend gracefully
+        // @ts-ignore
+        if (error.status === 403 || (typeof error.message === 'string' && error.message.toLowerCase().includes('daily limit'))) {
+          toast({
+            title: "Daily limit reached",
+            description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+            action: (
+              <Button variant="default" onClick={() => navigate('/pricing')}>
+                Upgrade
+              </Button>
+            ),
+          });
+          return;
+        }
+        throw error;
+      }
 
       if (data.analysis) {
         setAnalysis(data.analysis);
@@ -56,11 +90,24 @@ export default function TrendAnalyzer() {
       }
     } catch (error: any) {
       console.error('Error analyzing trends:', error);
-      toast({
-        title: "Analysis Failed",
-        description: error.message || "Failed to analyze trends",
-        variant: "destructive",
-      });
+      const msg = (typeof (error as any)?.message === 'string' ? (error as any).message : '') as string;
+      if ((error as any)?.status === 403 || msg.toLowerCase().includes('daily limit')) {
+        toast({
+          title: "Daily limit reached",
+          description: "Free: 5/day. Upgrade to Pro for 20/day or check back after reset.",
+          action: (
+            <Button variant="default" onClick={() => navigate('/pricing')}>
+              Upgrade
+            </Button>
+          ),
+        });
+      } else {
+        toast({
+          title: "Analysis Failed",
+          description: msg || "Failed to analyze trends",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
