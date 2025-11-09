@@ -28,7 +28,6 @@ import TextToSpeech from "./pages/TextToSpeech";
 import Dubbing from "./pages/Dubbing";
 import AIAgents from "./pages/AIAgents";
 import CreatorHelperBot from "./pages/CreatorHelperBot";
-import VideoAnalyzer from "./pages/VideoAnalyzer";
 import CommentAutoResponder from "./pages/CommentAutoResponder";
 import ShortsFactory from "./pages/ShortsFactory";
 
@@ -55,7 +54,6 @@ const App = () => (
           <Route path="/trend-analyzer" element={<Layout><TrendAnalyzer /></Layout>} />
           <Route path="/seo-optimizer" element={<Layout><SEOOptimizer /></Layout>} />
           <Route path="/hashtag-generator" element={<Layout><HashtagGenerator /></Layout>} />
-          <Route path="/video-analyzer" element={<Layout><VideoAnalyzer /></Layout>} />
           <Route path="/shorts-factory" element={<Layout><ShortsFactory /></Layout>} />
           <Route path="/comment-auto-responder" element={<Layout><CommentAutoResponder /></Layout>} />
           <Route path="/background-removal" element={<Layout><BackgroundRemoval /></Layout>} />

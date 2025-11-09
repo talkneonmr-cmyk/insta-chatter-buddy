@@ -33,7 +33,6 @@ const aiTools = [
   { title: "Trend Analyzer", url: "/trend-analyzer", icon: TrendingUp },
   { title: "SEO Optimizer", url: "/seo-optimizer", icon: Search },
   { title: "Hashtag Generator", url: "/hashtag-generator", icon: Hash },
-  { title: "Video Analyzer", url: "/video-analyzer", icon: Video },
   { title: "Comment Auto-Responder", url: "/comment-auto-responder", icon: MessageSquare },
   { title: "Background Removal", url: "/background-removal", icon: Scissors },
   { title: "Speech-to-Text", url: "/speech-to-text", icon: Mic },
