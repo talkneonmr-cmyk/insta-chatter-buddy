@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Video, Sparkles, Youtube, Music, Crown, Image, FileText, TrendingUp, Hash, Search, Mic, Volume2, UserCircle, Languages, AudioLines, Eraser, Wand2, BookOpen } from "lucide-react";
+import { Sparkles, Youtube, Music, Crown, Image, FileText, TrendingUp, Hash, Search, Mic, Volume2, Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import UsageResetCountdown from "@/components/UsageResetCountdown";
@@ -270,13 +270,6 @@ export default function UsageStats() {
       </CardHeader>
       <CardContent className="space-y-6">
         <UsageItem
-          icon={Video}
-          label="Video Uploads (Daily)"
-          used={usage?.video_uploads_count || 0}
-          limit={limits.video_uploads}
-          color="text-red-500"
-        />
-        <UsageItem
           icon={Sparkles}
           label="AI Captions (Daily)"
           used={usage?.ai_captions_count || 0}
@@ -299,14 +292,7 @@ export default function UsageStats() {
         />
         <UsageItem
           icon={Youtube}
-          label="YouTube Channels"
-          used={usage?.youtube_channels_count || 0}
-          limit={limits.youtube_channels}
-          color="text-red-600"
-        />
-        <UsageItem
-          icon={Youtube}
-          label="YouTube Operations (Daily)"
+          label="YouTube Manager (Daily)"
           used={usage?.youtube_operations_count || 0}
           limit={limits.youtube_operations}
           color="text-red-500"
@@ -354,52 +340,17 @@ export default function UsageStats() {
           color="text-teal-500"
         />
         <UsageItem
-          icon={UserCircle}
-          label="AI Voice Cloning (Daily)"
-          used={usage?.ai_voice_cloning_count || 0}
-          limit={limits.ai_voice_cloning}
-          color="text-violet-500"
-        />
-        <UsageItem
-          icon={Languages}
-          label="AI Dubbing (Daily)"
-          used={usage?.ai_dubbing_count || 0}
-          limit={limits.ai_dubbing}
-          color="text-amber-500"
-        />
-        <UsageItem
           icon={Eraser}
           label="AI Background Removal (Daily)"
           used={usage?.ai_background_removal_count || 0}
           limit={limits.ai_background_removal}
           color="text-lime-500"
         />
-        <UsageItem
-          icon={Wand2}
-          label="AI Image Enhancement (Daily)"
-          used={usage?.ai_image_enhancement_count || 0}
-          limit={limits.ai_image_enhancement}
-          color="text-fuchsia-500"
-        />
-        <UsageItem
-          icon={BookOpen}
-          label="AI Text Summarizer (Daily)"
-          used={usage?.ai_text_summarizer_count || 0}
-          limit={limits.ai_text_summarizer}
-          color="text-sky-500"
-        />
-        <UsageItem
-          icon={Sparkles}
-          label="AI Shorts Packages (Daily)"
-          used={usage?.ai_shorts_packages_count || 0}
-          limit={limits.ai_shorts_packages}
-          color="text-purple-500"
-        />
 
         {plan === "free" && (
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground text-center">
-              Free Plan: Daily limits reset every 24 hours automatically. YouTube Operations include uploads, analytics, bulk updates, playlists, and video management. Upgrade to Pro for more: 10 thumbnails/day, unlimited scripts/captions/uploads/YouTube operations, 200 music/day, 20 trends/hashtags/SEO per day!
+              Free Plan: Daily limits reset every 24 hours automatically. YouTube Manager includes uploads, channel connections, analytics, bulk updates, playlists, and video management. Upgrade to Pro for unlimited features!
             </p>
           </div>
         )}
