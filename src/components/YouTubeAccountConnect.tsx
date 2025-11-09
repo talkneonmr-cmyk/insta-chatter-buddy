@@ -2,15 +2,22 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Youtube, CheckCircle, AlertCircle } from "lucide-react";
+import { Youtube, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
+import UsageResetCountdown from "./UsageResetCountdown";
 
 const YouTubeAccountConnect = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [channelInfo, setChannelInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [resetAt, setResetAt] = useState<string>("");
+  const [channelsUsage, setChannelsUsage] = useState<number>(0);
   const { toast } = useToast();
+  const { plan } = useSubscription();
+  const navigate = useNavigate();
 
   useEffect(() => {
     checkConnection();
@@ -78,6 +85,18 @@ const YouTubeAccountConnect = () => {
         setIsConnected(true);
         setChannelInfo(data);
       }
+
+      // Fetch usage data
+      const { data: usageData } = await supabase
+        .from('usage_tracking')
+        .select('youtube_channels_count, reset_at')
+        .eq('user_id', user.id)
+        .single();
+
+      if (usageData) {
+        setChannelsUsage(usageData.youtube_channels_count || 0);
+        setResetAt(usageData.reset_at || "");
+      }
     } catch (error) {
       console.error('Error checking YouTube connection:', error);
     } finally {
@@ -88,6 +107,26 @@ const YouTubeAccountConnect = () => {
   const handleConnect = async () => {
     try {
       setLoading(true);
+      
+      // Check usage limit before connecting
+      const limits = plan === 'pro' ? -1 : 4;
+      if (limits !== -1 && channelsUsage >= limits) {
+        toast({
+          title: "Daily Limit Reached 🎯",
+          description: plan === 'free' 
+            ? `You've reached your daily limit (Free: ${limits}/day). Upgrade to Pro for unlimited channels!`
+            : `You've reached your daily limit.`,
+          variant: "destructive",
+          action: plan === 'free' ? (
+            <Button size="sm" variant="outline" onClick={() => navigate('/pricing')}>
+              <Sparkles className="h-3 w-3 mr-1" />
+              Upgrade
+            </Button>
+          ) : undefined,
+        });
+        setLoading(false);
+        return;
+      }
       
       // Get OAuth URL
       const { data: authData, error: authError } = await supabase.functions.invoke('youtube-oauth/auth-url');
@@ -199,15 +238,24 @@ const YouTubeAccountConnect = () => {
     );
   }
 
+  const limits = plan === 'pro' ? -1 : 4;
+  const isAtLimit = limits !== -1 && channelsUsage >= limits;
+
   return (
     <Alert className="border-yellow-500/20 bg-yellow-500/10">
       <AlertCircle className="h-4 w-4 text-yellow-500" />
       <AlertDescription className="flex items-center justify-between">
-        <div>
+        <div className="flex-1">
           <p className="font-medium">YouTube Account Not Connected</p>
           <p className="text-sm text-muted-foreground">Connect your YouTube account to upload and schedule videos</p>
+          {isAtLimit && (
+            <div className="mt-2 flex items-center gap-2">
+              <p className="text-xs text-destructive">Daily limit reached ({channelsUsage}/{limits})</p>
+              <UsageResetCountdown resetAt={resetAt} className="text-xs" />
+            </div>
+          )}
         </div>
-        <Button onClick={handleConnect} size="sm">
+        <Button onClick={handleConnect} size="sm" disabled={isAtLimit}>
           <Youtube className="h-4 w-4 mr-2" />
           Connect YouTube
         </Button>
