@@ -21,6 +21,29 @@ const CreatorHelperBot = () => {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    // Check usage limit first
+    const { data: limitCheck, error: limitError } = await supabase.functions.invoke('check-usage-limit', {
+      body: { limitType: 'ai_creator_helper_bot' }
+    });
+
+    if (limitError) {
+      toast({
+        title: "Error",
+        description: "Failed to check usage limit",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!limitCheck.canUse) {
+      toast({
+        title: "Daily limit reached",
+        description: limitCheck.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
     const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -38,6 +61,11 @@ const CreatorHelperBot = () => {
         content: data.reply || "I'm here to help with creator-related questions!",
       };
       setMessages((prev) => [...prev, assistantMessage]);
+      
+      // Increment usage after successful response
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'ai_creator_helper_bot' }
+      });
     } catch (error: any) {
       console.error("Error:", error);
       toast({

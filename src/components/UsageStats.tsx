@@ -49,6 +49,7 @@ const PLAN_LIMITS = {
     ai_image_enhancement: 4,
     ai_text_summarizer: 4,
     ai_shorts_packages: 4,
+    ai_creator_helper_bot: 20,
   },
   pro: {
     video_uploads: -1,
@@ -69,6 +70,7 @@ const PLAN_LIMITS = {
     ai_image_enhancement: 100,
     ai_text_summarizer: 20,
     ai_shorts_packages: 20,
+    ai_creator_helper_bot: 100,
   },
 };
 

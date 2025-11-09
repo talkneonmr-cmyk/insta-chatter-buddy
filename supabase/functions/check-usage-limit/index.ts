@@ -46,6 +46,7 @@ const PLAN_LIMITS = {
     aiImageEnhancement: 4,
     aiTextSummarizer: 4,
     aiShortsPackages: 4,
+    aiCreatorHelperBot: 20,
   },
   pro: {
     videoUploads: -1,
@@ -66,6 +67,7 @@ const PLAN_LIMITS = {
     aiImageEnhancement: 100,
     aiTextSummarizer: 20,
     aiShortsPackages: 20,
+    aiCreatorHelperBot: 100,
   },
 };
 
@@ -385,6 +387,16 @@ Deno.serve(async (req) => {
           : plan === 'free'
             ? `Hey there! Your daily limit of ${limit} text summarizations is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
             : `Hey there! Your daily limit of ${limit} text summarizations is reached. Please check back tomorrow!`;
+        break;
+      case 'ai_creator_helper_bot':
+        currentUsage = usage?.ai_creator_helper_bot_count || 0;
+        limit = limits.aiCreatorHelperBot;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} bot messages remaining today`
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} bot messages is reached. Please check back tomorrow or upgrade to Pro for 100/day!`
+            : `Hey there! Your daily limit of ${limit} bot messages is reached. Please check back tomorrow!`;
         break;
     }
 
