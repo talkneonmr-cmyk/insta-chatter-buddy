@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Sparkles, Youtube, Music, Crown, Image, FileText, TrendingUp, Hash, Search, Mic, Volume2, Eraser } from "lucide-react";
+import { Sparkles, Youtube, Music, Crown, Image, FileText, TrendingUp, Hash, Search, Mic, Volume2, Eraser, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import UsageResetCountdown from "@/components/UsageResetCountdown";
@@ -27,6 +27,7 @@ interface UsageData {
   ai_image_enhancement_count: number;
   ai_text_summarizer_count: number;
   ai_shorts_packages_count: number;
+  ai_creator_helper_bot_count: number;
 }
 
 const PLAN_LIMITS = {
@@ -110,9 +111,9 @@ export default function UsageStats() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+        const { data, error } = await supabase
         .from("usage_tracking")
-        .select("video_uploads_count, ai_captions_count, youtube_channels_count, youtube_operations_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count, ai_speech_to_text_count, ai_text_to_speech_count, ai_voice_cloning_count, ai_dubbing_count, ai_background_removal_count, ai_image_enhancement_count, ai_text_summarizer_count, ai_shorts_packages_count, reset_at")
+        .select("video_uploads_count, ai_captions_count, youtube_channels_count, youtube_operations_count, ai_music_count, ai_thumbnails_count, ai_scripts_count, ai_trends_count, ai_hashtags_count, ai_seo_count, ai_speech_to_text_count, ai_text_to_speech_count, ai_voice_cloning_count, ai_dubbing_count, ai_background_removal_count, ai_image_enhancement_count, ai_text_summarizer_count, ai_shorts_packages_count, ai_creator_helper_bot_count, reset_at")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -150,6 +151,7 @@ export default function UsageStats() {
           ai_image_enhancement_count: 0,
           ai_text_summarizer_count: 0,
           ai_shorts_packages_count: 0,
+          ai_creator_helper_bot_count: 0,
         });
         return;
       }
@@ -173,6 +175,7 @@ export default function UsageStats() {
         ai_image_enhancement_count: data.ai_image_enhancement_count || 0,
         ai_text_summarizer_count: data.ai_text_summarizer_count || 0,
         ai_shorts_packages_count: data.ai_shorts_packages_count || 0,
+        ai_creator_helper_bot_count: data.ai_creator_helper_bot_count || 0,
       });
       setResetAt(data.reset_at || "");
     } catch (error) {
@@ -354,6 +357,13 @@ export default function UsageStats() {
           used={usage?.ai_image_enhancement_count || 0}
           limit={limits.ai_image_enhancement}
           color="text-amber-500"
+        />
+        <UsageItem
+          icon={Bot}
+          label="Creator Helper Bot (Daily)"
+          used={usage?.ai_creator_helper_bot_count || 0}
+          limit={limits.ai_creator_helper_bot}
+          color="text-violet-500"
         />
 
         {plan === "free" && (

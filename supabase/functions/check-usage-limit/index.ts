@@ -176,6 +176,7 @@ Deno.serve(async (req) => {
           ai_image_enhancement_count: 0,
           ai_text_summarizer_count: 0,
           ai_shorts_packages_count: 0,
+          ai_creator_helper_bot_count: 0,
           youtube_operations_count: 0,
           reset_at: now.toISOString(),
         })
