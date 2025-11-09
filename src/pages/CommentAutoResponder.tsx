@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowLeft, Video, Trash2, Play, Youtube } from "lucide-react";
+import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowLeft, Video, Trash2, Play, Youtube, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "@/hooks/useSubscription";
+import UsageResetCountdown from "@/components/UsageResetCountdown";
 import {
   Select,
   SelectContent,
@@ -31,8 +33,10 @@ import { formatDistanceToNow } from "date-fns";
 export default function CommentAutoResponder() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { plan } = useSubscription();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [usage, setUsage] = useState({ current: 0, limit: 20, resetAt: '' });
   const [settings, setSettings] = useState({
     enabled: false,
     response_style: "friendly",
@@ -57,6 +61,7 @@ export default function CommentAutoResponder() {
     loadLogs();
     loadMonitoredVideos();
     checkYouTubeConnection();
+    loadUsage();
   }, []);
 
   const loadSettings = async () => {
@@ -118,6 +123,36 @@ export default function CommentAutoResponder() {
       setStats({ total, replied, skipped, failed });
     } catch (error) {
       console.error('Error loading logs:', error);
+    }
+  };
+
+  const loadUsage = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: usageData } = await supabase
+        .from('usage_tracking')
+        .select('youtube_operations_count, reset_at')
+        .eq('user_id', user.id)
+        .single();
+
+      const { data: subscription } = await supabase
+        .from('user_subscriptions')
+        .select('plan')
+        .eq('user_id', user.id)
+        .single();
+
+      const userPlan = subscription?.plan || 'free';
+      const limit = userPlan === 'free' ? 20 : -1;
+
+      setUsage({
+        current: usageData?.youtube_operations_count || 0,
+        limit,
+        resetAt: usageData?.reset_at || ''
+      });
+    } catch (error) {
+      console.error('Error loading usage:', error);
     }
   };
 
@@ -301,19 +336,64 @@ export default function CommentAutoResponder() {
   };
 
   const manualCheckVideo = async (videoId: string) => {
+    // Pre-check usage limits
+    if (usage.limit !== -1 && usage.current >= usage.limit) {
+      toast({
+        variant: "destructive",
+        title: "Daily Limit Reached",
+        description: (
+          <div className="space-y-2">
+            <p>Free: {usage.limit}/day limit reached</p>
+            {usage.resetAt && <UsageResetCountdown resetAt={usage.resetAt} />}
+          </div>
+        ),
+        action: plan === 'free' ? (
+          <Button size="sm" onClick={() => navigate("/pricing")}>
+            <Sparkles className="h-4 w-4 mr-2" />
+            Upgrade
+          </Button>
+        ) : undefined,
+      });
+      return;
+    }
+
     setCheckingVideo(videoId);
     try {
       const { data, error } = await supabase.functions.invoke('manual-check-comments', {
         body: { videoId }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle 403 limit reached response
+        if (error.message?.includes('Daily limit reached') || error.message?.includes('403')) {
+          toast({
+            variant: "destructive",
+            title: "Daily Limit Reached",
+            description: (
+              <div className="space-y-2">
+                <p>Free: {usage.limit}/day limit reached</p>
+                {usage.resetAt && <UsageResetCountdown resetAt={usage.resetAt} />}
+              </div>
+            ),
+            action: plan === 'free' ? (
+              <Button size="sm" onClick={() => navigate("/pricing")}>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Upgrade
+              </Button>
+            ) : undefined,
+          });
+          await loadUsage();
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Check Complete",
         description: `Replied: ${data.replied}, Skipped: ${data.skipped}`,
       });
       await loadLogs();
+      await loadUsage(); // Refresh usage after successful check
     } catch (error: any) {
       console.error('Error checking video:', error);
       toast({
@@ -439,6 +519,32 @@ export default function CommentAutoResponder() {
           <div className="text-2xl font-bold text-red-500">{stats.failed}</div>
         </Card>
       </div>
+
+      {/* Usage Limits */}
+      <Card className="p-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm text-muted-foreground mb-1">Manual Checks (Daily)</div>
+            <div className="text-2xl font-bold">
+              {usage.current} / {usage.limit === -1 ? '∞' : usage.limit}
+            </div>
+            {usage.limit !== -1 && usage.current >= usage.limit && (
+              <p className="text-xs text-destructive mt-1">Daily limit reached</p>
+            )}
+            {usage.resetAt && usage.limit !== -1 && (
+              <div className="mt-2">
+                <UsageResetCountdown resetAt={usage.resetAt} />
+              </div>
+            )}
+          </div>
+          {plan === 'free' && (
+            <Button size="sm" variant="gradient" onClick={() => navigate("/pricing")}>
+              <Sparkles className="h-4 w-4 mr-2" />
+              Upgrade for Unlimited
+            </Button>
+          )}
+        </div>
+      </Card>
 
       {/* Settings */}
       <Card className="p-6 mb-6">
@@ -569,7 +675,7 @@ export default function CommentAutoResponder() {
                       variant="outline"
                       size="sm"
                       onClick={() => manualCheckVideo(video.video_id)}
-                      disabled={checkingVideo === video.video_id}
+                      disabled={checkingVideo === video.video_id || (usage.limit !== -1 && usage.current >= usage.limit)}
                     >
                       {checkingVideo === video.video_id ? (
                         <>

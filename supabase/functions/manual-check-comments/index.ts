@@ -38,6 +38,35 @@ serve(async (req) => {
       );
     }
 
+    // Check usage limits
+    const { data: usageData, error: usageError } = await supabaseClient
+      .from('usage_tracking')
+      .select('youtube_operations_count')
+      .eq('user_id', user.id)
+      .single();
+
+    const { data: subscription, error: subError } = await supabaseClient
+      .from('user_subscriptions')
+      .select('plan')
+      .eq('user_id', user.id)
+      .single();
+
+    const plan = subscription?.plan || 'free';
+    const currentUsage = usageData?.youtube_operations_count || 0;
+    const limit = plan === 'free' ? 20 : -1; // -1 means unlimited for pro
+
+    if (limit !== -1 && currentUsage >= limit) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Daily limit reached',
+          limit,
+          current: currentUsage,
+          plan
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Get user's settings
     const { data: setting, error: settingsError } = await supabaseClient
       .from('youtube_comment_settings')
@@ -102,6 +131,15 @@ serve(async (req) => {
       accessToken,
       setting
     );
+
+    // Increment usage counter
+    await supabaseClient
+      .from('usage_tracking')
+      .update({ 
+        youtube_operations_count: currentUsage + 1,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', user.id);
 
     return new Response(
       JSON.stringify({ success: true, ...result }),
