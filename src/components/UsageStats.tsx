@@ -66,7 +66,7 @@ const PLAN_LIMITS = {
     ai_voice_cloning: 20,
     ai_dubbing: 20,
     ai_background_removal: 20,
-    ai_image_enhancement: 20,
+    ai_image_enhancement: 100,
     ai_text_summarizer: 20,
     ai_shorts_packages: 20,
   },
@@ -345,6 +345,13 @@ export default function UsageStats() {
           used={usage?.ai_background_removal_count || 0}
           limit={limits.ai_background_removal}
           color="text-lime-500"
+        />
+        <UsageItem
+          icon={Sparkles}
+          label="AI Image Enhancement (Daily)"
+          used={usage?.ai_image_enhancement_count || 0}
+          limit={limits.ai_image_enhancement}
+          color="text-amber-500"
         />
 
         {plan === "free" && (

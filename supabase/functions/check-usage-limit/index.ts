@@ -63,7 +63,7 @@ const PLAN_LIMITS = {
     aiVoiceCloning: 20,
     aiDubbing: 20,
     aiBackgroundRemoval: 20,
-    aiImageEnhancement: 20,
+    aiImageEnhancement: 100,
     aiTextSummarizer: 20,
     aiShortsPackages: 20,
   },
