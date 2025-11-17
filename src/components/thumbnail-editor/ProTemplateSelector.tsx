@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Crown, Zap, TrendingUp, Sparkles, Loader2, Download, Check } from "lucide-react";
+import { Crown, Zap, TrendingUp, Sparkles, Loader2, Download, Check, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { removeBackground, loadImage } from "@/lib/backgroundRemoval";
 
 interface Template {
   id: string;
@@ -73,6 +74,8 @@ export const ProTemplateSelector = () => {
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [processingImage, setProcessingImage] = useState(false);
 
   const POPULAR_EMOJIS = [
     { emoji: "🔥", label: "Fire" },
@@ -97,6 +100,41 @@ export const ProTemplateSelector = () => {
     setSelectedEmojis((prev) =>
       prev.includes(emoji) ? prev.filter((e) => e !== emoji) : [...prev, emoji]
     );
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    setProcessingImage(true);
+    toast.info("Processing image and removing background...");
+
+    try {
+      const imageElement = await loadImage(file);
+      const processedBlob = await removeBackground(imageElement);
+      const processedDataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(processedBlob);
+      });
+
+      setUploadedImage(processedDataUrl);
+      toast.success("Image processed! Background removed successfully");
+    } catch (error) {
+      console.error("Error processing image:", error);
+      toast.error("Failed to process image. Please try another image.");
+    } finally {
+      setProcessingImage(false);
+    }
+  };
+
+  const removeUploadedImage = () => {
+    setUploadedImage(null);
   };
 
   const generateThumbnail = async () => {
@@ -167,6 +205,7 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
           prompt: finalPrompt,
           style: "professional",
           title: `${selectedTemplate.name} - ${customPrompt.substring(0, 30)}`,
+          userImage: uploadedImage || null
         },
       });
 
@@ -223,6 +262,7 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
     setThumbnailText("");
     setSelectedEmojis([]);
     setSelectedTemplate(null);
+    setUploadedImage(null);
   };
 
   return (
@@ -306,6 +346,62 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
               <p className="text-xs text-muted-foreground">
                 AI will automatically style and position your text for maximum impact
               </p>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Upload Your Image (Optional)</label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Add your own photo - we'll remove the background automatically!
+              </p>
+              {!uploadedImage ? (
+                <div className="relative">
+                  <input
+                    id="user-image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={processingImage}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="user-image-upload"
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                      processingImage
+                        ? "border-muted bg-muted/20 cursor-not-allowed"
+                        : "border-border hover:border-primary bg-muted/10 hover:bg-muted/20"
+                    }`}
+                  >
+                    {processingImage ? (
+                      <>
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">Removing background...</p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">Click to upload your image</p>
+                        <p className="text-xs text-muted-foreground mt-1">Background will be removed automatically</p>
+                      </>
+                    )}
+                  </label>
+                </div>
+              ) : (
+                <div className="relative w-full h-32 border-2 border-primary rounded-lg overflow-hidden bg-checkerboard">
+                  <img
+                    src={uploadedImage}
+                    alt="Uploaded"
+                    className="w-full h-full object-contain"
+                  />
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="absolute top-2 right-2"
+                    onClick={removeUploadedImage}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3">

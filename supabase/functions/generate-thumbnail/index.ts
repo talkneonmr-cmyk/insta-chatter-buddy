@@ -36,8 +36,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { prompt, style, title } = requestBody;
-    console.log('Generating thumbnail with prompt:', prompt, 'style:', style);
+    const { prompt, style, title, userImage } = requestBody;
+    console.log('Generating thumbnail with prompt:', prompt, 'style:', style, 'has user image:', !!userImage);
 
     const startTime = Date.now();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -70,9 +70,26 @@ Deno.serve(async (req) => {
       food: 'Create an appetizing food YouTube thumbnail with mouth-watering presentation and bright, natural colors.'
     };
 
-    const enhancedPrompt = `${stylePrompts[style] || 'Create a YouTube thumbnail with eye-catching design'}. ${prompt}. Ultra high resolution, 16:9 aspect ratio, professional quality.`;
+    let enhancedPrompt = `${stylePrompts[style] || 'Create a YouTube thumbnail with eye-catching design'}. ${prompt}. Ultra high resolution, 16:9 aspect ratio, professional quality.`;
+    
+    // If user uploaded an image, modify the prompt to incorporate it
+    if (userImage) {
+      enhancedPrompt = `${enhancedPrompt} IMPORTANT: Incorporate the person/subject from the provided image into the thumbnail, maintaining their appearance with the background already removed. Place them prominently in the composition.`;
+    }
 
     // Generate image using Lovable AI
+    const messageContent: any[] = [
+      { type: 'text', text: enhancedPrompt }
+    ];
+
+    // Add user image if provided
+    if (userImage) {
+      messageContent.push({
+        type: 'image_url',
+        image_url: { url: userImage }
+      });
+    }
+
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -82,7 +99,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash-image-preview',
         messages: [
-          { role: 'user', content: enhancedPrompt }
+          { role: 'user', content: messageContent }
         ],
         modalities: ['image', 'text']
       }),
