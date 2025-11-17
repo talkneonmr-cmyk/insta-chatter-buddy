@@ -59,20 +59,13 @@ Deno.serve(async (req) => {
     }
 
     // Build comprehensive prompt for natural, human speech
-    const systemPrompt = `You are an expert YouTube script writer specializing in creating scripts that sound NATURAL and HUMAN when spoken aloud. Your scripts are designed for real people to deliver on camera, not robots. Focus on:
-1. Conversational, natural speech patterns - how real people actually talk
-2. Short, punchy sentences that are easy to speak and breathe while delivering
-3. Emotional connection and authenticity - make it feel personal and genuine
-4. Natural pauses and rhythm for comfortable speaking
-5. Avoiding robotic, overly formal, or awkward phrasing
-6. Words and phrases that flow smoothly when spoken out loud
-7. Energy and enthusiasm that translates well on camera`;
+    const systemPrompt = `You are an expert YouTube script writer who creates scripts that real people can easily read and speak on camera. Your scripts are CLEAN, SIMPLE, and NATURAL - just the words to say, nothing else.`;
 
     const languageInstruction = language !== 'english' 
-      ? `\n\nCRITICAL: Write the ENTIRE script in ${language.toUpperCase()}. Every single word, sentence, and section must be in native ${language}. Use natural ${language} expressions and idioms.`
+      ? `\n\nCRITICAL: Write the ENTIRE script in ${language.toUpperCase()}. Every single word must be in native ${language}. Use natural ${language} expressions and speaking style.`
       : '';
 
-    const userPrompt = `Create a YouTube video script that sounds NATURAL when a human speaks it on camera.
+    const userPrompt = `Create a clean, easy-to-read YouTube video script that a human can speak naturally on camera.
 
 Topic: ${videoTopic}
 Length: ${videoLength}
@@ -80,35 +73,35 @@ Tone: ${tone}
 Target Audience: ${targetAudience || 'General audience'}
 Language: ${language.charAt(0).toUpperCase() + language.slice(1)}${languageInstruction}
 
-CRITICAL REQUIREMENTS FOR NATURAL SPEECH:
-- Write EXACTLY how a real person would speak on camera
-- Use contractions (I'm, you'll, we're, don't) to sound natural
-- Include filler phrases like "you know", "actually", "honestly" where appropriate
-- Break up long sentences - humans need to breathe while speaking
-- Add emotional cues like [smile], [pause], [emphasis] where helpful
-- Use simple, everyday language - not corporate or robotic jargon
-- Make it sound like a conversation with a friend, not a lecture
-- Include rhetorical questions to engage the audience naturally
-- Add natural transitions like "So here's the thing...", "Now, check this out..."
+CRITICAL FORMATTING RULES:
+- NO stage directions like [smile], [pause], [emphasis] 
+- NO technical markers or timestamps in the script itself
+- NO section headers or labels within the speaking text
+- Just write EXACTLY what the person should say, word for word
+- Write it as one flowing conversation
+- Use line breaks between different thoughts/sections for easy reading
+- Make it conversational - use "I'm", "you'll", "don't", "gonna" etc.
+- Short sentences that are easy to speak without running out of breath
 
-Structure the script with:
-1. HOOK (0:00-0:05) - An attention-grabbing opening line that sounds excited and natural
-2. INTRODUCTION (0:05-0:30) - Friendly welcome, what they'll learn, why it matters
-3. MAIN CONTENT - Break into clear sections with:
-   - Natural speaking rhythm
-   - Personal anecdotes or examples
-   - Conversational transitions between points
-   - Easy-to-speak explanations
-4. CALL-TO-ACTION - Natural, friendly request (not pushy)
-5. OUTRO - Warm, authentic closing
+CONTENT STRUCTURE (but don't label these in the script):
+1. Start with an exciting hook - first 1-2 sentences grab attention
+2. Quick intro - who you are, what the video is about
+3. Main content - 3-5 key points explained simply and conversationally
+4. Natural call-to-action - ask for likes/comments/subscribes in a friendly way
+5. Warm goodbye
 
-Add [SPEAKING TIPS] throughout for:
-- Where to pause for emphasis
-- Which words to stress
-- Where to smile or show emotion
-- Pacing suggestions
+Write ONLY the words to speak. Make it flow naturally like talking to a friend. No formatting, no directions, no labels - just pure conversational speech that's easy to read and deliver.
 
-Make this script so natural that when someone reads it, they'll sound like a confident, engaging human - not a robot reading a teleprompter.`;
+Example of what to write:
+"Hey everyone, welcome back! Today I'm gonna show you something super cool that's gonna change how you think about this. So let's jump right in.
+
+First thing you need to know is this..."
+
+NOT like this:
+"[HOOK] (0:00-0:05)
+HOST: [Enthusiastically] Hey everyone! [Smile and wave]"
+
+Just clean, readable text that flows naturally.`;
 
 
     // Generate script using Lovable AI
