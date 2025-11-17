@@ -263,31 +263,31 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
       {/* Customization Step */}
       {selectedTemplate && !generatedImage && (
         <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="text-3xl">{selectedTemplate.emoji}</span>
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <span className="text-2xl sm:text-3xl">{selectedTemplate.emoji}</span>
                   Step 2: Describe Your Thumbnail
                 </CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   Template: {selectedTemplate.name}
                 </p>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedTemplate(null)}>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedTemplate(null)} className="self-start sm:self-auto">
                 Change Template
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 px-4 sm:px-6">
             <div className="space-y-2">
               <label className="text-sm font-medium">What should be in the thumbnail?</label>
               <Textarea
                 placeholder={selectedTemplate.placeholder}
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                rows={3}
-                className="resize-none text-base"
+                rows={4}
+                className="resize-none text-sm sm:text-base"
               />
             </div>
 
@@ -300,7 +300,7 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
                 placeholder="e.g., 'I SPENT $100,000' or 'YOU WON'T BELIEVE THIS'"
                 value={thumbnailText}
                 onChange={(e) => setThumbnailText(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-input bg-background text-base font-bold placeholder:font-normal"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-input bg-background text-sm sm:text-base font-bold placeholder:font-normal"
                 maxLength={50}
               />
               <p className="text-xs text-muted-foreground">
@@ -310,13 +310,13 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
 
             <div className="space-y-3">
               <label className="text-sm font-medium">Add Emojis (Optional)</label>
-              <div className="grid grid-cols-8 gap-2">
+              <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
                 {POPULAR_EMOJIS.map((item) => (
                   <button
                     key={item.emoji}
                     type="button"
                     onClick={() => toggleEmoji(item.emoji)}
-                    className={`text-3xl p-3 rounded-lg border-2 transition-all hover:scale-110 ${
+                    className={`text-2xl sm:text-3xl p-2 sm:p-3 rounded-lg border-2 transition-all hover:scale-110 ${
                       selectedEmojis.includes(item.emoji)
                         ? "border-primary bg-primary/10 scale-105"
                         : "border-border hover:border-primary/50"
@@ -349,9 +349,12 @@ CRITICAL YOUTUBE THUMBNAIL REQUIREMENTS:
               </p>
             </div>
 
-            <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-              <p className="text-sm font-medium">💡 Pro Tips:</p>
-              <ul className="text-xs text-muted-foreground space-y-1">
+            <div className="bg-muted/50 p-3 sm:p-4 rounded-lg space-y-2">
+              <p className="text-sm font-medium flex items-center gap-2">
+                <span>💡</span>
+                <span>Pro Tips:</span>
+              </p>
+              <ul className="text-xs text-muted-foreground space-y-1 pl-1">
                 <li>• Describe the main visual you want</li>
                 <li>• Add text for viral titles like MrBeast</li>
                 <li>• Pick 1-3 emojis that match your emotion</li>
