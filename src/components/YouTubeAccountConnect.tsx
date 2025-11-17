@@ -142,7 +142,9 @@ const YouTubeAccountConnect = () => {
       }
       
       // Get OAuth URL
-      const { data: authData, error: authError } = await supabase.functions.invoke('youtube-oauth/auth-url');
+      const { data: authData, error: authError } = await supabase.functions.invoke('youtube-oauth/auth-url', {
+        body: { redirectOrigin: window.location.origin },
+      });
       
       if (authError) {
         // Check if it's a limit error
