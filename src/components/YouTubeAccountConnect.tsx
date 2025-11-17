@@ -29,6 +29,8 @@ const YouTubeAccountConnect = () => {
     console.log('[YouTube OAuth] URL params - code:', code, 'state:', state);
     
     if (code && state) {
+      // Clean URL immediately to prevent reuse
+      window.history.replaceState({}, document.title, window.location.pathname);
       handleOAuthCallback(code, state);
     }
   }, []);
@@ -43,7 +45,15 @@ const YouTubeAccountConnect = () => {
         body: { code, state },
       });
 
-      if (error) throw error as any;
+      if (error) {
+        console.error('[YouTube OAuth] Function error:', error);
+        throw error;
+      }
+
+      if (!data || data.error) {
+        console.error('[YouTube OAuth] Response error:', data?.error);
+        throw new Error(data?.error || 'Failed to connect YouTube channel');
+      }
 
       console.log('[YouTube OAuth] Exchange success:', data);
       
@@ -56,16 +66,14 @@ const YouTubeAccountConnect = () => {
         title: "Success",
         description: `Connected to YouTube channel: ${data.channelTitle}`,
       });
-
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
       
       await checkConnection();
-    } catch (error) {
+    } catch (error: any) {
       console.error('[YouTube OAuth] Token exchange error:', error);
+      const errorMessage = error?.message || error?.error || 'Failed to complete YouTube connection. Please try again.';
       toast({
-        title: "Error",
-        description: "Failed to complete YouTube connection.",
+        title: "Connection Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
