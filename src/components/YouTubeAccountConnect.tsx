@@ -42,7 +42,7 @@ const YouTubeAccountConnect = () => {
       
       // Exchange code for tokens
       const { data, error } = await supabase.functions.invoke('youtube-oauth', {
-        body: { code, state },
+        body: { code, state, redirectOrigin: window.location.origin },
       });
 
       if (error) {
