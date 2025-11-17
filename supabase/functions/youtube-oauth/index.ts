@@ -132,17 +132,16 @@ serve(async (req) => {
         );
       }
 
-      // Use the referer to get the redirect URI
+      // Use the provided origin (preferred) or fallback to referer to get the redirect URI
       const referer = req.headers.get('referer') || req.headers.get('origin') || '';
-      if (!referer) {
+      const redirectOrigin = body.redirectOrigin || (referer ? new URL(referer).origin : '');
+      if (!redirectOrigin) {
         return new Response(
           JSON.stringify({ error: 'Unable to determine redirect URI. Please try again.' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
-      const appUrl = new URL(referer);
-      const redirectUri = `${appUrl.origin}/youtube-manager`;
+      const redirectUri = `${redirectOrigin}/youtube-manager`;
       
       console.log('Token exchange redirect URI:', redirectUri);
 
@@ -169,7 +168,7 @@ serve(async (req) => {
         if (tokens.error === 'invalid_grant') {
           errorMessage = 'Authorization expired. Please try connecting again.';
         } else if (tokens.error === 'redirect_uri_mismatch') {
-          errorMessage = `Redirect URI mismatch. Please ensure ${appUrl.origin} is added to your Google Cloud Console authorized redirect URIs.`;
+          errorMessage = `Redirect URI mismatch. Please ensure ${redirectOrigin} is added to your Google Cloud Console authorized redirect URIs.`;
         }
         
         return new Response(
