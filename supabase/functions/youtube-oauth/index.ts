@@ -57,9 +57,16 @@ serve(async (req) => {
       if (existingChannel) {
         // Allow reconnecting/updating existing channel without counting as new usage
         const clientId = Deno.env.get('YOUTUBE_CLIENT_ID');
-        const referer = req.headers.get('referer') || req.headers.get('origin') || '';
-        const appUrl = new URL(referer);
-        const redirectUri = `${appUrl.origin}/youtube-manager`;
+        const bodyJson = req.method === 'POST' ? body : {};
+        const headerOrigin = req.headers.get('origin') || req.headers.get('referer') || '';
+        const redirectOrigin = bodyJson.redirectOrigin || (headerOrigin ? new URL(headerOrigin).origin : '');
+        if (!redirectOrigin) {
+          return new Response(
+            JSON.stringify({ error: 'Unable to determine redirect URI. Please try again.' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        const redirectUri = `${redirectOrigin}/youtube-manager`;
         
         const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
         authUrl.searchParams.set('client_id', clientId!);
