@@ -57,35 +57,40 @@ Deno.serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are a YouTube SEO expert. Provide ONLY clean, ready-to-use optimized content. No explanations, no bullet points, no "why it works" - just the final optimized text.`;
+    const systemPrompt = `You are a YouTube SEO expert who creates SHORT, PRACTICAL content that real creators actually use. No essays, no fluff - just clean, copy-paste ready text.`;
 
-    const userPrompt = `Optimize this YouTube video for maximum discoverability:
+    const userPrompt = `Optimize this YouTube video SEO:
 
 Original Title: ${title}
 ${description ? `Description: ${description}` : ''}
 ${niche ? `Niche: ${niche}` : ''}
 
-Provide ONLY the following in clean format (no explanations):
+Return ONLY these sections in clean format:
 
 1. OPTIMIZED TITLE
-[Write only the final title - compelling, keyword-rich, under 60 characters]
+[One line only - under 60 characters, keyword-rich, compelling]
 
-2. OPTIMIZED DESCRIPTION
-[Write only the complete description - detailed, SEO-optimized, 150-300 words with natural keyword placement]
+2. OPTIMIZED DESCRIPTION  
+[3-5 short paragraphs max, 100-150 words total - not an essay!
+- First line: Hook with main keyword
+- Middle: 2-3 sentences about the video
+- End: Simple CTA
+Keep it natural and conversational like real YouTubers write]
 
 3. KEYWORDS
-[List 15-20 keywords separated by commas - high-traffic search terms]
+[15-20 keywords, comma-separated - actual search terms people use]
 
 4. TAGS
-[List 25-30 tags separated by commas - include variations and related terms]
+[25-30 tags, comma-separated - variations and related terms]
 
 5. SEO SCORE
-[Just the number from 1-100 rating the original title]
+[Just write: "Original Score: X/100" - one line]
 
 6. QUICK TIPS
-[3-5 short, actionable bullet points for improvement]
+[3 bullet points only - short, actionable advice]
 
-IMPORTANT: Write clean, copy-paste ready content. No "why it works", no explanations in the title or description, no formatting beyond what's needed. Just give the optimized content that can be used directly.`;
+CRITICAL: Keep descriptions SHORT (100-150 words max). Write like a human YouTuber, not a corporate blog. Be conversational, direct, and practical. No academic writing!`;
+
 
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
