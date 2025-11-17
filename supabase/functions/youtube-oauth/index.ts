@@ -124,10 +124,27 @@ serve(async (req) => {
 
       const clientId = Deno.env.get('YOUTUBE_CLIENT_ID');
       const clientSecret = Deno.env.get('YOUTUBE_CLIENT_SECRET');
+      
+      if (!clientId || !clientSecret) {
+        return new Response(
+          JSON.stringify({ error: 'YouTube OAuth credentials not configured. Please contact support.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       // Use the referer to get the redirect URI
       const referer = req.headers.get('referer') || req.headers.get('origin') || '';
+      if (!referer) {
+        return new Response(
+          JSON.stringify({ error: 'Unable to determine redirect URI. Please try again.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       const appUrl = new URL(referer);
       const redirectUri = `${appUrl.origin}/youtube-manager`;
+      
+      console.log('Token exchange redirect URI:', redirectUri);
 
       // Exchange code for tokens
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -135,8 +152,8 @@ serve(async (req) => {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           code,
-          client_id: clientId!,
-          client_secret: clientSecret!,
+          client_id: clientId,
+          client_secret: clientSecret,
           redirect_uri: redirectUri,
           grant_type: 'authorization_code',
         }),
@@ -145,7 +162,23 @@ serve(async (req) => {
       const tokens = await tokenResponse.json();
 
       if (!tokenResponse.ok) {
-        throw new Error(`Token exchange failed: ${JSON.stringify(tokens)}`);
+        console.error('Token exchange failed:', tokens);
+        
+        // Return user-friendly error messages
+        let errorMessage = 'Failed to connect YouTube account.';
+        if (tokens.error === 'invalid_grant') {
+          errorMessage = 'Authorization expired. Please try connecting again.';
+        } else if (tokens.error === 'redirect_uri_mismatch') {
+          errorMessage = `Redirect URI mismatch. Please ensure ${appUrl.origin} is added to your Google Cloud Console authorized redirect URIs.`;
+        }
+        
+        return new Response(
+          JSON.stringify({ 
+            error: errorMessage,
+            details: tokens.error_description || tokens.error 
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
 
       // Get channel info
@@ -160,7 +193,10 @@ serve(async (req) => {
       const channel = channelData.items?.[0];
 
       if (!channel) {
-        throw new Error('No YouTube channel found');
+        return new Response(
+          JSON.stringify({ error: 'No YouTube channel found for this Google account. Please ensure you have a YouTube channel.' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
 
       const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
@@ -186,7 +222,13 @@ serve(async (req) => {
           token_expires_at: expiresAt.toISOString(),
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Database insert error:', insertError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to save YouTube account. Please try again.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
 
       // Increment usage only for new channel connections
       if (isNewChannel) {
