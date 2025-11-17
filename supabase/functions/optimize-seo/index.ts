@@ -57,39 +57,27 @@ Deno.serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are a YouTube SEO expert who creates SHORT, PRACTICAL content that real creators actually use. No essays, no fluff - just clean, copy-paste ready text.`;
+    const systemPrompt = `You are a YouTube SEO expert. Create SHORT, PRACTICAL optimized titles and descriptions that real creators use.`;
 
-    const userPrompt = `Optimize this YouTube video SEO:
+    const userPrompt = `Optimize this YouTube video:
 
 Original Title: ${title}
-${description ? `Description: ${description}` : ''}
+${description ? `Original Description: ${description}` : ''}
 ${niche ? `Niche: ${niche}` : ''}
 
-Return ONLY these sections in clean format:
+Return ONLY these two things:
 
-1. OPTIMIZED TITLE
-[One line only - under 60 characters, keyword-rich, compelling]
+OPTIMIZED TITLE:
+[Write one compelling, keyword-rich title under 60 characters]
 
-2. OPTIMIZED DESCRIPTION  
-[3-5 short paragraphs max, 100-150 words total - not an essay!
-- First line: Hook with main keyword
-- Middle: 2-3 sentences about the video
-- End: Simple CTA
-Keep it natural and conversational like real YouTubers write]
+OPTIMIZED DESCRIPTION:
+[Write 3-4 short sentences, 80-120 words total
+- Start with a hook using main keywords
+- Briefly explain what the video is about
+- End with a simple call-to-action
+Keep it natural and conversational - like how real YouTubers actually write]
 
-3. KEYWORDS
-[15-20 keywords, comma-separated - actual search terms people use]
-
-4. TAGS
-[25-30 tags, comma-separated - variations and related terms]
-
-5. SEO SCORE
-[Just write: "Original Score: X/100" - one line]
-
-6. QUICK TIPS
-[3 bullet points only - short, actionable advice]
-
-CRITICAL: Keep descriptions SHORT (100-150 words max). Write like a human YouTuber, not a corporate blog. Be conversational, direct, and practical. No academic writing!`;
+CRITICAL: Be concise. Write like a human, not a robot. No extra sections, no explanations, just title and description.`;
 
 
 
