@@ -72,9 +72,18 @@ Deno.serve(async (req) => {
 
     let enhancedPrompt = `${stylePrompts[style] || 'Create a YouTube thumbnail with eye-catching design'}. ${prompt}. Ultra high resolution, 16:9 aspect ratio, professional quality.`;
     
-    // If user uploaded an image, modify the prompt to incorporate it
+    // If user uploaded an image, use image editing mode instead
     if (userImage) {
-      enhancedPrompt = `${enhancedPrompt} IMPORTANT: Incorporate the person/subject from the provided image into the thumbnail, maintaining their appearance with the background already removed. Place them prominently in the composition.`;
+      enhancedPrompt = `Create a professional YouTube thumbnail background ONLY for this image. ${stylePrompts[style] || 'Eye-catching design'}. ${prompt}. 
+      
+CRITICAL REQUIREMENTS:
+- DO NOT modify, redraw, or change the person's face, features, or appearance in ANY way
+- DO NOT alter skin tone, facial structure, expression, or any physical characteristics
+- Keep the exact person from the image with NO modifications
+- Only add: exciting background, dynamic lighting effects, text overlays if requested, dramatic scene elements
+- The person must remain EXACTLY as they appear in the provided image
+- Focus on creating an amazing background that complements the person
+- 1280x720 pixels, 16:9 aspect ratio, professional YouTube thumbnail quality`;
     }
 
     // Generate image using Lovable AI
