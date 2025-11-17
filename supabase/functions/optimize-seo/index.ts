@@ -57,27 +57,54 @@ Deno.serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are a YouTube SEO expert. Create SHORT, PRACTICAL optimized titles and descriptions that real creators use.`;
+    const systemPrompt = `You are a YouTube SEO expert. Provide complete, professional SEO optimization in clean format - ready to copy and paste into YouTube Studio.`;
 
-    const userPrompt = `Optimize this YouTube video:
+    const userPrompt = `Optimize this YouTube video for maximum visibility:
 
 Original Title: ${title}
 ${description ? `Original Description: ${description}` : ''}
 ${niche ? `Niche: ${niche}` : ''}
 
-Return ONLY these two things:
+Provide complete YouTube SEO in this exact format:
 
-OPTIMIZED TITLE:
+━━━━━━━━━━━━━━━━━━━━━━
+OPTIMIZED TITLE
+━━━━━━━━━━━━━━━━━━━━━━
 [Write one compelling, keyword-rich title under 60 characters]
 
-OPTIMIZED DESCRIPTION:
-[Write 3-4 short sentences, 80-120 words total
-- Start with a hook using main keywords
-- Briefly explain what the video is about
-- End with a simple call-to-action
-Keep it natural and conversational - like how real YouTubers actually write]
+━━━━━━━━━━━━━━━━━━━━━━
+OPTIMIZED DESCRIPTION
+━━━━━━━━━━━━━━━━━━━━━━
+[Write 100-150 words total:
+- First line: Hook with main keyword
+- 2-3 sentences explaining the video
+- Include 3-5 relevant timestamps (00:00 format)
+- End with CTA (like/subscribe/comment)
+Keep it natural and conversational]
 
-CRITICAL: Be concise. Write like a human, not a robot. No extra sections, no explanations, just title and description.`;
+━━━━━━━━━━━━━━━━━━━━━━
+KEYWORDS (Target these in your content)
+━━━━━━━━━━━━━━━━━━━━━━
+[List 15-20 high-traffic keywords, comma-separated]
+
+━━━━━━━━━━━━━━━━━━━━━━
+TAGS (Copy-paste into YouTube tags)
+━━━━━━━━━━━━━━━━━━━━━━
+[List 25-30 tags including variations, comma-separated]
+
+━━━━━━━━━━━━━━━━━━━━━━
+SEO SCORE
+━━━━━━━━━━━━━━━━━━━━━━
+Original: [X/100]
+Optimized: [Y/100]
+
+IMPORTANT: 
+- Make title catchy and under 60 characters
+- Keep description conversational (100-150 words)
+- Include realistic timestamps
+- Use actual search terms people use
+- Format everything cleanly with the separators above`;
+
 
 
 
