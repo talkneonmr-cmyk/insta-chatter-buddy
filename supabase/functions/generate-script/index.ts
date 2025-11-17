@@ -36,8 +36,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { videoTopic, videoLength, tone, targetAudience, title } = requestBody;
-    console.log('Generating script for topic:', videoTopic);
+    const { videoTopic, videoLength, tone, targetAudience, title, language = 'english' } = requestBody;
+    console.log('Generating script for topic:', videoTopic, 'in language:', language);
 
     const startTime = Date.now();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -58,30 +58,58 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build comprehensive prompt
-    const systemPrompt = `You are an expert YouTube script writer. Create engaging, well-structured video scripts that captivate audiences and drive engagement. Focus on:
-1. Strong hooks that grab attention in the first 5 seconds
-2. Clear structure with smooth transitions
-3. Natural, conversational language
-4. Strategic CTAs (Call-to-Actions)
-5. Timestamps for better navigation`;
+    // Build comprehensive prompt for natural, human speech
+    const systemPrompt = `You are an expert YouTube script writer specializing in creating scripts that sound NATURAL and HUMAN when spoken aloud. Your scripts are designed for real people to deliver on camera, not robots. Focus on:
+1. Conversational, natural speech patterns - how real people actually talk
+2. Short, punchy sentences that are easy to speak and breathe while delivering
+3. Emotional connection and authenticity - make it feel personal and genuine
+4. Natural pauses and rhythm for comfortable speaking
+5. Avoiding robotic, overly formal, or awkward phrasing
+6. Words and phrases that flow smoothly when spoken out loud
+7. Energy and enthusiasm that translates well on camera`;
 
-    const userPrompt = `Create a YouTube video script with these specifications:
+    const languageInstruction = language !== 'english' 
+      ? `\n\nCRITICAL: Write the ENTIRE script in ${language.toUpperCase()}. Every single word, sentence, and section must be in native ${language}. Use natural ${language} expressions and idioms.`
+      : '';
+
+    const userPrompt = `Create a YouTube video script that sounds NATURAL when a human speaks it on camera.
 
 Topic: ${videoTopic}
 Length: ${videoLength}
 Tone: ${tone}
 Target Audience: ${targetAudience || 'General audience'}
+Language: ${language.charAt(0).toUpperCase() + language.slice(1)}${languageInstruction}
 
-Format your response as a structured script with:
-1. HOOK (first 5 seconds - make it attention-grabbing)
-2. INTRODUCTION (set expectations, build credibility)
-3. MAIN CONTENT (3-5 key points with smooth transitions)
-4. CALL-TO-ACTION (encourage likes, comments, subscriptions)
-5. TIMESTAMPS (suggested time markers for each section)
-6. B-ROLL SUGGESTIONS (visual elements to enhance the video)
+CRITICAL REQUIREMENTS FOR NATURAL SPEECH:
+- Write EXACTLY how a real person would speak on camera
+- Use contractions (I'm, you'll, we're, don't) to sound natural
+- Include filler phrases like "you know", "actually", "honestly" where appropriate
+- Break up long sentences - humans need to breathe while speaking
+- Add emotional cues like [smile], [pause], [emphasis] where helpful
+- Use simple, everyday language - not corporate or robotic jargon
+- Make it sound like a conversation with a friend, not a lecture
+- Include rhetorical questions to engage the audience naturally
+- Add natural transitions like "So here's the thing...", "Now, check this out..."
 
-Make it engaging, authentic, and optimized for YouTube's algorithm.`;
+Structure the script with:
+1. HOOK (0:00-0:05) - An attention-grabbing opening line that sounds excited and natural
+2. INTRODUCTION (0:05-0:30) - Friendly welcome, what they'll learn, why it matters
+3. MAIN CONTENT - Break into clear sections with:
+   - Natural speaking rhythm
+   - Personal anecdotes or examples
+   - Conversational transitions between points
+   - Easy-to-speak explanations
+4. CALL-TO-ACTION - Natural, friendly request (not pushy)
+5. OUTRO - Warm, authentic closing
+
+Add [SPEAKING TIPS] throughout for:
+- Where to pause for emphasis
+- Which words to stress
+- Where to smile or show emotion
+- Pacing suggestions
+
+Make this script so natural that when someone reads it, they'll sound like a confident, engaging human - not a robot reading a teleprompter.`;
+
 
     // Generate script using Lovable AI
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

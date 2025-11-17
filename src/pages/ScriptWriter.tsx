@@ -23,6 +23,7 @@ const ScriptWriter = () => {
   const [videoLength, setVideoLength] = useState("5min");
   const [tone, setTone] = useState("energetic");
   const [targetAudience, setTargetAudience] = useState("");
+  const [language, setLanguage] = useState("english");
   const [generatedScript, setGeneratedScript] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [refreshHistory, setRefreshHistory] = useState(0);
@@ -75,7 +76,8 @@ const ScriptWriter = () => {
           videoLength,
           tone,
           targetAudience: targetAudience.trim() || 'General audience',
-          title: title || `${videoTopic.substring(0, 50)} Script`
+          title: title || `${videoTopic.substring(0, 50)} Script`,
+          language
         }
       });
 
@@ -248,6 +250,32 @@ const ScriptWriter = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="language">Script Language</Label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger id="language">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="english">English</SelectItem>
+                      <SelectItem value="hindi">Hindi</SelectItem>
+                      <SelectItem value="spanish">Spanish</SelectItem>
+                      <SelectItem value="french">French</SelectItem>
+                      <SelectItem value="german">German</SelectItem>
+                      <SelectItem value="italian">Italian</SelectItem>
+                      <SelectItem value="portuguese">Portuguese</SelectItem>
+                      <SelectItem value="russian">Russian</SelectItem>
+                      <SelectItem value="japanese">Japanese</SelectItem>
+                      <SelectItem value="korean">Korean</SelectItem>
+                      <SelectItem value="chinese">Chinese (Mandarin)</SelectItem>
+                      <SelectItem value="arabic">Arabic</SelectItem>
+                      <SelectItem value="turkish">Turkish</SelectItem>
+                      <SelectItem value="dutch">Dutch</SelectItem>
+                      <SelectItem value="polish">Polish</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
