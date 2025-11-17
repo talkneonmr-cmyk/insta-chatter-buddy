@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are a YouTube SEO expert who understands the algorithm, search trends, and optimization strategies. Provide specific, actionable SEO improvements.`;
+    const systemPrompt = `You are a YouTube SEO expert. Provide ONLY clean, ready-to-use optimized content. No explanations, no bullet points, no "why it works" - just the final optimized text.`;
 
     const userPrompt = `Optimize this YouTube video for maximum discoverability:
 
@@ -65,15 +65,28 @@ Original Title: ${title}
 ${description ? `Description: ${description}` : ''}
 ${niche ? `Niche: ${niche}` : ''}
 
-Provide:
-1. OPTIMIZED TITLE (compelling, keyword-rich, under 60 characters)
-2. KEYWORDS (15-20 high-traffic keywords to target)
-3. TAGS (30 relevant tags including variations)
-4. OPTIMIZED DESCRIPTION (detailed, SEO-optimized description with timestamps format)
-5. SEO SCORE (rate the original title from 1-100)
-6. IMPROVEMENT TIPS (specific actions to improve ranking)
+Provide ONLY the following in clean format (no explanations):
 
-Make it algorithm-friendly while keeping it engaging for human viewers.`;
+1. OPTIMIZED TITLE
+[Write only the final title - compelling, keyword-rich, under 60 characters]
+
+2. OPTIMIZED DESCRIPTION
+[Write only the complete description - detailed, SEO-optimized, 150-300 words with natural keyword placement]
+
+3. KEYWORDS
+[List 15-20 keywords separated by commas - high-traffic search terms]
+
+4. TAGS
+[List 25-30 tags separated by commas - include variations and related terms]
+
+5. SEO SCORE
+[Just the number from 1-100 rating the original title]
+
+6. QUICK TIPS
+[3-5 short, actionable bullet points for improvement]
+
+IMPORTANT: Write clean, copy-paste ready content. No "why it works", no explanations in the title or description, no formatting beyond what's needed. Just give the optimized content that can be used directly.`;
+
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
