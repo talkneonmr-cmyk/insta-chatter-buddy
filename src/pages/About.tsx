@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
   Sparkles, 
   Video, 
@@ -9,7 +10,10 @@ import {
   Youtube,
   Brain,
   Mic,
-  MessageSquare
+  MessageSquare,
+  Linkedin,
+  Twitter,
+  Instagram
 } from "lucide-react";
 
 const About = () => {
@@ -141,6 +145,45 @@ const About = () => {
                 </ul>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Connect Section */}
+        <Card className="mb-12">
+          <CardHeader>
+            <CardTitle className="text-2xl">Connect With Us</CardTitle>
+            <CardDescription>Follow our journey and stay updated</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3 mb-4">
+              <Button variant="outline" asChild>
+                <a href="https://linkedin.com/company/fabulous-creators" target="_blank" rel="noopener noreferrer">
+                  <Linkedin className="w-4 h-4 mr-2" />
+                  LinkedIn
+                </a>
+              </Button>
+              <Button variant="outline" asChild>
+                <a href="https://twitter.com/fabuoscreators" target="_blank" rel="noopener noreferrer">
+                  <Twitter className="w-4 h-4 mr-2" />
+                  Twitter
+                </a>
+              </Button>
+              <Button variant="outline" asChild>
+                <a href="https://youtube.com/@fabuoscreators" target="_blank" rel="noopener noreferrer">
+                  <Youtube className="w-4 h-4 mr-2" />
+                  YouTube
+                </a>
+              </Button>
+              <Button variant="outline" asChild>
+                <a href="https://instagram.com/fabuoscreators" target="_blank" rel="noopener noreferrer">
+                  <Instagram className="w-4 h-4 mr-2" />
+                  Instagram
+                </a>
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Or reach out: <a href="mailto:contact@fabuos.com" className="text-primary hover:underline">contact@fabuos.com</a>
+            </p>
           </CardContent>
         </Card>
 

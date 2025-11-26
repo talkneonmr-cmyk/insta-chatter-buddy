@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
+import { Footer } from "./Footer";
 import { Menu, Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,7 +88,10 @@ export function Layout({ children }: LayoutProps) {
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto [-webkit-overflow-scrolling:touch] safe-bottom">
-            {children}
+            <div className="min-h-[calc(100vh-3.5rem)] flex flex-col">
+              <div className="flex-1">{children}</div>
+              <Footer />
+            </div>
           </main>
         </div>
       </div>
