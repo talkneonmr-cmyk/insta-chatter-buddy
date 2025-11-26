@@ -1,0 +1,115 @@
+# Fabulous Creators - AI-Powered Content Studio
+
+## Platform Overview
+Fabulous Creators (fabuos.com) is a professional AI-powered content creation platform designed specifically for YouTube creators. The platform provides a comprehensive suite of AI tools to streamline the entire content creation workflow.
+
+## Owner & Founder
+**Name:** Jagrit Khundia
+**Role:** Founder & CEO
+**Platform:** Fabulous Creators
+**Website:** https://fabuos.com
+
+## About the Platform
+Fabulous Creators was founded by Jagrit Khundia to empower YouTube content creators with cutting-edge AI technology. The platform offers an all-in-one solution for video content creation, from script writing to video upload and management.
+
+## Core Features & AI Tools
+
+### Content Creation Tools
+1. **AI Caption Generator** - Generate engaging captions for social media posts and reels
+2. **AI Script Writer** - Create professional video scripts with hooks, key points, and call-to-actions
+3. **AI Music Generator** - Generate custom background music tracks for videos
+4. **AI Thumbnail Generator** - Create eye-catching thumbnails with AI-powered design
+5. **AI Hashtag Generator** - Generate relevant hashtags for better content discovery
+6. **AI SEO Optimizer** - Optimize video titles, descriptions, and tags for search engines
+
+### Video Enhancement Tools
+7. **Text to Speech** - Convert text to natural-sounding voiceovers
+8. **Speech to Text** - Transcribe audio and video content accurately
+9. **Voice Cloning** - Clone and use custom voice profiles for content
+10. **AI Dubbing** - Translate and dub content in multiple languages
+11. **Shorts Factory** - Create short-form content packages automatically
+
+### Image & Design Tools
+12. **Background Removal** - Remove backgrounds from images with AI precision
+13. **Image Enhancement** - Enhance image quality and resolution
+
+### Analytics & Strategy Tools
+14. **Trend Analyzer** - Analyze current trends in your niche
+15. **YouTube Video Analyzer** - Get insights on video performance
+16. **Creator Helper Bot** - AI assistant for content strategy and ideas
+
+### YouTube Management
+17. **YouTube Channel Manager** - Manage multiple YouTube channels
+18. **Video Upload Scheduler** - Schedule and automate video uploads
+19. **YouTube Analytics** - Track channel and video performance
+20. **Playlist Manager** - Organize and manage playlists
+21. **Bulk Operations** - Perform bulk updates across multiple videos
+22. **Comment Auto-Responder** - Automatically respond to comments with AI
+
+## Pricing Plans
+
+### Free Plan (₹0/month)
+- 3 video uploads per day
+- 4 AI captions per day
+- 4 AI scripts per day
+- 4 AI thumbnails per day
+- 4 AI music tracks per day
+- Connect up to 4 YouTube channels
+- All limits reset daily
+- Perfect for getting started
+
+### Pro Plan (₹699/month)
+- **Unlimited** video uploads
+- **Unlimited** AI captions
+- **Unlimited** AI scripts
+- 10 AI thumbnails per day
+- 200 AI music tracks per day
+- **Unlimited** YouTube channel connections
+- **Unlimited** YouTube operations
+- Priority support
+- For serious content creators
+
+## Target Audience
+- YouTube Content Creators
+- Social Media Influencers
+- Video Producers
+- Digital Marketers
+- Content Marketing Teams
+- Agencies managing multiple channels
+
+## Technology Stack
+- Frontend: React, TypeScript, Vite, Tailwind CSS
+- Backend: Supabase (Database, Authentication, Storage)
+- AI Integration: Multiple AI models for various features
+- Platform: Web-based application
+
+## Use Cases
+1. **New Content Creators** - Get started with professional content creation tools without expensive software
+2. **Growing Channels** - Scale content production with AI automation
+3. **Multi-Channel Management** - Manage multiple YouTube channels from one dashboard
+4. **Content Agencies** - Streamline client content creation and management
+5. **Time-Constrained Creators** - Automate repetitive tasks and focus on creativity
+
+## Key Benefits
+- All-in-one platform for YouTube content creation
+- Significant time savings through AI automation
+- Professional quality results without technical expertise
+- Affordable pricing starting from free
+- Daily usage limits that reset every 24 hours
+- Scalable from hobby to professional use
+
+## Contact & Support
+- Website: https://fabuos.com
+- Platform Access: https://fabuos.com/auth
+- Pricing Information: https://fabuos.com/pricing
+
+## Platform Statistics
+- 15+ AI-powered tools
+- 2 subscription tiers (Free & Pro)
+- Support for multiple YouTube channels
+- Daily usage limit resets
+- Comprehensive content creation workflow
+
+---
+
+This information is accurate as of the last update. For the most current features and pricing, please visit https://fabuos.com

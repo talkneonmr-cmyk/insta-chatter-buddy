@@ -13,4 +13,8 @@ Allow: /
 User-agent: *
 Allow: /
 
+# AI-friendly information file
+User-agent: *
+Allow: /llms.txt
+
 Sitemap: https://fabuos.com/sitemap.xml
