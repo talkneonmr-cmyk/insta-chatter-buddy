@@ -1,0 +1,29 @@
+/* TEAM */
+
+Founder & CEO: Jagrit Khundia
+Site: https://fabuos.com
+Contact: contact@fabuos.com
+LinkedIn: linkedin.com/in/jagritkhundia
+Twitter: @jagritkhundia
+Location: India
+
+/* THANKS */
+
+AI Platform: Lovable.dev
+Database: Supabase
+UI Components: shadcn/ui
+Icons: Lucide Icons
+
+/* SITE */
+
+Platform: Fabulous Creators
+Purpose: AI-powered content creation for YouTube creators
+Standards: HTML5, CSS3, TypeScript, React
+Components: Vite, React Router, TanStack Query, Tailwind CSS
+Backend: Supabase (Database, Auth, Storage, Edge Functions)
+Software: VS Code, Git
+
+Last update: 2025-01-26
+Language: English
+Doctype: HTML5
+IDE: Visual Studio Code

@@ -7,6 +7,7 @@ import { Layout } from "./components/Layout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
+import Press from "./pages/Press";
 import Settings from "./pages/Settings";
 import CaptionGenerator from "./pages/CaptionGenerator";
 import YouTubeManager from "./pages/YouTubeManager";
@@ -47,6 +48,7 @@ const App = () => (
           {/* All other routes with sidebar layout */}
           <Route path="/" element={<Layout><Index /></Layout>} />
           <Route path="/about" element={<Layout><About /></Layout>} />
+          <Route path="/press" element={<Layout><Press /></Layout>} />
           <Route path="/settings" element={<Layout><Settings /></Layout>} />
           <Route path="/caption-generator" element={<Layout><CaptionGenerator /></Layout>} />
           <Route path="/thumbnail-generator" element={<Layout><ThumbnailGenerator /></Layout>} />

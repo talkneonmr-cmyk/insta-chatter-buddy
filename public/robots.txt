@@ -16,5 +16,6 @@ Allow: /
 # AI-friendly information file
 User-agent: *
 Allow: /llms.txt
+Allow: /humans.txt
 
 Sitemap: https://fabuos.com/sitemap.xml
