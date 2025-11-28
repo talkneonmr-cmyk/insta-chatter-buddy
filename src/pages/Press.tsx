@@ -146,9 +146,11 @@ export default function Press() {
                 <h3 className="font-semibold text-lg mb-2">Pro Plan</h3>
                 <p className="text-3xl font-bold mb-4">₹699<span className="text-sm font-normal text-muted-foreground">/month</span></p>
                 <ul className="text-sm space-y-2 text-muted-foreground">
-                  <li>• Unlimited AI generations</li>
+                  <li>• Unlimited uploads, captions, scripts & channels</li>
+                  <li>• 200 AI music generations/day</li>
+                  <li>• 100 image enhancements/day</li>
+                  <li>• 20-100 daily limits on other AI tools</li>
                   <li>• Priority support</li>
-                  <li>• All premium features included</li>
                 </ul>
               </div>
             </div>
@@ -218,8 +220,8 @@ export default function Press() {
             <p className="text-sm text-muted-foreground mb-2">
               For press inquiries, partnerships, or interviews:
             </p>
-            <a href="mailto:contact@fabuos.com" className="text-primary hover:underline">
-              contact@fabuos.com
+            <a href="mailto:jagritkhundiaa@gmail.com" className="text-primary hover:underline">
+              jagritkhundiaa@gmail.com
             </a>
           </CardContent>
         </Card>
