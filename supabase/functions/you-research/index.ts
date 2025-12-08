@@ -32,117 +32,58 @@ serve(async (req) => {
 
     console.log(`You Research - Mode: ${mode}, Query: ${query}`);
 
-    let endpoint = '';
-    let body: any = {};
+    // Build the search URL with query parameters
+    const searchParams = new URLSearchParams({
+      query: query,
+      count: String(options?.limit || 10),
+    });
 
-    switch (mode) {
-      case 'search':
-        // Web search with AI-powered results
-        endpoint = 'https://api.you.com/search';
-        body = {
-          query,
-          num_results: options?.limit || 10,
-          country: options?.country || 'US',
-          safesearch: 'moderate',
-        };
-        break;
-
-      case 'research':
-        // Deep research mode - AI-powered comprehensive research
-        endpoint = 'https://api.you.com/smart';
-        body = {
-          query,
-          instructions: options?.instructions || 'Provide comprehensive, well-researched information with sources.',
-        };
-        break;
-
-      case 'news':
-        // Real-time news search
-        endpoint = 'https://api.you.com/search';
-        body = {
-          query: `${query} latest news`,
-          num_results: options?.limit || 10,
-          country: options?.country || 'US',
-          recency: 'day', // Get recent results
-        };
-        break;
-
-      case 'rag':
-        // RAG mode for AI answers with citations
-        endpoint = 'https://api.you.com/smart';
-        body = {
-          query,
-          chat_mode: 'research',
-          instructions: options?.instructions || 'Provide detailed analysis with citations and sources.',
-        };
-        break;
-
-      default:
-        endpoint = 'https://api.you.com/search';
-        body = {
-          query,
-          num_results: 10,
-        };
+    // Add optional parameters
+    if (options?.country) {
+      searchParams.append('country', options.country);
     }
 
+    // Correct You.com API endpoint
+    const endpoint = `https://ydc-index.io/v1/search?${searchParams.toString()}`;
+    
     console.log(`Calling You.com API: ${endpoint}`);
 
     const response = await fetch(endpoint, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'X-API-Key': YOU_COM_API_KEY,
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
-      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`You.com API error: ${response.status} - ${errorText}`);
-      
-      // Fallback: Try the simple search endpoint with GET
-      console.log('Trying fallback search endpoint...');
-      const fallbackUrl = `https://api.you.com/search?query=${encodeURIComponent(query)}`;
-      const fallbackResponse = await fetch(fallbackUrl, {
-        method: 'GET',
-        headers: {
-          'X-API-Key': YOU_COM_API_KEY,
-        },
-      });
-
-      if (!fallbackResponse.ok) {
-        const fallbackError = await fallbackResponse.text();
-        console.error(`Fallback also failed: ${fallbackResponse.status} - ${fallbackError}`);
-        return new Response(
-          JSON.stringify({ 
-            error: 'You.com API request failed', 
-            details: errorText,
-            status: response.status 
-          }),
-          { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const fallbackData = await fallbackResponse.json();
-      console.log('Fallback search successful');
       return new Response(
         JSON.stringify({ 
-          success: true, 
-          mode,
-          data: fallbackData 
+          error: 'You.com API request failed', 
+          details: errorText,
+          status: response.status 
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
     console.log('You.com API response received successfully');
 
+    // Transform the response to a consistent format
+    const transformedData = {
+      hits: data.results?.web || [],
+      news: data.results?.news || [],
+      answer: data.results?.ai_snippets?.[0]?.text || null,
+    };
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         mode,
-        data 
+        data: transformedData 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
