@@ -126,3 +126,6 @@ verify_jwt = true
 
 [functions.run-auto-pilot]
 verify_jwt = true
+
+[functions.you-research]
+verify_jwt = true

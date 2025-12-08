@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, FileCheck, Wand2, Volume2, MessageSquareText, Radio, Languages, Bot, HelpCircle, Video, MessageSquare } from "lucide-react";
+import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, FileCheck, Wand2, Volume2, MessageSquareText, Radio, Languages, Bot, HelpCircle, Video, MessageSquare, Globe } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +22,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const mainItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "YouTube Manager", url: "/youtube-manager", icon: Youtube },
+  { title: "You Research", url: "/you-research", icon: Globe },
 ];
 
 const aiTools = [
