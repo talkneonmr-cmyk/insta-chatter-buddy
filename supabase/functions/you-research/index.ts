@@ -43,8 +43,8 @@ serve(async (req) => {
       searchParams.append('country', options.country);
     }
 
-    // Correct You.com API endpoint
-    const endpoint = `https://ydc-index.io/v1/search?${searchParams.toString()}`;
+    // You.com Search API endpoint
+    const endpoint = `https://api.ydc-index.io/search?${searchParams.toString()}`;
     
     console.log(`Calling You.com API: ${endpoint}`);
 
@@ -74,9 +74,9 @@ serve(async (req) => {
 
     // Transform the response to a consistent format
     const transformedData = {
-      hits: data.results?.web || [],
-      news: data.results?.news || [],
-      answer: data.results?.ai_snippets?.[0]?.text || null,
+      hits: data.hits || [],
+      news: data.news || [],
+      answer: data.answer || null,
     };
 
     return new Response(
