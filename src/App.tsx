@@ -32,6 +32,7 @@ import AIAgents from "./pages/AIAgents";
 import CreatorHelperBot from "./pages/CreatorHelperBot";
 import CommentAutoResponder from "./pages/CommentAutoResponder";
 import ShortsFactory from "./pages/ShortsFactory";
+import YouResearch from "./pages/YouResearch";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
           <Route path="/dubbing" element={<Layout><Dubbing /></Layout>} />
           <Route path="/ai-agents" element={<Layout><AIAgents /></Layout>} />
           <Route path="/creator-helper-bot" element={<Layout><CreatorHelperBot /></Layout>} />
+          <Route path="/you-research" element={<Layout><YouResearch /></Layout>} />
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/payment-success" element={<Layout><PaymentSuccess /></Layout>} />
           <Route path="/admin" element={<Layout><Admin /></Layout>} />
