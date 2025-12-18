@@ -43,8 +43,8 @@ serve(async (req) => {
       searchParams.append('country', options.country);
     }
 
-    // You.com Search API endpoint (correct v1 path)
-    const endpoint = `https://api.ydc-index.io/v1/search?${searchParams.toString()}`;
+    // You.com Search API endpoint (correct domain without api. prefix)
+    const endpoint = `https://ydc-index.io/v1/search?${searchParams.toString()}`;
     
     console.log(`Calling You.com API: ${endpoint}`);
 
