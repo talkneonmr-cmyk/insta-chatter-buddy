@@ -129,3 +129,6 @@ verify_jwt = true
 
 [functions.you-research]
 verify_jwt = true
+
+[functions.check-name-availability]
+verify_jwt = true

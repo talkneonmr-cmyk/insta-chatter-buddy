@@ -23,7 +23,11 @@ import {
   Target,
   Users,
   BarChart3,
-  Zap
+  Zap,
+  AtSign,
+  CheckCircle2,
+  XCircle,
+  Youtube
 } from "lucide-react";
 
 interface SearchResult {
@@ -46,12 +50,34 @@ interface ResearchResponse {
   };
 }
 
+interface NameCheckResult {
+  success: boolean;
+  name: string;
+  youtube: {
+    handle: string;
+    available: boolean;
+    error?: string;
+  };
+  domain: {
+    name: string;
+    available: boolean;
+    error?: string;
+  };
+  bothAvailable: boolean;
+  recommendation: string;
+}
+
 export default function YouResearch() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ResearchResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("search");
+  
+  // Name checker state
+  const [nameToCheck, setNameToCheck] = useState("");
+  const [nameCheckResult, setNameCheckResult] = useState<NameCheckResult | null>(null);
+  const [isCheckingName, setIsCheckingName] = useState(false);
 
   // Quick research prompts for creators
   const quickPrompts = [
@@ -62,6 +88,41 @@ export default function YouResearch() {
     { label: "Thumbnail Ideas", query: "What makes YouTube thumbnails get the most clicks?", icon: Target },
     { label: "SEO Strategies", query: "Best YouTube SEO practices for maximum visibility", icon: Search },
   ];
+
+  const checkNameAvailability = async () => {
+    if (!nameToCheck.trim()) {
+      toast.error("Please enter a name to check");
+      return;
+    }
+
+    setIsCheckingName(true);
+    setNameCheckResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-name-availability', {
+        body: { name: nameToCheck }
+      });
+
+      if (error) {
+        console.error('Name check error:', error);
+        toast.error("Failed to check name availability");
+        return;
+      }
+
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      setNameCheckResult(data);
+      toast.success("Name check complete!");
+    } catch (err) {
+      console.error('Name check error:', err);
+      toast.error("Failed to check name");
+    } finally {
+      setIsCheckingName(false);
+    }
+  };
 
   const performResearch = async (searchQuery: string, mode: string) => {
     if (!searchQuery.trim()) {
@@ -168,7 +229,7 @@ export default function YouResearch() {
           <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
             {/* Research Mode Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-4 w-full h-auto p-1">
+              <TabsList className="grid grid-cols-5 w-full h-auto p-1">
                 <TabsTrigger value="search" className="flex items-center justify-center gap-1 px-1 py-1.5 sm:py-2 text-xs sm:text-sm">
                   <Search className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Web Search</span>
@@ -185,58 +246,204 @@ export default function YouResearch() {
                   <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">AI Analysis</span>
                 </TabsTrigger>
+                <TabsTrigger value="namecheck" className="flex items-center justify-center gap-1 px-1 py-1.5 sm:py-2 text-xs sm:text-sm">
+                  <AtSign className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Name Check</span>
+                </TabsTrigger>
               </TabsList>
             </Tabs>
 
-            {/* Search Input */}
-            <div className="flex flex-col sm:flex-row gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search for trends, topics..."
-                  className="pl-10 h-10 sm:h-12 text-sm"
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                />
-              </div>
-              <Button 
-                onClick={handleSearch} 
-                disabled={isLoading}
-                className="h-10 sm:h-12 px-4 sm:px-6 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 w-full sm:w-auto"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <Search className="h-4 w-4 mr-2" />
-                    Research
-                  </>
-                )}
-              </Button>
-            </div>
-
-            {/* Quick Prompts */}
-            <div className="pt-2">
-              <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">Quick Research:</p>
-              <div className="flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 sm:flex-wrap scrollbar-hide">
-                {quickPrompts.map((prompt, idx) => (
-                  <Button
-                    key={idx}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleQuickPrompt(prompt.query)}
-                    className="text-xs hover:bg-primary/5 hover:border-primary/30 whitespace-nowrap flex-shrink-0"
+            {/* Search Input - Show for non-namecheck tabs */}
+            {activeTab !== "namecheck" ? (
+              <>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Search for trends, topics..."
+                      className="pl-10 h-10 sm:h-12 text-sm"
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleSearch} 
                     disabled={isLoading}
+                    className="h-10 sm:h-12 px-4 sm:px-6 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 w-full sm:w-auto"
                   >
-                    <prompt.icon className="h-3 w-3 mr-1" />
-                    {prompt.label}
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Search className="h-4 w-4 mr-2" />
+                        Research
+                      </>
+                    )}
                   </Button>
-                ))}
+                </div>
+
+                {/* Quick Prompts */}
+                <div className="pt-2">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">Quick Research:</p>
+                  <div className="flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 sm:flex-wrap scrollbar-hide">
+                    {quickPrompts.map((prompt, idx) => (
+                      <Button
+                        key={idx}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleQuickPrompt(prompt.query)}
+                        className="text-xs hover:bg-primary/5 hover:border-primary/30 whitespace-nowrap flex-shrink-0"
+                        disabled={isLoading}
+                      >
+                        <prompt.icon className="h-3 w-3 mr-1" />
+                        {prompt.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Name Checker Input */
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="relative flex-1">
+                    <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      value={nameToCheck}
+                      onChange={(e) => setNameToCheck(e.target.value)}
+                      placeholder="Enter channel/brand name to check..."
+                      className="pl-10 h-10 sm:h-12 text-sm"
+                      onKeyDown={(e) => e.key === 'Enter' && checkNameAvailability()}
+                    />
+                  </div>
+                  <Button 
+                    onClick={checkNameAvailability} 
+                    disabled={isCheckingName}
+                    className="h-10 sm:h-12 px-4 sm:px-6 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 w-full sm:w-auto"
+                  >
+                    {isCheckingName ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Search className="h-4 w-4 mr-2" />
+                        Check Name
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Check if a YouTube channel (@username) and .com domain are available for your brand name.
+                </p>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* Name Check Results */}
+        {isCheckingName && (
+          <Card className="border-2 border-primary/10">
+            <CardContent className="py-10 sm:py-16">
+              <div className="flex flex-col items-center justify-center gap-3 sm:gap-4">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-red-500 to-pink-500 blur-xl opacity-30 animate-pulse" />
+                  <div className="relative p-3 sm:p-4 rounded-full bg-gradient-to-r from-red-500 to-pink-500">
+                    <AtSign className="h-6 w-6 sm:h-8 sm:w-8 text-white animate-spin" />
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="font-medium text-sm sm:text-base">Checking availability...</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Checking YouTube & domain</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {nameCheckResult && !isCheckingName && (
+          <Card className={`border-2 ${nameCheckResult.bothAvailable ? 'border-green-500/30 bg-gradient-to-br from-green-500/5 to-emerald-500/5' : 'border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-red-500/5'}`}>
+            <CardHeader className="px-3 sm:px-6 py-3 sm:py-4">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                {nameCheckResult.bothAvailable ? (
+                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-orange-500" />
+                )}
+                Name Availability: "{nameCheckResult.name}"
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-3 sm:px-6 space-y-4">
+              {/* Recommendation */}
+              <div className={`p-3 rounded-lg ${nameCheckResult.bothAvailable ? 'bg-green-500/10 border border-green-500/20' : 'bg-orange-500/10 border border-orange-500/20'}`}>
+                <p className="text-sm font-medium">{nameCheckResult.recommendation}</p>
+              </div>
+
+              {/* YouTube Result */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-background/50 border">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${nameCheckResult.youtube.available ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+                    <Youtube className={`h-5 w-5 ${nameCheckResult.youtube.available ? 'text-green-500' : 'text-red-500'}`} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">YouTube Channel</p>
+                    <p className="text-xs text-muted-foreground">{nameCheckResult.youtube.handle}</p>
+                  </div>
+                </div>
+                <Badge variant={nameCheckResult.youtube.available ? "default" : "destructive"} className={nameCheckResult.youtube.available ? "bg-green-500" : ""}>
+                  {nameCheckResult.youtube.error || (nameCheckResult.youtube.available ? "Available" : "Taken")}
+                </Badge>
+              </div>
+
+              {/* Domain Result */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-background/50 border">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${nameCheckResult.domain.available ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+                    <Globe className={`h-5 w-5 ${nameCheckResult.domain.available ? 'text-green-500' : 'text-red-500'}`} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Domain</p>
+                    <p className="text-xs text-muted-foreground">{nameCheckResult.domain.name}</p>
+                  </div>
+                </div>
+                <Badge variant={nameCheckResult.domain.available ? "default" : "destructive"} className={nameCheckResult.domain.available ? "bg-green-500" : ""}>
+                  {nameCheckResult.domain.error || (nameCheckResult.domain.available ? "Available" : "Taken")}
+                </Badge>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-wrap gap-2 pt-2">
+                {!nameCheckResult.youtube.available && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(`https://www.youtube.com/@${nameCheckResult.name}`, '_blank')}
+                  >
+                    <Youtube className="h-3 w-3 mr-1" />
+                    View Channel
+                  </Button>
+                )}
+                {!nameCheckResult.domain.available && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(`https://${nameCheckResult.domain.name}`, '_blank')}
+                  >
+                    <Globe className="h-3 w-3 mr-1" />
+                    Visit Website
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(`YouTube: ${nameCheckResult.youtube.handle} - ${nameCheckResult.youtube.available ? 'Available' : 'Taken'}\nDomain: ${nameCheckResult.domain.name} - ${nameCheckResult.domain.available ? 'Available' : 'Taken'}`)}
+                >
+                  <Copy className="h-3 w-3 mr-1" />
+                  Copy Results
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Results Section */}
         {isLoading && (
