@@ -416,10 +416,12 @@ export default function YouResearch() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(`https://www.youtube.com/@${nameCheckResult.name}`, '_blank')}
+                    onClick={() => {
+                      copyToClipboard(`https://www.youtube.com/@${nameCheckResult.name}`);
+                    }}
                   >
                     <Youtube className="h-3 w-3 mr-1" />
-                    View Channel
+                    Copy Channel Link
                   </Button>
                 )}
                 {!nameCheckResult.domain.available && (
