@@ -74,10 +74,11 @@ serve(async (req) => {
     console.log('Response data:', JSON.stringify(data, null, 2));
 
     // Transform the response to a consistent format
+    // You.com API returns results.web, not hits
     const transformedData = {
-      hits: data.hits || [],
-      news: data.news || [],
-      answer: data.answer || null,
+      hits: data.results?.web || [],
+      news: data.results?.news || [],
+      answer: data.results?.answer || null,
     };
 
     return new Response(
