@@ -71,6 +71,7 @@ serve(async (req) => {
 
     const data = await response.json();
     console.log('You.com API response received successfully');
+    console.log('Response data:', JSON.stringify(data, null, 2));
 
     // Transform the response to a consistent format
     const transformedData = {
