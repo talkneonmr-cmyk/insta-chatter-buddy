@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
-import { Wrench, Clock, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Wrench, Clock, RefreshCw, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Maintenance() {
+  const navigate = useNavigate();
   const [message, setMessage] = useState("We are currently performing scheduled maintenance. Please check back soon.");
   const [checking, setChecking] = useState(false);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
 
   useEffect(() => {
     fetchMaintenanceMessage();
@@ -87,16 +94,28 @@ export default function Maintenance() {
         </div>
 
         {/* Check Status Button */}
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={checkStatus}
-          disabled={checking}
-          className="gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${checking ? "animate-spin" : ""}`} />
-          {checking ? "Checking..." : "Check Status"}
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={checkStatus}
+            disabled={checking}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${checking ? "animate-spin" : ""}`} />
+            {checking ? "Checking..." : "Check Status"}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="lg"
+            onClick={handleLogout}
+            className="gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
 
         {/* Footer */}
         <p className="text-xs text-muted-foreground/60">
