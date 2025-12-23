@@ -99,9 +99,48 @@ export default function YouResearch() {
     { label: "SEO Strategies", query: "Best YouTube SEO practices for maximum visibility", icon: Search },
   ];
 
+  const checkUsageLimit = async (): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-usage-limit', {
+        body: { limitType: 'ai_you_research' }
+      });
+
+      if (error) {
+        console.error('Usage check error:', error);
+        return true; // Allow if check fails
+      }
+
+      if (!data?.canUse) {
+        toast.error(data?.message || "Daily limit reached");
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Usage check error:', err);
+      return true; // Allow if check fails
+    }
+  };
+
+  const incrementUsage = async () => {
+    try {
+      await supabase.functions.invoke('increment-usage', {
+        body: { usageType: 'ai_you_research' }
+      });
+    } catch (err) {
+      console.error('Failed to increment usage:', err);
+    }
+  };
+
   const checkNameAvailability = async () => {
     if (!nameToCheck.trim()) {
       toast.error("Please enter a name to check");
+      return;
+    }
+
+    // Check usage limit first
+    const canProceed = await checkUsageLimit();
+    if (!canProceed) {
       return;
     }
 
@@ -124,6 +163,9 @@ export default function YouResearch() {
         return;
       }
 
+      // Increment usage on success
+      await incrementUsage();
+
       setNameCheckResult(data);
       toast.success("Name check complete!");
     } catch (err) {
@@ -137,6 +179,12 @@ export default function YouResearch() {
   const performResearch = async (searchQuery: string, mode: string) => {
     if (!searchQuery.trim()) {
       toast.error("Please enter a search query");
+      return;
+    }
+
+    // Check usage limit first
+    const canProceed = await checkUsageLimit();
+    if (!canProceed) {
       return;
     }
 
@@ -166,6 +214,9 @@ export default function YouResearch() {
         toast.error(data.error);
         return;
       }
+
+      // Increment usage on success
+      await incrementUsage();
 
       setResults(data);
       toast.success("Research complete!");
