@@ -149,8 +149,8 @@ export function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
-        <div className="flex items-center justify-between p-4 border-b">
+      <PopoverContent className="w-[calc(100vw-2rem)] max-w-md p-0 bg-popover border shadow-lg z-50" align="start" sideOffset={8}>
+        <div className="flex items-center justify-between p-4 border-b bg-popover">
           <h4 className="font-semibold">Announcements</h4>
           {unreadCount > 0 && (
             <Button
@@ -163,14 +163,14 @@ export function NotificationBell() {
             </Button>
           )}
         </div>
-        <ScrollArea className="h-[300px]">
+        <ScrollArea className="max-h-[70vh]">
           {announcements.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">
+            <div className="p-4 text-center text-muted-foreground bg-popover">
               <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No announcements</p>
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y bg-popover">
               {announcements.map((announcement) => (
                 <div
                   key={announcement.id}
@@ -181,10 +181,12 @@ export function NotificationBell() {
                   onClick={() => markAsRead(announcement.id)}
                 >
                   <div className="flex items-start gap-3">
-                    {getTypeIcon(announcement.type)}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm truncate">
+                    <div className="flex-shrink-0 mt-0.5">
+                      {getTypeIcon(announcement.type)}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className="font-medium text-sm">
                           {announcement.title}
                         </span>
                         {!readAnnouncements.has(announcement.id) && (
@@ -193,10 +195,10 @@ export function NotificationBell() {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
                         {announcement.message}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-2">
                         {formatDate(announcement.created_at)}
                       </p>
                     </div>
