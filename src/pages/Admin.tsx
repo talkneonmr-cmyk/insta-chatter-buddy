@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ActivityLogs from "@/components/ActivityLogs";
 import AnnouncementsManager from "@/components/admin/AnnouncementsManager";
+import MaintenanceToggle from "@/components/admin/MaintenanceToggle";
 
 interface UserData {
   id: string;
@@ -557,6 +558,9 @@ export default function Admin() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Maintenance Mode Toggle */}
+        <MaintenanceToggle />
 
         {/* Tabs for Users, Tester Keys, Announcements and Activity Logs */}
         <Tabs defaultValue="users" className="w-full">
