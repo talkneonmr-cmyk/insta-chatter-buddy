@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { MaintenanceGuard } from "./components/MaintenanceGuard";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
@@ -43,40 +44,40 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Auth route without layout */}
+          {/* Auth route without layout or maintenance guard */}
           <Route path="/auth" element={<Auth />} />
           
-          {/* All other routes with sidebar layout */}
-          <Route path="/" element={<Layout><Index /></Layout>} />
-          <Route path="/about" element={<Layout><About /></Layout>} />
-          <Route path="/press" element={<Layout><Press /></Layout>} />
-          <Route path="/settings" element={<Layout><Settings /></Layout>} />
-          <Route path="/caption-generator" element={<Layout><CaptionGenerator /></Layout>} />
-          <Route path="/thumbnail-generator" element={<Layout><ThumbnailGenerator /></Layout>} />
-          <Route path="/script-writer" element={<Layout><ScriptWriter /></Layout>} />
-          <Route path="/youtube-manager" element={<Layout><YouTubeManager /></Layout>} />
-          <Route path="/music-generator" element={<Layout><MusicGenerator /></Layout>} />
-          <Route path="/trend-analyzer" element={<Layout><TrendAnalyzer /></Layout>} />
-          <Route path="/seo-optimizer" element={<Layout><SEOOptimizer /></Layout>} />
-          <Route path="/hashtag-generator" element={<Layout><HashtagGenerator /></Layout>} />
-          <Route path="/shorts-factory" element={<Layout><ShortsFactory /></Layout>} />
-          <Route path="/comment-auto-responder" element={<Layout><CommentAutoResponder /></Layout>} />
-          <Route path="/background-removal" element={<Layout><BackgroundRemoval /></Layout>} />
-          <Route path="/speech-to-text" element={<Layout><SpeechToText /></Layout>} />
-          <Route path="/text-summarizer" element={<Layout><TextSummarizer /></Layout>} />
-          <Route path="/image-enhancement" element={<Layout><ImageEnhancement /></Layout>} />
-          <Route path="/voice-cloning" element={<Layout><VoiceCloning /></Layout>} />
-          <Route path="/text-to-speech" element={<Layout><TextToSpeech /></Layout>} />
-          <Route path="/dubbing" element={<Layout><Dubbing /></Layout>} />
-          <Route path="/ai-agents" element={<Layout><AIAgents /></Layout>} />
-          <Route path="/creator-helper-bot" element={<Layout><CreatorHelperBot /></Layout>} />
-          <Route path="/you-research" element={<Layout><YouResearch /></Layout>} />
-          <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
-          <Route path="/payment-success" element={<Layout><PaymentSuccess /></Layout>} />
-          <Route path="/admin" element={<Layout><Admin /></Layout>} />
+          {/* All other routes with sidebar layout and maintenance guard */}
+          <Route path="/" element={<MaintenanceGuard><Layout><Index /></Layout></MaintenanceGuard>} />
+          <Route path="/about" element={<MaintenanceGuard><Layout><About /></Layout></MaintenanceGuard>} />
+          <Route path="/press" element={<MaintenanceGuard><Layout><Press /></Layout></MaintenanceGuard>} />
+          <Route path="/settings" element={<MaintenanceGuard><Layout><Settings /></Layout></MaintenanceGuard>} />
+          <Route path="/caption-generator" element={<MaintenanceGuard><Layout><CaptionGenerator /></Layout></MaintenanceGuard>} />
+          <Route path="/thumbnail-generator" element={<MaintenanceGuard><Layout><ThumbnailGenerator /></Layout></MaintenanceGuard>} />
+          <Route path="/script-writer" element={<MaintenanceGuard><Layout><ScriptWriter /></Layout></MaintenanceGuard>} />
+          <Route path="/youtube-manager" element={<MaintenanceGuard><Layout><YouTubeManager /></Layout></MaintenanceGuard>} />
+          <Route path="/music-generator" element={<MaintenanceGuard><Layout><MusicGenerator /></Layout></MaintenanceGuard>} />
+          <Route path="/trend-analyzer" element={<MaintenanceGuard><Layout><TrendAnalyzer /></Layout></MaintenanceGuard>} />
+          <Route path="/seo-optimizer" element={<MaintenanceGuard><Layout><SEOOptimizer /></Layout></MaintenanceGuard>} />
+          <Route path="/hashtag-generator" element={<MaintenanceGuard><Layout><HashtagGenerator /></Layout></MaintenanceGuard>} />
+          <Route path="/shorts-factory" element={<MaintenanceGuard><Layout><ShortsFactory /></Layout></MaintenanceGuard>} />
+          <Route path="/comment-auto-responder" element={<MaintenanceGuard><Layout><CommentAutoResponder /></Layout></MaintenanceGuard>} />
+          <Route path="/background-removal" element={<MaintenanceGuard><Layout><BackgroundRemoval /></Layout></MaintenanceGuard>} />
+          <Route path="/speech-to-text" element={<MaintenanceGuard><Layout><SpeechToText /></Layout></MaintenanceGuard>} />
+          <Route path="/text-summarizer" element={<MaintenanceGuard><Layout><TextSummarizer /></Layout></MaintenanceGuard>} />
+          <Route path="/image-enhancement" element={<MaintenanceGuard><Layout><ImageEnhancement /></Layout></MaintenanceGuard>} />
+          <Route path="/voice-cloning" element={<MaintenanceGuard><Layout><VoiceCloning /></Layout></MaintenanceGuard>} />
+          <Route path="/text-to-speech" element={<MaintenanceGuard><Layout><TextToSpeech /></Layout></MaintenanceGuard>} />
+          <Route path="/dubbing" element={<MaintenanceGuard><Layout><Dubbing /></Layout></MaintenanceGuard>} />
+          <Route path="/ai-agents" element={<MaintenanceGuard><Layout><AIAgents /></Layout></MaintenanceGuard>} />
+          <Route path="/creator-helper-bot" element={<MaintenanceGuard><Layout><CreatorHelperBot /></Layout></MaintenanceGuard>} />
+          <Route path="/you-research" element={<MaintenanceGuard><Layout><YouResearch /></Layout></MaintenanceGuard>} />
+          <Route path="/pricing" element={<MaintenanceGuard><Layout><Pricing /></Layout></MaintenanceGuard>} />
+          <Route path="/payment-success" element={<MaintenanceGuard><Layout><PaymentSuccess /></Layout></MaintenanceGuard>} />
+          <Route path="/admin" element={<MaintenanceGuard><Layout><Admin /></Layout></MaintenanceGuard>} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<Layout><NotFound /></Layout>} />
+          <Route path="*" element={<MaintenanceGuard><Layout><NotFound /></Layout></MaintenanceGuard>} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
