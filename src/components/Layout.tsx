@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Footer } from "./Footer";
+import { NotificationBell } from "./NotificationBell";
 import { Menu, Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
-
 interface LayoutProps {
   children: ReactNode;
 }
@@ -80,9 +80,9 @@ export function Layout({ children }: LayoutProps) {
                 <Menu className="h-5 w-5" />
               </SidebarTrigger>
               
-              <div className="flex-1" />
+              <NotificationBell />
               
-              {/* Additional header content can go here */}
+              <div className="flex-1" />
             </div>
           </header>
 

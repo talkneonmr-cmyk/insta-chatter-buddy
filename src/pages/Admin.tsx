@@ -7,10 +7,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw, Users, Activity, Mail, CheckCircle, XCircle, Key, Copy, Trash2 } from "lucide-react";
+import { ArrowLeft, Crown, Loader2, RefreshCw, Shield, RotateCcw, Users, Activity, Mail, CheckCircle, XCircle, Key, Copy, Trash2, Megaphone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ActivityLogs from "@/components/ActivityLogs";
+import AnnouncementsManager from "@/components/admin/AnnouncementsManager";
 
 interface UserData {
   id: string;
@@ -557,9 +558,9 @@ export default function Admin() {
           </Card>
         </div>
 
-        {/* Tabs for Users, Tester Keys and Activity Logs */}
+        {/* Tabs for Users, Tester Keys, Announcements and Activity Logs */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-4 max-w-3xl">
             <TabsTrigger value="users" className="gap-2">
               <Users className="h-4 w-4" />
               Users
@@ -567,6 +568,10 @@ export default function Admin() {
             <TabsTrigger value="tester-keys" className="gap-2">
               <Key className="h-4 w-4" />
               Tester Keys
+            </TabsTrigger>
+            <TabsTrigger value="announcements" className="gap-2">
+              <Megaphone className="h-4 w-4" />
+              Announcements
             </TabsTrigger>
             <TabsTrigger value="logs" className="gap-2">
               <Activity className="h-4 w-4" />
@@ -896,6 +901,10 @@ export default function Admin() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="announcements" className="mt-6">
+            <AnnouncementsManager />
           </TabsContent>
 
           <TabsContent value="logs" className="mt-6">
