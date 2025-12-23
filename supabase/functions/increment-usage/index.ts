@@ -129,6 +129,9 @@ Deno.serve(async (req) => {
       case 'ai_creator_helper_bot':
         updateData = { ai_creator_helper_bot_count: usage.ai_creator_helper_bot_count + 1 };
         break;
+      case 'ai_you_research':
+        updateData = { ai_you_research_count: (usage.ai_you_research_count || 0) + 1 };
+        break;
       case 'youtube_operations':
       case 'youtube_operation':
       case 'youtube_upload':
