@@ -245,10 +245,6 @@ export default function YouResearch() {
                 </div>
               </div>
             </div>
-            <Badge className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 text-violet-600 border-violet-500/20 px-4 py-2 gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="hidden sm:inline">Powered by</span> You.com
-            </Badge>
           </div>
         </div>
       </div>
