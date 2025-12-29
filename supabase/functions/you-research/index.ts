@@ -43,7 +43,7 @@ serve(async (req) => {
       searchParams.append('country', options.country);
     }
 
-    // You.com Search API endpoint (correct domain without api. prefix)
+    // You.com Search API endpoint
     const endpoint = `https://ydc-index.io/v1/search?${searchParams.toString()}`;
     
     console.log(`Calling You.com API: ${endpoint}`);
@@ -71,21 +71,99 @@ serve(async (req) => {
 
     const data = await response.json();
     console.log('You.com API response received successfully');
-    console.log('Response data:', JSON.stringify(data, null, 2));
 
-    // Transform the response to a consistent format
-    // You.com API returns results.web, not hits
-    const transformedData = {
-      hits: data.results?.web || [],
-      news: data.results?.news || [],
-      answer: data.results?.answer || null,
-    };
+    // Get the web results
+    const webResults = data.results?.web || [];
+    const newsResults = data.results?.news || [];
+    
+    // Combine content from all results for AI synthesis
+    const combinedContent = webResults.slice(0, 8).map((result: any, idx: number) => {
+      return `Source ${idx + 1}: ${result.title || 'Untitled'}
+URL: ${result.url || 'N/A'}
+Content: ${result.description || result.snippet || 'No content'}`;
+    }).join('\n\n');
+
+    // Generate AI synthesis using Lovable AI
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    let aiSynthesis = '';
+    
+    if (LOVABLE_API_KEY && combinedContent) {
+      try {
+        console.log('Generating AI synthesis...');
+        
+        const aiResponse = await fetch('https://api.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'openai/gpt-5-mini',
+            messages: [
+              {
+                role: 'system',
+                content: `You are an expert research analyst and content synthesizer. Your task is to create a comprehensive, well-structured article based on search results.
+
+FORMAT YOUR RESPONSE AS A COMPLETE ARTICLE WITH:
+1. **A compelling headline/title** (on its own line, bold)
+2. **An executive summary** (2-3 sentences capturing the key insight)
+3. **Main content sections** with clear headers using markdown (##)
+4. **Key takeaways** as a bulleted list
+5. **Conclusion** with actionable insights
+
+STYLE GUIDELINES:
+- Write in a professional yet engaging tone
+- Use clear, concise language
+- Include specific facts, numbers, and examples from the sources
+- Make it comprehensive but easy to scan
+- Use markdown formatting for headers, bold, bullets, etc.
+- Aim for 400-600 words of high-quality content
+- DO NOT mention that you're synthesizing from sources - write as if you're the author
+- DO NOT include source citations in the text itself`
+              },
+              {
+                role: 'user',
+                content: `Research Query: "${query}"
+
+Based on these search results, create a comprehensive article:
+
+${combinedContent}
+
+Write an insightful, well-structured article that answers the query comprehensively.`
+              }
+            ],
+            max_tokens: 2000,
+            temperature: 0.7,
+          }),
+        });
+
+        if (aiResponse.ok) {
+          const aiData = await aiResponse.json();
+          aiSynthesis = aiData.choices?.[0]?.message?.content || '';
+          console.log('AI synthesis generated successfully');
+        } else {
+          console.error('AI synthesis failed:', await aiResponse.text());
+        }
+      } catch (aiError) {
+        console.error('Error generating AI synthesis:', aiError);
+      }
+    }
+
+    // Collect source URLs for reference
+    const sources = webResults.slice(0, 6).map((result: any) => ({
+      title: result.title || 'Source',
+      url: result.url || '',
+    }));
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         mode,
-        data: transformedData 
+        data: {
+          synthesis: aiSynthesis,
+          sources: sources,
+          query: query,
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
