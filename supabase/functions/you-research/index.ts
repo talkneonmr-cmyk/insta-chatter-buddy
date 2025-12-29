@@ -72,86 +72,16 @@ serve(async (req) => {
     const data = await response.json();
     console.log('You.com API response received successfully');
 
-    // Get the web results
+    // Get the web results with full content
     const webResults = data.results?.web || [];
     const newsResults = data.results?.news || [];
     
-    // Combine content from all results for AI synthesis
-    const combinedContent = webResults.slice(0, 8).map((result: any, idx: number) => {
-      return `Source ${idx + 1}: ${result.title || 'Untitled'}
-URL: ${result.url || 'N/A'}
-Content: ${result.description || result.snippet || 'No content'}`;
-    }).join('\n\n');
-
-    // Generate AI synthesis using Lovable AI
-    let aiSynthesis = '';
-    
-    if (combinedContent) {
-      try {
-        console.log('Generating AI synthesis...');
-        
-        const aiResponse = await fetch('https://lovable.dev/api/llm-proxy/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'openai/gpt-4o-mini',
-            messages: [
-              {
-                role: 'system',
-                content: `You are an expert research analyst and content synthesizer. Your task is to create a comprehensive, well-structured article based on search results.
-
-FORMAT YOUR RESPONSE AS A COMPLETE ARTICLE WITH:
-1. **A compelling headline/title** (on its own line, bold)
-2. **An executive summary** (2-3 sentences capturing the key insight)
-3. **Main content sections** with clear headers using markdown (##)
-4. **Key takeaways** as a bulleted list
-5. **Conclusion** with actionable insights
-
-STYLE GUIDELINES:
-- Write in a professional yet engaging tone
-- Use clear, concise language
-- Include specific facts, numbers, and examples from the sources
-- Make it comprehensive but easy to scan
-- Use markdown formatting for headers, bold, bullets, etc.
-- Aim for 400-600 words of high-quality content
-- DO NOT mention that you're synthesizing from sources - write as if you're the author
-- DO NOT include source citations in the text itself`
-              },
-              {
-                role: 'user',
-                content: `Research Query: "${query}"
-
-Based on these search results, create a comprehensive article:
-
-${combinedContent}
-
-Write an insightful, well-structured article that answers the query comprehensively.`
-              }
-            ],
-            max_tokens: 2000,
-            temperature: 0.7,
-          }),
-        });
-
-        if (aiResponse.ok) {
-          const aiData = await aiResponse.json();
-          aiSynthesis = aiData.choices?.[0]?.message?.content || '';
-          console.log('AI synthesis generated successfully');
-        } else {
-          const errorText = await aiResponse.text();
-          console.error('AI synthesis failed:', aiResponse.status, errorText);
-        }
-      } catch (aiError) {
-        console.error('Error generating AI synthesis:', aiError);
-      }
-    }
-
-    // Collect source URLs for reference
-    const sources = webResults.slice(0, 6).map((result: any) => ({
-      title: result.title || 'Source',
+    // Transform results with full content for inline viewing
+    const transformedResults = webResults.map((result: any) => ({
+      title: result.title || 'Untitled',
       url: result.url || '',
+      description: result.description || result.snippet || '',
+      content: result.snippet || result.description || '',
     }));
 
     return new Response(
@@ -159,9 +89,8 @@ Write an insightful, well-structured article that answers the query comprehensiv
         success: true, 
         mode,
         data: {
-          synthesis: aiSynthesis,
-          sources: sources,
-          query: query,
+          hits: transformedResults,
+          news: newsResults,
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

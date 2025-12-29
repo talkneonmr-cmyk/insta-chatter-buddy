@@ -32,18 +32,19 @@ import {
   Radio
 } from "lucide-react";
 
-interface Source {
+interface SearchResult {
   title: string;
   url: string;
+  description: string;
+  content: string;
 }
 
 interface ResearchResponse {
   success: boolean;
   mode: string;
   data: {
-    synthesis?: string;
-    sources?: Source[];
-    query?: string;
+    hits?: SearchResult[];
+    news?: any[];
   };
 }
 
@@ -584,156 +585,84 @@ export default function YouResearch() {
 
         {/* Results Section */}
         {results && !isLoading && (
-          <div className="space-y-6 animate-fade-in">
-            {/* AI Synthesized Article */}
-            {results.data.synthesis && (
-              <Card className="card-glass border-violet-500/20 overflow-hidden">
-                <div className="h-1.5 bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500" />
-                <CardHeader className="px-4 sm:px-8 py-6 border-b border-border/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-3 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg">
-                        <Sparkles className="h-6 w-6 text-white" />
+          <div className="space-y-4 animate-fade-in">
+            {/* Search Results */}
+            {results.data.hits && results.data.hits.length > 0 ? (
+              <Card className="card-glass overflow-hidden">
+                <div className={`h-1 bg-gradient-to-r ${activeMode.color}`} />
+                <CardHeader className="px-4 sm:px-6 py-4">
+                  <CardTitle className="flex items-center justify-between text-lg font-heading">
+                    <span className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500/10 to-purple-500/10">
+                        <Globe className="h-5 w-5 text-primary" />
                       </div>
-                      <div>
-                        <CardTitle className="text-xl font-heading">AI Research Report</CardTitle>
-                        <CardDescription className="text-sm">
-                          Synthesized from {results.data.sources?.length || 0} sources
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="rounded-full gap-2"
-                      onClick={() => copyToClipboard(results.data.synthesis || '')}
-                    >
-                      <Copy className="h-4 w-4" />
-                      Copy
-                    </Button>
-                  </div>
+                      Research Results
+                    </span>
+                    <Badge variant="secondary" className="rounded-full px-3">{results.data.hits.length} results</Badge>
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="px-4 sm:px-8 py-8">
-                  {/* Rendered Article Content */}
-                  <article className="prose prose-sm sm:prose-base dark:prose-invert max-w-none">
+                <CardContent className="px-4 sm:px-6 pb-6">
+                  <ScrollArea className="h-[500px] sm:h-[600px] pr-4">
                     <div className="space-y-4">
-                      {results.data.synthesis.split('\n').map((line, idx) => {
-                        const trimmedLine = line.trim();
-                        
-                        // Skip empty lines
-                        if (!trimmedLine) return <div key={idx} className="h-2" />;
-                        
-                        // Main title (starts with # or **)
-                        if (trimmedLine.startsWith('# ')) {
-                          return (
-                            <h1 key={idx} className="text-2xl sm:text-3xl font-heading font-bold gradient-text mb-4">
-                              {trimmedLine.replace('# ', '')}
-                            </h1>
-                          );
-                        }
-                        
-                        // Bold title (surrounded by **)
-                        if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**') && !trimmedLine.includes(':')) {
-                          return (
-                            <h2 key={idx} className="text-xl sm:text-2xl font-heading font-bold gradient-text mb-4">
-                              {trimmedLine.replace(/\*\*/g, '')}
-                            </h2>
-                          );
-                        }
-                        
-                        // Section headers (## or ###)
-                        if (trimmedLine.startsWith('## ')) {
-                          return (
-                            <h2 key={idx} className="text-lg sm:text-xl font-heading font-semibold mt-6 mb-3 flex items-center gap-2">
-                              <div className="w-1 h-6 bg-gradient-to-b from-violet-500 to-purple-500 rounded-full" />
-                              {trimmedLine.replace('## ', '')}
-                            </h2>
-                          );
-                        }
-                        
-                        if (trimmedLine.startsWith('### ')) {
-                          return (
-                            <h3 key={idx} className="text-base sm:text-lg font-heading font-semibold mt-4 mb-2 text-foreground/90">
-                              {trimmedLine.replace('### ', '')}
-                            </h3>
-                          );
-                        }
-                        
-                        // Bullet points
-                        if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
-                          return (
-                            <div key={idx} className="flex items-start gap-3 py-1">
-                              <div className="mt-2 w-2 h-2 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex-shrink-0" />
-                              <span className="text-foreground/80 leading-relaxed">
-                                {trimmedLine.replace(/^[-*] /, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').split('<strong>').map((part, i) => {
-                                  if (part.includes('</strong>')) {
-                                    const [bold, rest] = part.split('</strong>');
-                                    return <span key={i}><strong className="font-semibold text-foreground">{bold}</strong>{rest}</span>;
-                                  }
-                                  return part;
-                                })}
-                              </span>
-                            </div>
-                          );
-                        }
-                        
-                        // Numbered lists
-                        if (/^\d+\. /.test(trimmedLine)) {
-                          const number = trimmedLine.match(/^(\d+)\./)?.[1];
-                          return (
-                            <div key={idx} className="flex items-start gap-3 py-1">
-                              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
-                                {number}
-                              </span>
-                              <span className="text-foreground/80 leading-relaxed">
-                                {trimmedLine.replace(/^\d+\. /, '')}
-                              </span>
-                            </div>
-                          );
-                        }
-                        
-                        // Regular paragraphs
-                        return (
-                          <p key={idx} className="text-foreground/80 leading-relaxed">
-                            {trimmedLine.split(/\*\*(.*?)\*\*/g).map((part, i) => 
-                              i % 2 === 1 ? <strong key={i} className="font-semibold text-foreground">{part}</strong> : part
-                            )}
-                          </p>
-                        );
-                      })}
-                    </div>
-                  </article>
-                </CardContent>
-                
-                {/* Sources Footer */}
-                {results.data.sources && results.data.sources.length > 0 && (
-                  <div className="px-4 sm:px-8 py-4 border-t border-border/50 bg-muted/30">
-                    <p className="text-xs text-muted-foreground mb-3 flex items-center gap-2">
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Sources Referenced
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {results.data.sources.map((source, idx) => (
-                        <Badge 
+                      {results.data.hits.map((result, idx) => (
+                        <div 
                           key={idx} 
-                          variant="outline" 
-                          className="cursor-pointer hover:bg-primary/10 hover:border-primary/30 rounded-full px-3 py-1.5 text-xs transition-all gap-1.5"
-                          onClick={() => source.url && window.open(source.url, '_blank')}
+                          className="group p-5 rounded-xl bg-muted/30 border border-border/50 hover:border-primary/30 hover:bg-muted/50 transition-all duration-300"
                         >
-                          <Globe className="h-3 w-3" />
-                          {source.title?.slice(0, 30) || `Source ${idx + 1}`}
-                          {source.title && source.title.length > 30 && '...'}
-                          <ExternalLink className="h-3 w-3 opacity-50" />
-                        </Badge>
+                          <div className="space-y-3">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-base mb-1 group-hover:text-primary transition-colors">
+                                  {result.title}
+                                </h3>
+                                {result.url && (
+                                  <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                                    <Globe className="h-3 w-3" />
+                                    {result.url}
+                                  </p>
+                                )}
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => copyToClipboard(
+                                  `${result.title}\n\n${result.description || result.content}\n\nSource: ${result.url}`
+                                )}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            
+                            {/* Full Content Display */}
+                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                              <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
+                                {result.description || result.content || 'No content available'}
+                              </p>
+                            </div>
+                            
+                            {/* Source Link */}
+                            {result.url && (
+                              <div className="pt-2 border-t border-border/30">
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
+                                  onClick={() => window.open(result.url, '_blank')}
+                                >
+                                  <ExternalLink className="h-3 w-3 mr-1" />
+                                  View Original Source
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  </ScrollArea>
+                </CardContent>
               </Card>
-            )}
-
-            {/* No Results */}
-            {!results.data.synthesis && (
+            ) : (
               <Card className="card-glass">
                 <CardContent className="py-16 text-center">
                   <div className="inline-flex p-4 rounded-2xl bg-muted/50 mb-4">
