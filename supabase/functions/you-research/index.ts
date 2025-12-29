@@ -84,21 +84,19 @@ Content: ${result.description || result.snippet || 'No content'}`;
     }).join('\n\n');
 
     // Generate AI synthesis using Lovable AI
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     let aiSynthesis = '';
     
-    if (LOVABLE_API_KEY && combinedContent) {
+    if (combinedContent) {
       try {
         console.log('Generating AI synthesis...');
         
-        const aiResponse = await fetch('https://api.lovable.dev/v1/chat/completions', {
+        const aiResponse = await fetch('https://lovable.dev/api/llm-proxy/chat/completions', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'openai/gpt-5-mini',
+            model: 'openai/gpt-4o-mini',
             messages: [
               {
                 role: 'system',
@@ -142,7 +140,8 @@ Write an insightful, well-structured article that answers the query comprehensiv
           aiSynthesis = aiData.choices?.[0]?.message?.content || '';
           console.log('AI synthesis generated successfully');
         } else {
-          console.error('AI synthesis failed:', await aiResponse.text());
+          const errorText = await aiResponse.text();
+          console.error('AI synthesis failed:', aiResponse.status, errorText);
         }
       } catch (aiError) {
         console.error('Error generating AI synthesis:', aiError);
