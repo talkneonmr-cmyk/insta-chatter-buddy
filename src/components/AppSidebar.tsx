@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-
+import fabulousLogo from "@/assets/fabulous-logo.png";
 const mainItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "YouTube Manager", url: "/youtube-manager", icon: Youtube },
@@ -79,6 +79,11 @@ export function AppSidebar() {
       {/* Header */}
       <div className="p-4 border-b bg-card">
         <div className="flex items-center gap-3 animate-scale-in">
+          <img 
+            src={fabulousLogo} 
+            alt="Fabulous Creators Logo" 
+            className="w-10 h-10 object-contain"
+          />
           {showText && (
             <div>
               <h1 className="font-bold text-xl gradient-text tracking-tight">Fabuos Creators</h1>
