@@ -25,6 +25,7 @@ interface UsageLimits {
   aiTextSummarizer: number;
   aiShortsPackages: number;
   aiYouResearch: number;
+  aiFaceSwap: number;
 }
 
 const PLAN_LIMITS = {
@@ -49,6 +50,7 @@ const PLAN_LIMITS = {
     aiShortsPackages: 4,
     aiCreatorHelperBot: 20,
     aiYouResearch: 5,
+    aiFaceSwap: 4,
   },
   pro: {
     videoUploads: -1,
@@ -71,6 +73,7 @@ const PLAN_LIMITS = {
     aiShortsPackages: 20,
     aiCreatorHelperBot: 100,
     aiYouResearch: 50,
+    aiFaceSwap: 20,
   },
 };
 
@@ -412,6 +415,16 @@ Deno.serve(async (req) => {
           : plan === 'free'
             ? `Hey there! Your daily limit of ${limit} research queries is reached. Please check back tomorrow or upgrade to Pro for 50/day!`
             : `Hey there! Your daily limit of ${limit} research queries is reached. Please check back tomorrow!`;
+        break;
+      case 'ai_face_swap':
+        currentUsage = usage?.ai_face_swap_count || 0;
+        limit = limits.aiFaceSwap;
+        canUse = limit === -1 || currentUsage < limit;
+        message = canUse 
+          ? `You have ${limit === -1 ? 'unlimited' : limit - currentUsage} face swaps remaining today`
+          : plan === 'free'
+            ? `Hey there! Your daily limit of ${limit} face swaps is reached. Please check back tomorrow or upgrade to Pro for 20/day!`
+            : `Hey there! Your daily limit of ${limit} face swaps is reached. Please check back tomorrow!`;
         break;
     }
 

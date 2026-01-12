@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, FileCheck, Wand2, Volume2, MessageSquareText, Radio, Languages, Bot, HelpCircle, Video, MessageSquare, Globe } from "lucide-react";
+import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, FileCheck, Wand2, Volume2, MessageSquareText, Radio, Languages, Bot, HelpCircle, Video, MessageSquare, Globe, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -42,6 +42,7 @@ const aiTools = [
   { title: "Voice Cloning", url: "/voice-cloning", icon: Volume2 },
   { title: "Text to Speech", url: "/text-to-speech", icon: MessageSquareText },
   { title: "AI Dubbing", url: "/dubbing", icon: Languages },
+  { title: "Face Swap", url: "/face-swap", icon: Users },
   { title: "AI Agents", url: "/ai-agents", icon: Bot },
 ];
 

@@ -34,6 +34,7 @@ import CreatorHelperBot from "./pages/CreatorHelperBot";
 import CommentAutoResponder from "./pages/CommentAutoResponder";
 import ShortsFactory from "./pages/ShortsFactory";
 import YouResearch from "./pages/YouResearch";
+import FaceSwap from "./pages/FaceSwap";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ const App = () => (
           <Route path="/ai-agents" element={<MaintenanceGuard><Layout><AIAgents /></Layout></MaintenanceGuard>} />
           <Route path="/creator-helper-bot" element={<MaintenanceGuard><Layout><CreatorHelperBot /></Layout></MaintenanceGuard>} />
           <Route path="/you-research" element={<MaintenanceGuard><Layout><YouResearch /></Layout></MaintenanceGuard>} />
+          <Route path="/face-swap" element={<MaintenanceGuard><Layout><FaceSwap /></Layout></MaintenanceGuard>} />
           <Route path="/pricing" element={<MaintenanceGuard><Layout><Pricing /></Layout></MaintenanceGuard>} />
           <Route path="/payment-success" element={<MaintenanceGuard><Layout><PaymentSuccess /></Layout></MaintenanceGuard>} />
           <Route path="/admin" element={<MaintenanceGuard><Layout><Admin /></Layout></MaintenanceGuard>} />
