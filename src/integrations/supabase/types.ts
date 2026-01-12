@@ -950,6 +950,7 @@ export type Database = {
           ai_captions_count: number
           ai_creator_helper_bot_count: number
           ai_dubbing_count: number
+          ai_face_swap_count: number
           ai_hashtags_count: number | null
           ai_image_enhancement_count: number
           ai_music_count: number
@@ -977,6 +978,7 @@ export type Database = {
           ai_captions_count?: number
           ai_creator_helper_bot_count?: number
           ai_dubbing_count?: number
+          ai_face_swap_count?: number
           ai_hashtags_count?: number | null
           ai_image_enhancement_count?: number
           ai_music_count?: number
@@ -1004,6 +1006,7 @@ export type Database = {
           ai_captions_count?: number
           ai_creator_helper_bot_count?: number
           ai_dubbing_count?: number
+          ai_face_swap_count?: number
           ai_hashtags_count?: number | null
           ai_image_enhancement_count?: number
           ai_music_count?: number

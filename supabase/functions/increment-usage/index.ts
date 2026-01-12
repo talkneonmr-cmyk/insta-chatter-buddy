@@ -132,6 +132,9 @@ Deno.serve(async (req) => {
       case 'ai_you_research':
         updateData = { ai_you_research_count: (usage.ai_you_research_count || 0) + 1 };
         break;
+      case 'ai_face_swap':
+        updateData = { ai_face_swap_count: (usage.ai_face_swap_count || 0) + 1 };
+        break;
       case 'youtube_operations':
       case 'youtube_operation':
       case 'youtube_upload':
