@@ -140,56 +140,57 @@ const FaceSwap = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
       <div>
-        <h1 className="text-3xl font-bold mb-2">AI Face Swap</h1>
-        <p className="text-muted-foreground">
-          Swap faces between two photos instantly with AI technology
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">AI Face Swap</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          Swap faces between two photos instantly with AI
         </p>
       </div>
 
-      {/* Instructions */}
-      <Card className="p-4 bg-primary/5 border-primary/20">
-        <div className="flex items-center gap-4">
+      {/* Instructions - Responsive */}
+      <Card className="p-3 sm:p-4 bg-primary/5 border-primary/20">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">1</div>
-            <span className="text-sm font-medium">Upload SOURCE (face to use)</span>
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs sm:text-sm">1</div>
+            <span className="text-xs sm:text-sm font-medium">Upload SOURCE (face to use)</span>
           </div>
-          <ArrowRight className="w-4 h-4 text-muted-foreground" />
+          <ArrowRight className="hidden sm:block w-4 h-4 text-muted-foreground" />
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">2</div>
-            <span className="text-sm font-medium">Upload TARGET (where to put face)</span>
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs sm:text-sm">2</div>
+            <span className="text-xs sm:text-sm font-medium">Upload TARGET (where to put face)</span>
           </div>
-          <ArrowRight className="w-4 h-4 text-muted-foreground" />
+          <ArrowRight className="hidden sm:block w-4 h-4 text-muted-foreground" />
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">3</div>
-            <span className="text-sm font-medium">Click Swap!</span>
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs sm:text-sm">3</div>
+            <span className="text-xs sm:text-sm font-medium">Click Swap!</span>
           </div>
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Image Cards - Responsive Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Source Image */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Upload className="w-5 h-5" />
+        <Card className="p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 flex items-center gap-2">
+            <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
             Source Face
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
             The face you want to use
           </p>
           
           <div 
-            className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors min-h-[250px] flex items-center justify-center"
+            className="border-2 border-dashed rounded-lg p-4 sm:p-8 text-center cursor-pointer hover:border-primary transition-colors min-h-[180px] sm:min-h-[250px] flex items-center justify-center"
             onClick={() => sourceInputRef.current?.click()}
           >
             {sourceImage ? (
-              <img src={sourceImage} alt="Source" className="max-w-full max-h-60 mx-auto rounded-lg" />
+              <img src={sourceImage} alt="Source" className="max-w-full max-h-40 sm:max-h-60 mx-auto rounded-lg" />
             ) : (
-              <div className="space-y-4">
-                <ImageIcon className="w-12 h-12 mx-auto text-muted-foreground" />
+              <div className="space-y-2 sm:space-y-4">
+                <ImageIcon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Click to upload</p>
+                  <p className="text-xs sm:text-sm font-medium">Tap to upload</p>
                   <p className="text-xs text-muted-foreground">Source image with face</p>
                 </div>
               </div>
@@ -206,26 +207,26 @@ const FaceSwap = () => {
         </Card>
 
         {/* Target Image */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Upload className="w-5 h-5" />
+        <Card className="p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 flex items-center gap-2">
+            <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
             Target Image
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
             Where to put the face
           </p>
           
           <div 
-            className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors min-h-[250px] flex items-center justify-center"
+            className="border-2 border-dashed rounded-lg p-4 sm:p-8 text-center cursor-pointer hover:border-primary transition-colors min-h-[180px] sm:min-h-[250px] flex items-center justify-center"
             onClick={() => targetInputRef.current?.click()}
           >
             {targetImage ? (
-              <img src={targetImage} alt="Target" className="max-w-full max-h-60 mx-auto rounded-lg" />
+              <img src={targetImage} alt="Target" className="max-w-full max-h-40 sm:max-h-60 mx-auto rounded-lg" />
             ) : (
-              <div className="space-y-4">
-                <ImageIcon className="w-12 h-12 mx-auto text-muted-foreground" />
+              <div className="space-y-2 sm:space-y-4">
+                <ImageIcon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Click to upload</p>
+                  <p className="text-xs sm:text-sm font-medium">Tap to upload</p>
                   <p className="text-xs text-muted-foreground">Target image for face</p>
                 </div>
               </div>
@@ -241,27 +242,27 @@ const FaceSwap = () => {
           />
         </Card>
 
-        {/* Result */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Download className="w-5 h-5" />
+        {/* Result - Full width on tablet, same row on desktop */}
+        <Card className="p-4 sm:p-6 md:col-span-2 xl:col-span-1">
+          <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 flex items-center gap-2">
+            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
             Result
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
             Your swapped image
           </p>
 
-          <div className="border-2 rounded-lg p-8 text-center bg-[repeating-linear-gradient(45deg,hsl(var(--muted))_0,hsl(var(--muted))_10px,transparent_10px,transparent_20px)] min-h-[250px] flex items-center justify-center">
+          <div className="border-2 rounded-lg p-4 sm:p-8 text-center bg-[repeating-linear-gradient(45deg,hsl(var(--muted))_0,hsl(var(--muted))_10px,transparent_10px,transparent_20px)] min-h-[180px] sm:min-h-[250px] flex items-center justify-center">
             {resultImage ? (
               <img 
                 src={resultImage} 
                 alt="Result" 
-                className="max-w-full max-h-60 mx-auto rounded-lg shadow-lg" 
+                className="max-w-full max-h-40 sm:max-h-60 mx-auto rounded-lg shadow-lg" 
               />
             ) : (
-              <div className="space-y-4">
-                <Users className="w-12 h-12 mx-auto text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-2 sm:space-y-4">
+                <Users className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground/50" />
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   {isProcessing ? "Swapping faces..." : "Result will appear here"}
                 </p>
               </div>
@@ -270,18 +271,18 @@ const FaceSwap = () => {
         </Card>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-4 justify-center">
+      {/* Action Buttons - Responsive */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
         <Button 
           size="lg"
           onClick={handleSwap}
           disabled={!sourceImage || !targetImage || isProcessing}
-          className="min-w-[200px]"
+          className="w-full sm:w-auto sm:min-w-[200px]"
         >
           {isProcessing ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Swapping Faces...
+              Swapping...
             </>
           ) : (
             <>
@@ -291,50 +292,60 @@ const FaceSwap = () => {
           )}
         </Button>
         
-        <Button 
-          size="lg"
-          variant="outline"
-          onClick={handleDownload}
-          disabled={!resultImage}
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Download
-        </Button>
-        
-        <Button 
-          size="lg"
-          variant="ghost"
-          onClick={handleClear}
-          disabled={!sourceImage && !targetImage && !resultImage}
-        >
-          Clear All
-        </Button>
+        <div className="flex gap-3 sm:gap-4">
+          <Button 
+            size="lg"
+            variant="outline"
+            onClick={handleDownload}
+            disabled={!resultImage}
+            className="flex-1 sm:flex-none"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download
+          </Button>
+          
+          <Button 
+            size="lg"
+            variant="ghost"
+            onClick={handleClear}
+            disabled={!sourceImage && !targetImage && !resultImage}
+            className="flex-1 sm:flex-none"
+          >
+            Clear
+          </Button>
+        </div>
       </div>
 
-      {/* Features */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-3">How It Works</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
+      {/* Features - Responsive */}
+      <Card className="p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold mb-3">How It Works</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="flex sm:block items-center gap-3 sm:space-y-2">
             <div className="text-2xl">🎭</div>
-            <h4 className="font-semibold">AI-Powered</h4>
-            <p className="text-sm text-muted-foreground">
-              Advanced AI for realistic face swapping
-            </p>
+            <div>
+              <h4 className="font-semibold text-sm sm:text-base">AI-Powered</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Advanced AI for realistic face swapping
+              </p>
+            </div>
           </div>
-          <div className="space-y-2">
+          <div className="flex sm:block items-center gap-3 sm:space-y-2">
             <div className="text-2xl">⚡</div>
-            <h4 className="font-semibold">Instant Results</h4>
-            <p className="text-sm text-muted-foreground">
-              Get your swapped image in seconds
-            </p>
+            <div>
+              <h4 className="font-semibold text-sm sm:text-base">Instant Results</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Get your swapped image in seconds
+              </p>
+            </div>
           </div>
-          <div className="space-y-2">
+          <div className="flex sm:block items-center gap-3 sm:space-y-2">
             <div className="text-2xl">🎨</div>
-            <h4 className="font-semibold">Creative Freedom</h4>
-            <p className="text-sm text-muted-foreground">
-              Perfect for memes, fun, and creative projects
-            </p>
+            <div>
+              <h4 className="font-semibold text-sm sm:text-base">Creative Freedom</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Perfect for memes and creative projects
+              </p>
+            </div>
           </div>
         </div>
       </Card>
