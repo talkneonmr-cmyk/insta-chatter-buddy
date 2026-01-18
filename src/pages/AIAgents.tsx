@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -12,17 +12,25 @@ export default function AIAgents() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState<Array<{ role: 'user' | 'assistant', text: string }>>([]);
+  const [audioLevel, setAudioLevel] = useState(0);
   const { toast } = useToast();
 
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Audio analysis refs for voice-synced waves
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
+
   // State refs to avoid stale closures inside SpeechRecognition callbacks
   const isConnectedRef = useRef(false);
   const isProcessingRef = useRef(false);
   const isSpeakingRef = useRef(false);
   const recognitionRunningRef = useRef(false);
+  const isListeningRef = useRef(false);
 
   // TTS voice loading is async on many browsers (especially mobile)
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
@@ -52,7 +60,57 @@ export default function AIAgents() {
     isConnectedRef.current = isConnected;
     isProcessingRef.current = isProcessing;
     isSpeakingRef.current = isSpeaking;
-  }, [isConnected, isProcessing, isSpeaking]);
+    isListeningRef.current = isListening;
+  }, [isConnected, isProcessing, isSpeaking, isListening]);
+
+  // Audio analysis for voice-synced wave animation
+  const startAudioAnalysis = useCallback(async (stream: MediaStream) => {
+    try {
+      micStreamRef.current = stream;
+      audioContextRef.current = new AudioContext();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      analyserRef.current.fftSize = 256;
+      
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      source.connect(analyserRef.current);
+      
+      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+      
+      const updateLevel = () => {
+        if (analyserRef.current && isListeningRef.current) {
+          analyserRef.current.getByteFrequencyData(dataArray);
+          const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+          setAudioLevel(average / 255);
+        }
+        animationFrameRef.current = requestAnimationFrame(updateLevel);
+      };
+      
+      updateLevel();
+    } catch (error) {
+      console.error("Failed to start audio analysis:", error);
+    }
+  }, []);
+
+  const stopAudioAnalysis = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    setAudioLevel(0);
+  }, []);
+
+  const simulateSpeakingLevel = useCallback(() => {
+    if (isSpeakingRef.current) {
+      // Create varied wave pattern for speaking
+      const level = 0.3 + Math.random() * 0.5;
+      setAudioLevel(level);
+      animationFrameRef.current = requestAnimationFrame(simulateSpeakingLevel);
+    }
+  }, []);
 
   function safeStartRecognition() {
     const rec = recognitionRef.current;
@@ -229,12 +287,16 @@ export default function AIAgents() {
       setIsSpeaking(true);
       isSpeakingRef.current = true;
       setIsListening(false);
+      stopAudioAnalysis();
+      // Start speaking wave animation
+      simulateSpeakingLevel();
     };
 
     utterance.onend = () => {
       console.log('TTS ended');
       setIsSpeaking(false);
       isSpeakingRef.current = false;
+      stopAudioAnalysis();
 
       // Resume listening after speaking
       setTimeout(() => {
@@ -248,6 +310,7 @@ export default function AIAgents() {
       console.error('TTS error:', e);
       setIsSpeaking(false);
       isSpeakingRef.current = false;
+      stopAudioAnalysis();
       toast({
         title: "Audio Error",
         description: "Your browser blocked voice output. Tap 'Test Speaker' once, then try again (also check Silent mode).",
@@ -293,10 +356,12 @@ export default function AIAgents() {
     try {
       console.log('Requesting microphone permission...');
       
-      // Request microphone permission
+      // Request microphone permission and keep stream for audio analysis
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log('Microphone permission granted');
-      stream.getTracks().forEach(track => track.stop());
+      
+      // Start audio analysis for wave animation
+      startAudioAnalysis(stream);
       
       setIsConnected(true);
       setIsListening(true);
@@ -345,11 +410,19 @@ export default function AIAgents() {
   const handleStopAgent = () => {
     recognitionRef.current?.stop();
     synthRef.current?.cancel();
+    stopAudioAnalysis();
+    
+    // Stop mic stream
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach(track => track.stop());
+      micStreamRef.current = null;
+    }
     
     setIsConnected(false);
     setIsListening(false);
     setIsSpeaking(false);
     setIsProcessing(false);
+    setAudioLevel(0);
     
     toast({
       title: "Agent Disconnected",
@@ -421,22 +494,46 @@ export default function AIAgents() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Voice-synced Wave Animation */}
+            {(isListening || isSpeaking) && (
+              <div className="h-16 flex items-center justify-center gap-1 rounded-xl bg-gradient-to-br from-background to-muted overflow-hidden">
+                {[...Array(24)].map((_, i) => {
+                  const waveOffset = Math.sin((i / 24) * Math.PI * 2) * 0.3;
+                  const height = Math.max(0.15, Math.min(1, (0.2 + audioLevel * 0.8) + waveOffset * audioLevel));
+                  return (
+                    <div
+                      key={i}
+                      className={`w-1.5 rounded-full transition-all duration-75 ${
+                        isListening 
+                          ? 'bg-gradient-to-t from-blue-600 to-cyan-400' 
+                          : 'bg-gradient-to-t from-red-600 to-orange-400'
+                      }`}
+                      style={{
+                        height: `${height * 100}%`,
+                        opacity: 0.6 + audioLevel * 0.4,
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
+
             {/* Main Microphone Button */}
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 {/* Pulse animation when listening */}
                 {isListening && (
                   <>
-                    <div className="absolute inset-0 rounded-full bg-green-500/30 animate-ping" />
-                    <div className="absolute inset-[-8px] rounded-full bg-green-500/20 animate-pulse" />
+                    <div className="absolute inset-0 rounded-full bg-blue-500/30 animate-ping" />
+                    <div className="absolute inset-[-8px] rounded-full bg-blue-500/20 animate-pulse" />
                   </>
                 )}
                 {/* Wave animation when speaking */}
                 {isSpeaking && (
                   <>
-                    <div className="absolute inset-[-4px] rounded-full border-2 border-blue-500/50 animate-pulse" />
-                    <div className="absolute inset-[-12px] rounded-full border border-blue-500/30 animate-pulse" style={{ animationDelay: '0.2s' }} />
-                    <div className="absolute inset-[-20px] rounded-full border border-blue-500/20 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                    <div className="absolute inset-[-4px] rounded-full border-2 border-red-500/50 animate-pulse" />
+                    <div className="absolute inset-[-12px] rounded-full border border-red-500/30 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    <div className="absolute inset-[-20px] rounded-full border border-red-500/20 animate-pulse" style={{ animationDelay: '0.4s' }} />
                   </>
                 )}
                 
@@ -446,9 +543,9 @@ export default function AIAgents() {
                   className={`relative z-10 h-24 w-24 sm:h-28 sm:w-28 rounded-full transition-all duration-300 ${
                     isConnected 
                       ? isSpeaking 
-                        ? 'bg-blue-500 hover:bg-blue-600' 
+                        ? 'bg-red-500 hover:bg-red-600' 
                         : isListening 
-                          ? 'bg-green-500 hover:bg-green-600' 
+                          ? 'bg-blue-500 hover:bg-blue-600' 
                           : 'bg-yellow-500 hover:bg-yellow-600'
                       : 'bg-primary hover:bg-primary/90'
                   }`}
