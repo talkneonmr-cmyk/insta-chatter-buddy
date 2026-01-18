@@ -2,20 +2,27 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Bot, Mic, MicOff, Loader2 } from "lucide-react";
+import { Bot, Mic, MicOff, Loader2, Volume2, VolumeX, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import TesterGuard from "@/components/TesterGuard";
-
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AIAgents() {
   const [isConnected, setIsConnected] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState<Array<{ role: 'user' | 'assistant', text: string }>>([]);
   const { toast } = useToast();
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
-  const [serviceError, setServiceError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [transcript]);
 
   useEffect(() => {
     // Initialize Speech Recognition
@@ -35,6 +42,8 @@ export default function AIAgents() {
         
         // Get AI response
         setIsListening(false);
+        setIsProcessing(true);
+        
         try {
           const { data, error } = await supabase.functions.invoke('ai-voice-chat', {
             body: { message: userText }
@@ -44,11 +53,13 @@ export default function AIAgents() {
 
           const aiResponse = data.reply;
           setTranscript(prev => [...prev, { role: 'assistant', text: aiResponse }]);
+          setIsProcessing(false);
           
           // Speak the response
           speakText(aiResponse);
         } catch (error: any) {
           console.error('AI error:', error);
+          setIsProcessing(false);
           toast({
             title: "Error",
             description: error.message || "Failed to get AI response",
@@ -61,7 +72,6 @@ export default function AIAgents() {
       recognitionRef.current.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         if (event.error === 'service-not-allowed') {
-          setServiceError('Your browser blocked speech recognition in this embedded preview. Open the app in a new tab and allow microphone access.');
           toast({
             title: "Permission Required",
             description: "Open in a new tab and allow microphone access to enable voice chat.",
@@ -79,8 +89,12 @@ export default function AIAgents() {
       };
 
       recognitionRef.current.onend = () => {
-        if (isConnected && isListening) {
-          recognitionRef.current?.start();
+        if (isConnected && isListening && !isSpeaking && !isProcessing) {
+          try {
+            recognitionRef.current?.start();
+          } catch (e) {
+            console.warn('Restart error:', e);
+          }
         }
       };
     }
@@ -96,22 +110,39 @@ export default function AIAgents() {
         synthRef.current.cancel();
       }
     };
-  }, [isConnected, isListening]);
+  }, [isConnected, isListening, isSpeaking, isProcessing]);
 
   const speakText = (text: string) => {
     if (!synthRef.current) return;
     
-    synthRef.current.cancel(); // Cancel any ongoing speech
+    synthRef.current.cancel();
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
     
+    // Try to get a natural voice
+    const voices = synthRef.current.getVoices();
+    const preferredVoice = voices.find(v => 
+      v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha')
+    ) || voices[0];
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+    
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => {
       setIsSpeaking(false);
       setIsListening(true);
+      // Restart recognition after speaking
+      setTimeout(() => {
+        try {
+          recognitionRef.current?.start();
+        } catch (e) {
+          console.warn('Restart after speech error:', e);
+        }
+      }, 100);
     };
     
     setIsSpeaking(true);
@@ -142,50 +173,41 @@ export default function AIAgents() {
     try {
       console.log('Requesting microphone permission...');
       
-      // Start recognition immediately in the user gesture to avoid service-not-allowed
-      try { recognitionRef.current?.start(); } catch (e) { console.warn('Immediate start error:', e); }
-      
-      // Request microphone permission explicitly
+      // Request microphone permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log('Microphone permission granted');
-      
-      // Stop the stream - we just needed permission
       stream.getTracks().forEach(track => track.stop());
       
-      setServiceError(null);
       setIsConnected(true);
       setIsListening(true);
       
       toast({
-        title: "🎙️ Agent Active",
-        description: "Listening... Start speaking now! (Completely free & real-time)",
+        title: "🎙️ Voice Agent Active",
+        description: "I'm listening! Start speaking now.",
       });
       
-      // Start recognition after permission is granted
-      console.log('Starting speech recognition...');
+      // Start recognition
       setTimeout(() => {
-        try { recognitionRef.current?.start(); } catch (e) { console.warn('Start error:', e); }
-      }, 250);
-
+        try {
+          recognitionRef.current?.start();
+        } catch (e) {
+          console.warn('Start error:', e);
+        }
+      }, 100);
       
     } catch (error: any) {
       console.error('Error starting agent:', error);
       
-      let errorTitle = "Microphone Access Required";
       let errorMessage = "Please allow microphone access to use voice chat.";
       
-      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        errorMessage = "Click the 🔒 icon in your browser's address bar and allow microphone access, then try again.";
+      if (error.name === 'NotAllowedError') {
+        errorMessage = "Click the 🔒 icon in your browser's address bar and allow microphone access.";
       } else if (error.name === 'NotFoundError') {
-        errorMessage = "No microphone detected. Please connect a microphone and try again.";
-      } else if (error.name === 'NotReadableError') {
-        errorMessage = "Microphone is being used by another app. Please close other apps and try again.";
-      } else if (error.name === 'SecurityError') {
-        errorMessage = "Microphone access blocked due to security settings. Please check your browser settings.";
+        errorMessage = "No microphone detected. Please connect a microphone.";
       }
       
       toast({
-        title: errorTitle,
+        title: "Microphone Access Required",
         description: errorMessage,
         variant: "destructive",
       });
@@ -199,11 +221,16 @@ export default function AIAgents() {
     setIsConnected(false);
     setIsListening(false);
     setIsSpeaking(false);
+    setIsProcessing(false);
     
     toast({
       title: "Agent Disconnected",
       description: "Voice conversation ended",
     });
+  };
+
+  const clearTranscript = () => {
+    setTranscript([]);
   };
 
   useEffect(() => {
@@ -213,77 +240,179 @@ export default function AIAgents() {
     };
   }, []);
 
-  return (
-    <TesterGuard featureName="AI Voice Agents">
-      
-        <div className="relative min-h-[calc(100vh-4rem)] container mx-auto p-6 max-w-4xl">
-      {/* Background Content - Blurred */}
-      <div className="blur-md pointer-events-none select-none">
-        <div className="mb-8 slide-in">
-          <h1 className="text-4xl font-bold mb-2 gradient-text">AI Voice Agents</h1>
-          <p className="text-muted-foreground">Conversational AI with voice interaction</p>
-        </div>
+  const getStatusText = () => {
+    if (!isConnected) return "Click to start";
+    if (isProcessing) return "Thinking...";
+    if (isSpeaking) return "Speaking...";
+    if (isListening) return "Listening...";
+    return "Ready";
+  };
 
-        <Card className="scale-in">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bot className="h-5 w-5" />
+  const getStatusColor = () => {
+    if (!isConnected) return "bg-muted";
+    if (isProcessing) return "bg-yellow-500/20 text-yellow-500";
+    if (isSpeaking) return "bg-blue-500/20 text-blue-500";
+    if (isListening) return "bg-green-500/20 text-green-500";
+    return "bg-muted";
+  };
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] container mx-auto p-4 sm:p-6 max-w-4xl">
+      {/* Header */}
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2 gradient-text">AI Voice Agent</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          Have a natural voice conversation with AI • 100% Free
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+        {/* Voice Control Card */}
+        <Card className="lg:sticky lg:top-6 lg:self-start">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Bot className="h-5 w-5 text-primary" />
               Voice Agent
             </CardTitle>
-            <CardDescription>
-              Start a voice conversation with an AI agent
+            <CardDescription className="text-sm">
+              Click the microphone and start talking
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex justify-center items-center min-h-[200px]">
-              <Button size="lg" className="h-24 w-24 rounded-full" disabled>
-                <Mic className="h-8 w-8" />
-              </Button>
+            {/* Main Microphone Button */}
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                {/* Pulse animation when listening */}
+                {isListening && (
+                  <>
+                    <div className="absolute inset-0 rounded-full bg-green-500/30 animate-ping" />
+                    <div className="absolute inset-[-8px] rounded-full bg-green-500/20 animate-pulse" />
+                  </>
+                )}
+                {/* Wave animation when speaking */}
+                {isSpeaking && (
+                  <>
+                    <div className="absolute inset-[-4px] rounded-full border-2 border-blue-500/50 animate-pulse" />
+                    <div className="absolute inset-[-12px] rounded-full border border-blue-500/30 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    <div className="absolute inset-[-20px] rounded-full border border-blue-500/20 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                  </>
+                )}
+                
+                <Button 
+                  size="lg" 
+                  onClick={isConnected ? handleStopAgent : handleStartAgent}
+                  className={`relative z-10 h-24 w-24 sm:h-28 sm:w-28 rounded-full transition-all duration-300 ${
+                    isConnected 
+                      ? isSpeaking 
+                        ? 'bg-blue-500 hover:bg-blue-600' 
+                        : isListening 
+                          ? 'bg-green-500 hover:bg-green-600' 
+                          : 'bg-yellow-500 hover:bg-yellow-600'
+                      : 'bg-primary hover:bg-primary/90'
+                  }`}
+                >
+                  {isProcessing ? (
+                    <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 animate-spin" />
+                  ) : isSpeaking ? (
+                    <Volume2 className="h-8 w-8 sm:h-10 sm:w-10" />
+                  ) : isConnected ? (
+                    <MicOff className="h-8 w-8 sm:h-10 sm:w-10" />
+                  ) : (
+                    <Mic className="h-8 w-8 sm:h-10 sm:w-10" />
+                  )}
+                </Button>
+              </div>
+
+              {/* Status Badge */}
+              <div className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor()}`}>
+                {getStatusText()}
+              </div>
             </div>
 
-            <div className="p-4 bg-muted/20 rounded-lg">
-              <h4 className="font-semibold mb-2">✨ Features</h4>
-              <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• 🎙️ Browser-based voice recognition</li>
-                <li>• 🔊 Natural text-to-speech</li>
-                <li>• 🤖 AI-powered responses</li>
-                <li>• 💬 Real-time conversation flow</li>
+            {/* Features */}
+            <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+              <h4 className="font-semibold text-sm">✨ Powered by</h4>
+              <ul className="text-xs sm:text-sm space-y-1 text-muted-foreground">
+                <li>• 🎙️ Browser Speech Recognition (Free)</li>
+                <li>• 🔊 Natural Text-to-Speech (Free)</li>
+                <li>• 🤖 Lovable AI (Gemini - Free)</li>
+                <li>• 💬 Real-time Conversation</li>
               </ul>
             </div>
+
+            {/* Browser Support Note */}
+            <p className="text-xs text-muted-foreground text-center">
+              Best experience on Chrome or Edge
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Conversation History Card */}
+        <Card>
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg sm:text-xl">Conversation</CardTitle>
+              <CardDescription className="text-sm">Live transcript</CardDescription>
+            </div>
+            {transcript.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={clearTranscript}
+                className="text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[300px] sm:h-[400px] pr-4" ref={scrollRef}>
+              {transcript.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                  <Bot className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground text-sm">
+                    {isConnected 
+                      ? "I'm listening... say something!" 
+                      : "Start the agent to begin a conversation"}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {transcript.map((message, index) => (
+                    <div 
+                      key={index}
+                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div 
+                        className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm sm:text-base ${
+                          message.role === 'user'
+                            ? 'bg-primary text-primary-foreground rounded-br-md'
+                            : 'bg-muted rounded-bl-md'
+                        }`}
+                      >
+                        {message.text}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Processing indicator */}
+                  {isProcessing && (
+                    <div className="flex justify-start">
+                      <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" />
+                          <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                          <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
-
-      {/* Development Notice Overlay */}
-      <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-        <Card className="p-6 sm:p-8 w-full max-w-md sm:max-w-lg border-2 border-orange-500/50 shadow-2xl">
-          <div className="text-center space-y-3 sm:space-y-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-orange-500/20 flex items-center justify-center">
-              <Bot className="w-8 h-8 sm:w-10 sm:h-10 text-orange-500" />
-            </div>
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-2">Feature Under Development</h2>
-              <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
-                AI Voice Agents are currently in active development and testing phase.
-              </p>
-            </div>
-            <div className="bg-muted/50 rounded-lg p-3 sm:p-4 space-y-2 text-left">
-              <p className="text-xs sm:text-sm font-semibold">What's Coming:</p>
-              <ul className="text-xs sm:text-sm text-muted-foreground space-y-1">
-                <li>• Real-time voice conversations with AI</li>
-                <li>• Natural language understanding</li>
-                <li>• Multi-turn dialogue support</li>
-                <li>• Custom voice personalities</li>
-              </ul>
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              This feature will be available soon. Thank you for your patience!
-            </p>
-          </div>
-        </Card>
-      </div>
     </div>
-      
-    </TesterGuard>
   );
 }
