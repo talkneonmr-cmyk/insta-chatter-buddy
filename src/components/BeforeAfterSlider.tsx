@@ -67,7 +67,7 @@ export const BeforeAfterSlider = ({
     <div
       ref={containerRef}
       className={cn(
-        "relative w-full aspect-[4/3] rounded-xl overflow-hidden cursor-ew-resize select-none border border-border shadow-lg bg-muted/30",
+        "relative w-full aspect-[4/3] sm:aspect-video rounded-lg sm:rounded-xl overflow-hidden cursor-ew-resize select-none border border-border shadow-lg bg-muted/30 touch-none",
         className
       )}
       onMouseMove={handleMouseMove}
@@ -109,26 +109,32 @@ export const BeforeAfterSlider = ({
         onMouseDown={handleMouseDown}
         onTouchStart={handleMouseDown}
       >
-        {/* Slider Handle */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-xl flex items-center justify-center border-4 border-primary transition-transform hover:scale-110">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-primary">
+        {/* Slider Handle - Responsive sizes */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-xl flex items-center justify-center border-2 sm:border-4 border-primary transition-transform hover:scale-110 active:scale-95">
+          <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            className="text-primary w-4 h-4 sm:w-5 sm:h-5"
+          >
             <path d="M8 6L4 12L8 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M16 6L20 12L16 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
       </div>
 
-      {/* Labels */}
-      <div className="absolute top-3 left-3 px-3 py-1.5 bg-black/70 text-white text-xs font-semibold rounded-full backdrop-blur-sm">
+      {/* Labels - Responsive sizes and positioning */}
+      <div className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-1 sm:px-3 sm:py-1.5 bg-black/70 text-white text-[10px] sm:text-xs font-semibold rounded-full backdrop-blur-sm">
         {beforeLabel}
       </div>
-      <div className="absolute top-3 right-3 px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded-full backdrop-blur-sm shadow-lg">
+      <div className="absolute top-2 right-2 sm:top-3 sm:right-3 px-2 py-1 sm:px-3 sm:py-1.5 bg-primary text-primary-foreground text-[10px] sm:text-xs font-semibold rounded-full backdrop-blur-sm shadow-lg">
         {afterLabel}
       </div>
 
       {/* Gradient overlay on edges */}
-      <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-black/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-y-0 left-0 w-4 sm:w-8 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-4 sm:w-8 bg-gradient-to-l from-black/20 to-transparent pointer-events-none" />
     </div>
   );
 };
