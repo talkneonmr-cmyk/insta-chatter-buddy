@@ -34,7 +34,7 @@ export const BackgroundRemover = () => {
       toast.success("Background removed successfully!");
     } catch (error) {
       console.error("Background removal error:", error);
-      toast.error("Failed to remove background. Try a smaller image.");
+      toast.error("Failed to remove background. Please try again.");
     } finally {
       setProcessing(false);
     }
@@ -83,7 +83,7 @@ export const BackgroundRemover = () => {
           <div className="text-center py-8">
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
             <p className="mt-4 text-sm text-muted-foreground">
-              Processing... This may take 10-30 seconds
+              Processing... This may take a few seconds
             </p>
           </div>
         )}
