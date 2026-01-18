@@ -42,16 +42,17 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           {
             role: "system",
-            content: "You are a helpful AI voice assistant. Keep responses concise and conversational, as they will be spoken aloud. Aim for 2-3 sentences maximum per response."
+            content:
+              "You are a helpful AI voice assistant. Keep responses short (1-2 sentences) and conversational because they will be spoken aloud.",
           },
           {
             role: "user",
-            content: message
-          }
+            content: message,
+          },
         ],
       }),
     });

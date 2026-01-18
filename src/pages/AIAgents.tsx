@@ -24,6 +24,23 @@ export default function AIAgents() {
   const isSpeakingRef = useRef(false);
   const recognitionRunningRef = useRef(false);
 
+  // TTS voice loading is async on many browsers (especially mobile)
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
+  const voicesLoadedOnceRef = useRef(false);
+
+  const loadVoices = () => {
+    const synth = synthRef.current;
+    if (!synth) return;
+    const voices = synth.getVoices();
+    if (voices && voices.length) {
+      voicesRef.current = voices;
+      if (!voicesLoadedOnceRef.current) {
+        console.log("TTS voices loaded:", voices.length);
+        voicesLoadedOnceRef.current = true;
+      }
+    }
+  };
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollRef.current) {
@@ -126,12 +143,13 @@ export default function AIAgents() {
       };
 
       rec.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-
         // 'aborted' happens when we programmatically stop() while switching modes; ignore it.
         if (event.error === 'aborted' || event.error === 'no-speech') {
+          console.log('Speech recognition:', event.error);
           return;
         }
+
+        console.error('Speech recognition error:', event.error);
 
         if (event.error === 'service-not-allowed') {
           toast({
@@ -161,16 +179,28 @@ export default function AIAgents() {
 
     // Initialize Speech Synthesis
     synthRef.current = window.speechSynthesis;
+    loadVoices();
+    (window.speechSynthesis as any).onvoiceschanged = () => loadVoices();
 
     return () => {
       safeStopRecognition();
       synthRef.current?.cancel();
+      (window.speechSynthesis as any).onvoiceschanged = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const speakText = (text: string) => {
     if (!synthRef.current) return;
+
+    try {
+      // Some browsers (esp. iOS) require resume() after a user gesture
+      synthRef.current.resume?.();
+    } catch (e) {
+      console.log('TTS resume error:', e);
+    }
+
+    loadVoices();
 
     // Stop recognition so it doesn't pick up the agent's own voice
     safeStopRecognition();
@@ -182,8 +212,10 @@ export default function AIAgents() {
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
 
+    const voices = voicesRef.current.length ? voicesRef.current : synthRef.current.getVoices();
+    console.log('Speaking. Voices available:', voices?.length ?? 0);
+
     // Try to get a natural voice
-    const voices = synthRef.current.getVoices();
     const preferredVoice =
       voices.find((v) => v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha')) ||
       voices.find((v) => v.lang?.startsWith('en')) ||
@@ -193,12 +225,14 @@ export default function AIAgents() {
     }
 
     utterance.onstart = () => {
+      console.log('TTS started');
       setIsSpeaking(true);
       isSpeakingRef.current = true;
       setIsListening(false);
     };
 
     utterance.onend = () => {
+      console.log('TTS ended');
       setIsSpeaking(false);
       isSpeakingRef.current = false;
 
@@ -210,12 +244,29 @@ export default function AIAgents() {
       }, 250);
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (e) => {
+      console.error('TTS error:', e);
       setIsSpeaking(false);
       isSpeakingRef.current = false;
+      toast({
+        title: "Audio Error",
+        description: "Your browser blocked voice output. Tap 'Test Speaker' once, then try again (also check Silent mode).",
+        variant: "destructive",
+      });
     };
 
-    synthRef.current.speak(utterance);
+    try {
+      synthRef.current.speak(utterance);
+    } catch (e: any) {
+      console.error('TTS speak failed:', e);
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      toast({
+        title: "Audio Error",
+        description: e?.message || "Failed to play voice output",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleStartAgent = async () => {
@@ -249,7 +300,15 @@ export default function AIAgents() {
       
       setIsConnected(true);
       setIsListening(true);
-      
+
+      // Warm up voices (some browsers need this after a user gesture)
+      try {
+        synthRef.current?.resume?.();
+      } catch (e) {
+        console.log("TTS resume error:", e);
+      }
+      loadVoices();
+
       toast({
         title: "🎙️ Voice Agent Active",
         description: "I'm listening! Start speaking now.",
@@ -300,6 +359,20 @@ export default function AIAgents() {
 
   const clearTranscript = () => {
     setTranscript([]);
+  };
+
+  const handleTestSpeaker = () => {
+    if (!window.speechSynthesis) {
+      toast({
+        title: "Not Supported",
+        description: "Speech synthesis is not supported in your browser.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Must be triggered by a user gesture on some mobile browsers
+    speakText("Audio test. If you can hear this, voice replies will work.");
   };
 
   useEffect(() => {
@@ -396,6 +469,16 @@ export default function AIAgents() {
               <div className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor()}`}>
                 {getStatusText()}
               </div>
+
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={handleTestSpeaker}
+                className="w-56"
+              >
+                Test Speaker
+              </Button>
             </div>
 
             {/* Features */}
