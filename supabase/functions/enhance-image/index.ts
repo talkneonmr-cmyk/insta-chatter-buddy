@@ -72,11 +72,22 @@ serve(async (req) => {
 
     console.log(`Enhancing image with ${scale}x upscale using Lovable AI...`);
 
-    const enhancementPrompt = scale === 2 
-      ? 'Upscale this image to 2x higher resolution. Enhance it professionally by: significantly improving sharpness and clarity, adding fine details and textures, enhancing color vibrancy and depth, removing any noise or compression artifacts, improving contrast and dynamic range. Make every part of the image crisp, clear, and detailed.'
-      : scale === 3
-      ? 'Upscale this image to 3x higher resolution. Enhance it professionally by: maximally improving sharpness and clarity, adding substantial fine details and realistic textures, greatly enhancing color vibrancy and depth, removing all noise and compression artifacts, significantly improving contrast and dynamic range, adding micro-details to surfaces. Make it look premium and high-definition.'
-      : 'Upscale this image to 4x higher resolution. Enhance it to ultra-professional quality by: maximally improving sharpness and clarity to razor-sharp levels, adding extensive fine details and ultra-realistic textures, maximizing color vibrancy and depth, removing all noise and artifacts completely, dramatically improving contrast and dynamic range, adding rich micro-details to every surface, enhancing lighting and shadows. Make it look like a professional high-end photograph with perfect clarity.';
+    // CRITICAL: Strict prompt to preserve original image exactly - only enhance quality
+    const enhancementPrompt = `CRITICAL INSTRUCTIONS - YOU MUST FOLLOW EXACTLY:
+
+1. DO NOT generate a new image
+2. DO NOT change the subject, person, or any content
+3. DO NOT change the orientation (keep portrait as portrait, landscape as landscape)
+4. DO NOT change the pose, expression, or composition
+5. DO NOT add or remove ANYTHING
+
+ONLY do the following to THIS EXACT image:
+- Improve sharpness and clarity
+- Reduce noise and artifacts
+- Enhance details that already exist
+- Slightly improve colors
+
+This is a ${scale}x upscale. Return the EXACT SAME image with better quality. The output must show the same person/subject in the same position.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
