@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Bot, Mic, MicOff, Loader2, Volume2, VolumeX, Trash2 } from "lucide-react";
+import { Bot, Mic, MicOff, Loader2, Volume2, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -13,9 +13,16 @@ export default function AIAgents() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState<Array<{ role: 'user' | 'assistant', text: string }>>([]);
   const { toast } = useToast();
+
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // State refs to avoid stale closures inside SpeechRecognition callbacks
+  const isConnectedRef = useRef(false);
+  const isProcessingRef = useRef(false);
+  const isSpeakingRef = useRef(false);
+  const recognitionRunningRef = useRef(false);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -25,25 +32,65 @@ export default function AIAgents() {
   }, [transcript]);
 
   useEffect(() => {
-    // Initialize Speech Recognition
+    isConnectedRef.current = isConnected;
+    isProcessingRef.current = isProcessing;
+    isSpeakingRef.current = isSpeaking;
+  }, [isConnected, isProcessing, isSpeaking]);
+
+  function safeStartRecognition() {
+    const rec = recognitionRef.current;
+    if (!rec) return;
+    if (recognitionRunningRef.current) return;
+
+    try {
+      rec.start();
+    } catch (e) {
+      // Common on mobile when start() is called twice; ignore.
+      console.warn('Recognition start error:', e);
+    }
+  }
+
+  function safeStopRecognition() {
+    const rec = recognitionRef.current;
+    if (!rec) return;
+
+    try {
+      rec.stop();
+    } catch (e) {
+      console.warn('Recognition stop error:', e);
+    }
+  }
+
+  useEffect(() => {
+    // Initialize Speech Recognition ONCE
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
+      const rec = new SpeechRecognition();
+      recognitionRef.current = rec;
 
-      recognitionRef.current.onresult = async (event: any) => {
+      // Important for stability: listen -> stop on result -> restart after TTS
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = 'en-US';
+
+      rec.onstart = () => {
+        recognitionRunningRef.current = true;
+        setIsListening(true);
+      };
+
+      rec.onresult = async (event: any) => {
         const last = event.results.length - 1;
         const userText = event.results[last][0].transcript;
-        
-        console.log('User said:', userText);
-        setTranscript(prev => [...prev, { role: 'user', text: userText }]);
-        
-        // Get AI response
+
+        // Stop listening while we think/speak
+        safeStopRecognition();
         setIsListening(false);
+
+        setTranscript(prev => [...prev, { role: 'user', text: userText }]);
+
         setIsProcessing(true);
-        
+        isProcessingRef.current = true;
+
         try {
           const { data, error } = await supabase.functions.invoke('ai-voice-chat', {
             body: { message: userText }
@@ -53,24 +100,39 @@ export default function AIAgents() {
 
           const aiResponse = data.reply;
           setTranscript(prev => [...prev, { role: 'assistant', text: aiResponse }]);
+
           setIsProcessing(false);
-          
-          // Speak the response
+          isProcessingRef.current = false;
+
+          // Speak the response (will restart recognition after speaking)
           speakText(aiResponse);
         } catch (error: any) {
           console.error('AI error:', error);
           setIsProcessing(false);
+          isProcessingRef.current = false;
           toast({
             title: "Error",
             description: error.message || "Failed to get AI response",
             variant: "destructive",
           });
-          setIsListening(true);
+
+          // Try to resume listening
+          setTimeout(() => {
+            if (isConnectedRef.current && !isSpeakingRef.current && !isProcessingRef.current) {
+              safeStartRecognition();
+            }
+          }, 250);
         }
       };
 
-      recognitionRef.current.onerror = (event: any) => {
+      rec.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
+
+        // 'aborted' happens when we programmatically stop() while switching modes; ignore it.
+        if (event.error === 'aborted' || event.error === 'no-speech') {
+          return;
+        }
+
         if (event.error === 'service-not-allowed') {
           toast({
             title: "Permission Required",
@@ -79,22 +141,20 @@ export default function AIAgents() {
           });
           return;
         }
-        if (event.error !== 'no-speech') {
-          toast({
-            title: "Recognition Error",
-            description: `Speech recognition error: ${event.error}`,
-            variant: "destructive",
-          });
-        }
+
+        toast({
+          title: "Recognition Error",
+          description: `Speech recognition error: ${event.error}`,
+          variant: "destructive",
+        });
       };
 
-      recognitionRef.current.onend = () => {
-        if (isConnected && isListening && !isSpeaking && !isProcessing) {
-          try {
-            recognitionRef.current?.start();
-          } catch (e) {
-            console.warn('Restart error:', e);
-          }
+      rec.onend = () => {
+        recognitionRunningRef.current = false;
+
+        // Auto-restart only when connected and not currently speaking/processing
+        if (isConnectedRef.current && !isSpeakingRef.current && !isProcessingRef.current) {
+          setTimeout(() => safeStartRecognition(), 200);
         }
       };
     }
@@ -103,49 +163,58 @@ export default function AIAgents() {
     synthRef.current = window.speechSynthesis;
 
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (synthRef.current) {
-        synthRef.current.cancel();
-      }
+      safeStopRecognition();
+      synthRef.current?.cancel();
     };
-  }, [isConnected, isListening, isSpeaking, isProcessing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const speakText = (text: string) => {
     if (!synthRef.current) return;
-    
+
+    // Stop recognition so it doesn't pick up the agent's own voice
+    safeStopRecognition();
+
     synthRef.current.cancel();
-    
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
-    
+
     // Try to get a natural voice
     const voices = synthRef.current.getVoices();
-    const preferredVoice = voices.find(v => 
-      v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha')
-    ) || voices[0];
+    const preferredVoice =
+      voices.find((v) => v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha')) ||
+      voices.find((v) => v.lang?.startsWith('en')) ||
+      voices[0];
     if (preferredVoice) {
       utterance.voice = preferredVoice;
     }
-    
-    utterance.onstart = () => setIsSpeaking(true);
+
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+      isSpeakingRef.current = true;
+      setIsListening(false);
+    };
+
     utterance.onend = () => {
       setIsSpeaking(false);
-      setIsListening(true);
-      // Restart recognition after speaking
+      isSpeakingRef.current = false;
+
+      // Resume listening after speaking
       setTimeout(() => {
-        try {
-          recognitionRef.current?.start();
-        } catch (e) {
-          console.warn('Restart after speech error:', e);
+        if (isConnectedRef.current && !isProcessingRef.current) {
+          safeStartRecognition();
         }
-      }, 100);
+      }, 250);
     };
-    
-    setIsSpeaking(true);
+
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+    };
+
     synthRef.current.speak(utterance);
   };
 
