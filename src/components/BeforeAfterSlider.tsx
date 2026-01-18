@@ -81,7 +81,7 @@ export const BeforeAfterSlider = ({
       <img
         src={afterImage}
         alt="After enhancement"
-        className="absolute inset-0 w-full h-full object-contain"
+        className="absolute inset-0 w-full h-full object-cover"
         draggable={false}
       />
 
@@ -93,7 +93,7 @@ export const BeforeAfterSlider = ({
         <img
           src={beforeImage}
           alt="Before enhancement"
-          className="absolute top-0 left-0 h-full object-contain"
+          className="absolute inset-0 w-full h-full object-cover"
           style={{ 
             width: containerWidth ? `${containerWidth}px` : '100%',
             maxWidth: 'none'
