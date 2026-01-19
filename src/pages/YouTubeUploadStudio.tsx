@@ -121,8 +121,10 @@ const YouTubeUploadStudio = () => {
         .from('scheduled_videos')
         .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, is_short')
         .eq('user_id', user.id)
-        .order('scheduled_for', { ascending: true })
+        .order('created_at', { ascending: false })
         .limit(50);
+      
+      console.log('Fetched scheduled videos:', data, error);
 
       if (!error && data) {
         setScheduledVideos(data);

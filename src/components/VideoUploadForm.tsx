@@ -175,6 +175,9 @@ const VideoUploadForm = () => {
       // Parse tags
       const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
 
+      // Determine if it's a short based on title
+      const isShort = data.title.toLowerCase().includes('#short');
+
       // Insert scheduled video
       const { error: insertError } = await supabase
         .from('scheduled_videos')
@@ -191,6 +194,7 @@ const VideoUploadForm = () => {
           scheduled_for: new Date(data.scheduledFor).toISOString(),
           ai_generated_metadata: data.useAI,
           status: 'scheduled',
+          is_short: isShort,
         });
 
       if (insertError) throw insertError;
