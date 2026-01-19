@@ -13,10 +13,12 @@ interface ScheduledVideo {
   title: string;
   description: string | null;
   scheduled_for: string;
-  status: string;
-  privacy_status: string;
+  status: string | null;
+  privacy_status: string | null;
   youtube_video_id: string | null;
   created_at: string;
+  upload_error: string | null;
+  is_short: boolean | null;
 }
 
 const ScheduledVideosList = () => {
@@ -116,6 +118,8 @@ const ScheduledVideosList = () => {
     switch (status) {
       case 'pending':
         return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'scheduled':
+        return <Clock className="h-4 w-4 text-yellow-500" />;
       case 'processing':
         return <Upload className="h-4 w-4 text-blue-500 animate-pulse" />;
       case 'uploaded':
@@ -126,6 +130,12 @@ const ScheduledVideosList = () => {
         return null;
     }
   };
+
+  const isShortVideo = (v: ScheduledVideo): boolean =>
+    typeof v.is_short === "boolean" ? v.is_short : v.title.toLowerCase().includes("#short");
+
+  const shortVideos = videos.filter(isShortVideo);
+  const longVideos = videos.filter((v) => !isShortVideo(v));
 
   if (loading) {
     return <div className="text-center py-8 text-muted-foreground">Loading scheduled videos...</div>;
@@ -141,98 +151,137 @@ const ScheduledVideosList = () => {
     );
   }
 
-  return (
-    <div className="space-y-4">
-      {videos.map((video) => (
-        <Card key={video.id} className="p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 space-y-2">
-              <div className="flex items-center gap-2">
-                {getStatusIcon(video.status)}
-                <h4 className="font-semibold">{video.title}</h4>
-              </div>
-              
-              {video.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2">{video.description}</p>
-              )}
-              
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {formatInTimeZone(new Date(video.scheduled_for), Intl.DateTimeFormat().resolvedOptions().timeZone, 'MMM dd, yyyy hh:mm a')}
-                </Badge>
-                <Badge variant={video.status === 'uploaded' ? 'default' : 'secondary'}>
-                  {video.status}
-                </Badge>
-                <Badge variant="outline">{video.privacy_status}</Badge>
-              </div>
+  const renderVideoCard = (video: ScheduledVideo) => {
+    const status = video.status || 'pending';
+    const showUploadNow = ['pending', 'scheduled', 'failed'].includes(status);
 
-              {video.youtube_video_id && (
-                <div className="flex items-center gap-2">
-                  <a
-                    href={`https://www.youtube.com/watch?v=${video.youtube_video_id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline inline-flex items-center gap-1"
-                    onClick={(e) => {
-                      // In preview, opening new tabs may be blocked
-                      const opened = window.open(`https://www.youtube.com/watch?v=${video.youtube_video_id}`, "_blank");
-                      if (!opened) {
-                        e.preventDefault();
-                        navigator.clipboard.writeText(`https://www.youtube.com/watch?v=${video.youtube_video_id}`);
-                        toast({ title: "Link copied", description: "YouTube link copied to clipboard." });
-                      }
-                    }}
-                  >
-                    View on YouTube <ExternalLink className="h-3 w-3" />
-                  </a>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`https://www.youtube.com/watch?v=${video.youtube_video_id}`);
-                      toast({ title: "Link copied", description: "YouTube link copied to clipboard." });
-                    }}
-                    aria-label="Copy YouTube link"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
+    return (
+      <Card key={video.id} className="p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center gap-2">
+              {getStatusIcon(status)}
+              <h4 className="font-semibold">{video.title}</h4>
             </div>
 
-            <div className="flex gap-2">
-              {video.status === 'pending' && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleUploadNow(video.id)}
-                  disabled={uploadingId === video.id}
+            {video.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2">{video.description}</p>
+            )}
+
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline">
+                <Clock className="h-3 w-3 mr-1" />
+                {formatInTimeZone(
+                  new Date(video.scheduled_for),
+                  Intl.DateTimeFormat().resolvedOptions().timeZone,
+                  'MMM dd, yyyy hh:mm a'
+                )}
+              </Badge>
+              <Badge variant={status === 'uploaded' ? 'default' : 'secondary'}>{status}</Badge>
+              {video.privacy_status && <Badge variant="outline">{video.privacy_status}</Badge>}
+              {isShortVideo(video) && <Badge variant="outline">Short</Badge>}
+            </div>
+
+            {status === 'failed' && video.upload_error && (
+              <p className="text-sm text-destructive">{video.upload_error}</p>
+            )}
+
+            {video.youtube_video_id && (
+              <div className="flex items-center gap-2">
+                <a
+                  href={`https://www.youtube.com/watch?v=${video.youtube_video_id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                  onClick={(e) => {
+                    // In preview, opening new tabs may be blocked
+                    const opened = window.open(
+                      `https://www.youtube.com/watch?v=${video.youtube_video_id}`,
+                      "_blank"
+                    );
+                    if (!opened) {
+                      e.preventDefault();
+                      navigator.clipboard.writeText(
+                        `https://www.youtube.com/watch?v=${video.youtube_video_id}`
+                      );
+                      toast({ title: "Link copied", description: "YouTube link copied to clipboard." });
+                    }
+                  }}
                 >
-                  {uploadingId === video.id ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4 mr-1" />
-                      Upload Now
-                    </>
-                  )}
+                  View on YouTube <ExternalLink className="h-3 w-3" />
+                </a>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `https://www.youtube.com/watch?v=${video.youtube_video_id}`
+                    );
+                    toast({ title: "Link copied", description: "YouTube link copied to clipboard." });
+                  }}
+                  aria-label="Copy YouTube link"
+                >
+                  <Copy className="h-4 w-4" />
                 </Button>
-              )}
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            {showUploadNow && (
               <Button
                 size="sm"
-                variant="ghost"
-                onClick={() => handleDelete(video.id)}
+                variant="outline"
+                onClick={() => handleUploadNow(video.id)}
+                disabled={uploadingId === video.id}
               >
-                <Trash2 className="h-4 w-4" />
+                {uploadingId === video.id ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-1" />
+                    Upload Now
+                  </>
+                )}
               </Button>
-            </div>
+            )}
+            <Button size="sm" variant="ghost" onClick={() => handleDelete(video.id)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
-        </Card>
-      ))}
+        </div>
+      </Card>
+    );
+  };
+
+  return (
+    <div className="space-y-8">
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Shorts</h3>
+          <Badge variant="secondary">{shortVideos.length}</Badge>
+        </div>
+        {shortVideos.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No Shorts yet.</p>
+        ) : (
+          <div className="space-y-4">{shortVideos.map(renderVideoCard)}</div>
+        )}
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Long Videos</h3>
+          <Badge variant="secondary">{longVideos.length}</Badge>
+        </div>
+        {longVideos.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No long videos yet.</p>
+        ) : (
+          <div className="space-y-4">{longVideos.map(renderVideoCard)}</div>
+        )}
+      </section>
     </div>
   );
 };
