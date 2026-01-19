@@ -760,6 +760,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          is_short: boolean | null
           privacy_status: string | null
           scheduled_for: string
           status: string | null
@@ -779,6 +780,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_short?: boolean | null
           privacy_status?: string | null
           scheduled_for: string
           status?: string | null
@@ -798,6 +800,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_short?: boolean | null
           privacy_status?: string | null
           scheduled_for?: string
           status?: string | null

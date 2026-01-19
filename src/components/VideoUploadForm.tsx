@@ -190,6 +190,7 @@ const VideoUploadForm = () => {
           thumbnail_path: thumbnailPath,
           scheduled_for: new Date(data.scheduledFor).toISOString(),
           ai_generated_metadata: data.useAI,
+          status: 'scheduled',
         });
 
       if (insertError) throw insertError;

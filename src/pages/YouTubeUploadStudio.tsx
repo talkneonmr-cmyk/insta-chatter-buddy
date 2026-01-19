@@ -55,6 +55,7 @@ interface ScheduledVideo {
   privacy_status: string | null;
   youtube_video_id: string | null;
   upload_error: string | null;
+  is_short: boolean | null;
 }
 
 interface ScheduleSettings {
@@ -118,7 +119,7 @@ const YouTubeUploadStudio = () => {
 
       const { data, error } = await supabase
         .from('scheduled_videos')
-        .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error')
+        .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, is_short')
         .eq('user_id', user.id)
         .order('scheduled_for', { ascending: true })
         .limit(50);
@@ -410,6 +411,8 @@ const YouTubeUploadStudio = () => {
             thumbnail_path: thumbnailPath,
             scheduled_for: scheduledFor,
             ai_generated_metadata: video.aiGenerated,
+            status: 'scheduled',
+            is_short: video.isShort,
           });
 
           await supabase.functions.invoke('increment-usage', {
@@ -445,6 +448,12 @@ const YouTubeUploadStudio = () => {
 
   const limits = plan === 'pro' ? -1 : 4;
   const isAtLimit = limits !== -1 && channelsUsage >= limits;
+
+  const isShortScheduledVideo = (v: ScheduledVideo): boolean =>
+    typeof v.is_short === "boolean" ? v.is_short : v.title.toLowerCase().includes("#short");
+
+  const shortScheduledVideos = scheduledVideos.filter(isShortScheduledVideo);
+  const longScheduledVideos = scheduledVideos.filter((v) => !isShortScheduledVideo(v));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-3 md:p-8">
@@ -813,62 +822,150 @@ const YouTubeUploadStudio = () => {
                     </div>
                   ) : (
                     <ScrollArea className="h-[400px] pr-4">
-                      <div className="space-y-3">
-                        {scheduledVideos.map((video) => (
-                          <div 
-                            key={video.id} 
-                            className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                          >
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge 
-                                  variant={
-                                    video.status === 'uploaded' ? 'default' :
-                                    video.status === 'processing' ? 'secondary' :
-                                    video.status === 'failed' ? 'destructive' :
-                                    'outline'
-                                  }
-                                  className={
-                                    video.status === 'uploaded' ? 'bg-green-500' :
-                                    video.status === 'processing' ? 'bg-yellow-500' :
-                                    ''
-                                  }
-                                >
-                                  {video.status === 'uploaded' && <CheckCircle className="h-3 w-3 mr-1" />}
-                                  {video.status === 'processing' && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
-                                  {video.status === 'failed' && <AlertCircle className="h-3 w-3 mr-1" />}
-                                  {video.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                                  {video.status === 'scheduled' && <Calendar className="h-3 w-3 mr-1" />}
-                                  {video.status || 'pending'}
-                                </Badge>
-                                {video.title.includes('#shorts') && (
-                                  <Badge variant="outline" className="text-purple-600">
-                                    <Film className="h-3 w-3 mr-1" />Short
-                                  </Badge>
-                                )}
-                              </div>
-                              <p className="font-medium text-sm truncate">{video.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {format(new Date(video.scheduled_for), 'MMM dd, yyyy h:mm a')}
-                              </p>
-                              {video.upload_error && (
-                                <p className="text-xs text-destructive mt-1">{video.upload_error}</p>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 ml-3">
-                              {video.youtube_video_id && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => window.open(`https://youtube.com/watch?v=${video.youtube_video_id}`, '_blank')}
-                                >
-                                  <Play className="h-3 w-3 mr-1" />
-                                  Watch
-                                </Button>
-                              )}
-                            </div>
+                      <div className="space-y-6">
+                        {/* Shorts */}
+                        <section className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-semibold flex items-center gap-2">
+                              <Film className="h-4 w-4" />
+                              Shorts
+                            </p>
+                            <Badge variant="secondary">{shortScheduledVideos.length}</Badge>
                           </div>
-                        ))}
+
+                          {shortScheduledVideos.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">No Shorts scheduled yet.</p>
+                          ) : (
+                            <div className="space-y-3">
+                              {shortScheduledVideos.map((video) => (
+                                <div
+                                  key={video.id}
+                                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Badge
+                                        variant={
+                                          video.status === 'uploaded'
+                                            ? 'default'
+                                            : video.status === 'processing'
+                                              ? 'secondary'
+                                              : video.status === 'failed'
+                                                ? 'destructive'
+                                                : 'outline'
+                                        }
+                                        className={
+                                          video.status === 'uploaded'
+                                            ? 'bg-green-500'
+                                            : video.status === 'processing'
+                                              ? 'bg-yellow-500'
+                                              : ''
+                                        }
+                                      >
+                                        {video.status === 'uploaded' && <CheckCircle className="h-3 w-3 mr-1" />}
+                                        {video.status === 'processing' && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                                        {video.status === 'failed' && <AlertCircle className="h-3 w-3 mr-1" />}
+                                        {video.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                                        {video.status === 'scheduled' && <Calendar className="h-3 w-3 mr-1" />}
+                                        {video.status || 'pending'}
+                                      </Badge>
+                                    </div>
+                                    <p className="font-medium text-sm truncate">{video.title}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {format(new Date(video.scheduled_for), 'MMM dd, yyyy h:mm a')}
+                                    </p>
+                                    {video.upload_error && <p className="text-xs text-destructive mt-1">{video.upload_error}</p>}
+                                  </div>
+                                  <div className="flex items-center gap-2 ml-3">
+                                    {video.youtube_video_id && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => window.open(`https://youtube.com/watch?v=${video.youtube_video_id}`, '_blank')}
+                                      >
+                                        <Play className="h-3 w-3 mr-1" />
+                                        Watch
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </section>
+
+                        <Separator />
+
+                        {/* Long Videos */}
+                        <section className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-semibold flex items-center gap-2">
+                              <Video className="h-4 w-4" />
+                              Long Videos
+                            </p>
+                            <Badge variant="secondary">{longScheduledVideos.length}</Badge>
+                          </div>
+
+                          {longScheduledVideos.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">No long videos scheduled yet.</p>
+                          ) : (
+                            <div className="space-y-3">
+                              {longScheduledVideos.map((video) => (
+                                <div
+                                  key={video.id}
+                                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Badge
+                                        variant={
+                                          video.status === 'uploaded'
+                                            ? 'default'
+                                            : video.status === 'processing'
+                                              ? 'secondary'
+                                              : video.status === 'failed'
+                                                ? 'destructive'
+                                                : 'outline'
+                                        }
+                                        className={
+                                          video.status === 'uploaded'
+                                            ? 'bg-green-500'
+                                            : video.status === 'processing'
+                                              ? 'bg-yellow-500'
+                                              : ''
+                                        }
+                                      >
+                                        {video.status === 'uploaded' && <CheckCircle className="h-3 w-3 mr-1" />}
+                                        {video.status === 'processing' && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                                        {video.status === 'failed' && <AlertCircle className="h-3 w-3 mr-1" />}
+                                        {video.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                                        {video.status === 'scheduled' && <Calendar className="h-3 w-3 mr-1" />}
+                                        {video.status || 'pending'}
+                                      </Badge>
+                                    </div>
+                                    <p className="font-medium text-sm truncate">{video.title}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {format(new Date(video.scheduled_for), 'MMM dd, yyyy h:mm a')}
+                                    </p>
+                                    {video.upload_error && <p className="text-xs text-destructive mt-1">{video.upload_error}</p>}
+                                  </div>
+                                  <div className="flex items-center gap-2 ml-3">
+                                    {video.youtube_video_id && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => window.open(`https://youtube.com/watch?v=${video.youtube_video_id}`, '_blank')}
+                                      >
+                                        <Play className="h-3 w-3 mr-1" />
+                                        Watch
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </section>
                       </div>
                     </ScrollArea>
                   )}
