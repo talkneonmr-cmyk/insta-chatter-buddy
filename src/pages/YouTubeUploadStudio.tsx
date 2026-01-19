@@ -205,13 +205,10 @@ const YouTubeUploadStudio = () => {
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, isShort: boolean) => {
     const files = Array.from(e.target.files || []);
     
     const newVideos: UploadedVideo[] = files.map((file, index) => {
-      const isShort = file.name.toLowerCase().includes('short') || 
-                      file.name.toLowerCase().includes('#shorts');
-      
       return {
         id: `${Date.now()}-${index}`,
         file,
@@ -489,28 +486,51 @@ const YouTubeUploadStudio = () => {
                     Add Videos
                   </CardTitle>
                   <CardDescription>
-                    Upload single or multiple videos. Shorts are auto-detected from filename.
+                    Choose the video type and upload single or multiple videos
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="h-10 w-10 text-muted-foreground mb-3" />
-                      <p className="text-sm text-muted-foreground">
-                        <span className="font-semibold text-primary">Click to upload</span> or drag and drop
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        MP4, MOV, AVI (Tip: Include "short" in filename for Shorts)
-                      </p>
-                    </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="video/*"
-                      multiple
-                      onChange={handleFileSelect}
-                    />
-                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Shorts Upload */}
+                    <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-purple-500/50 rounded-lg cursor-pointer hover:bg-purple-500/10 transition-colors group">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <div className="p-3 bg-purple-500/10 rounded-full mb-3 group-hover:bg-purple-500/20 transition-colors">
+                          <Film className="h-8 w-8 text-purple-500" />
+                        </div>
+                        <p className="text-sm font-semibold text-purple-600">Upload Shorts</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Vertical videos (under 60 sec)
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="video/*"
+                        multiple
+                        onChange={(e) => handleFileSelect(e, true)}
+                      />
+                    </label>
+
+                    {/* Long Video Upload */}
+                    <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-red-500/50 rounded-lg cursor-pointer hover:bg-red-500/10 transition-colors group">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <div className="p-3 bg-red-500/10 rounded-full mb-3 group-hover:bg-red-500/20 transition-colors">
+                          <Video className="h-8 w-8 text-red-500" />
+                        </div>
+                        <p className="text-sm font-semibold text-red-600">Upload Long Videos</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Standard YouTube videos
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="video/*"
+                        multiple
+                        onChange={(e) => handleFileSelect(e, false)}
+                      />
+                    </label>
+                  </div>
                 </CardContent>
               </Card>
 
