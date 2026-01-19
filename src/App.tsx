@@ -12,6 +12,7 @@ import Press from "./pages/Press";
 import Settings from "./pages/Settings";
 import CaptionGenerator from "./pages/CaptionGenerator";
 import YouTubeManager from "./pages/YouTubeManager";
+import YouTubeUploadStudio from "./pages/YouTubeUploadStudio";
 import Pricing from "./pages/Pricing";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import MusicGenerator from "./pages/MusicGenerator";
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/thumbnail-generator" element={<MaintenanceGuard><Layout><ThumbnailGenerator /></Layout></MaintenanceGuard>} />
           <Route path="/script-writer" element={<MaintenanceGuard><Layout><ScriptWriter /></Layout></MaintenanceGuard>} />
           <Route path="/youtube-manager" element={<MaintenanceGuard><Layout><YouTubeManager /></Layout></MaintenanceGuard>} />
+          <Route path="/youtube-upload-studio" element={<MaintenanceGuard><Layout><YouTubeUploadStudio /></Layout></MaintenanceGuard>} />
           <Route path="/music-generator" element={<MaintenanceGuard><Layout><MusicGenerator /></Layout></MaintenanceGuard>} />
           <Route path="/trend-analyzer" element={<MaintenanceGuard><Layout><TrendAnalyzer /></Layout></MaintenanceGuard>} />
           <Route path="/seo-optimizer" element={<MaintenanceGuard><Layout><SEOOptimizer /></Layout></MaintenanceGuard>} />
