@@ -16,8 +16,11 @@ serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+  
+  // Use service role for all operations - this function is called by scheduler
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   let scheduledVideoId: string | undefined;
 
@@ -49,23 +52,39 @@ serve(async (req) => {
       throw new Error('Scheduled video not found');
     }
 
-    console.log('Found video:', video.title);
+    console.log('Found video:', video.title, 'for user:', video.user_id);
 
-    // Check usage limit for YouTube operations
-    const limitCheckRes = await fetch(`${supabaseUrl}/functions/v1/check-usage-limit`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': req.headers.get('Authorization')!,
-      },
-      body: JSON.stringify({ limitType: 'youtube_operations' }),
-    });
+    // Get user's subscription to check limits
+    const { data: subscription } = await supabase
+      .from('user_subscriptions')
+      .select('plan')
+      .eq('user_id', video.user_id)
+      .maybeSingle();
 
-    const limitCheck = await limitCheckRes.json();
+    const plan = subscription?.plan || 'free';
     
-    if (!limitCheck.canUse) {
+    // Get current usage
+    const { data: usage } = await supabase
+      .from('usage_tracking')
+      .select('youtube_operations_count')
+      .eq('user_id', video.user_id)
+      .maybeSingle();
+
+    const currentUsage = usage?.youtube_operations_count || 0;
+    const limit = plan === 'pro' ? -1 : 20; // -1 means unlimited
+    
+    if (limit !== -1 && currentUsage >= limit) {
+      console.log('Usage limit reached for user:', video.user_id);
+      await supabase
+        .from('scheduled_videos')
+        .update({ 
+          status: 'failed', 
+          upload_error: 'Daily YouTube operations limit reached. Video will retry tomorrow.' 
+        })
+        .eq('id', scheduledVideoId);
+        
       return new Response(
-        JSON.stringify({ error: limitCheck.message || 'YouTube operations limit reached' }),
+        JSON.stringify({ error: 'YouTube operations limit reached' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -256,15 +275,16 @@ serve(async (req) => {
         status: 'uploaded'
       });
 
-    // Increment YouTube operations usage
-    await fetch(`${supabaseUrl}/functions/v1/increment-usage`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': req.headers.get('Authorization')!,
-      },
-      body: JSON.stringify({ usageType: 'youtube_operations' }),
-    });
+    // Increment YouTube operations usage directly in database
+    await supabase
+      .from('usage_tracking')
+      .update({ 
+        youtube_operations_count: currentUsage + 1,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', video.user_id);
+    
+    console.log('Usage incremented for user:', video.user_id);
 
     return new Response(
       JSON.stringify({
@@ -278,15 +298,20 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in youtube-upload function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     
-    // Try to update video status to failed
+    // Try to update video status to failed with actual error message
     if (scheduledVideoId) {
       try {
+        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        
         await supabase
           .from('scheduled_videos')
           .update({
             status: 'failed',
-            upload_error: 'Upload failed. Please try again.'
+            upload_error: errorMessage.substring(0, 500) // Limit error length
           })
           .eq('id', scheduledVideoId);
       } catch (updateError) {
