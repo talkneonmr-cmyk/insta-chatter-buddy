@@ -357,11 +357,15 @@ const YouTubeUploadStudio = () => {
 
     setIsProcessing(true);
 
+    // Track successes locally (do NOT rely on async React state updates)
+    const successfulLocalIds: string[] = [];
+    const newlyScheduledRows: ScheduledVideo[] = [];
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Apply schedule if in auto mode
+      // Apply schedule if in auto mode (updates UI dates)
       if (scheduleSettings.mode === 'auto') {
         applyAutoSchedule();
       }
@@ -389,7 +393,7 @@ const YouTubeUploadStudio = () => {
             const { error: thumbError } = await supabase.storage
               .from('videos')
               .upload(thumbFileName, video.thumbnailFile, { cacheControl: '3600', upsert: false });
-            
+
             if (!thumbError) {
               thumbnailPath = `videos/${thumbFileName}`;
             }
@@ -401,26 +405,34 @@ const YouTubeUploadStudio = () => {
           const tagsArray = video.tags ? video.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
           const scheduledFor = scheduleDates[i] || new Date().toISOString();
 
-          await supabase.from('scheduled_videos').insert({
-            user_id: user.id,
-            youtube_account_id: channelInfo.id,
-            title: video.title + (video.isShort ? ' #shorts' : ''),
-            description: video.description,
-            tags: tagsArray,
-            category_id: video.isShort ? '22' : '22',
-            privacy_status: video.privacyStatus,
-            video_file_path: `videos/${videoFileName}`,
-            thumbnail_path: thumbnailPath,
-            scheduled_for: scheduledFor,
-            ai_generated_metadata: video.aiGenerated,
-            status: 'scheduled',
-            is_short: video.isShort,
-          });
+          const { data: inserted, error: insertDbError } = await supabase
+            .from('scheduled_videos')
+            .insert({
+              user_id: user.id,
+              youtube_account_id: channelInfo.id,
+              title: video.title + (video.isShort ? ' #shorts' : ''),
+              description: video.description,
+              tags: tagsArray,
+              category_id: video.isShort ? '22' : '22',
+              privacy_status: video.privacyStatus,
+              video_file_path: `videos/${videoFileName}`,
+              thumbnail_path: thumbnailPath,
+              scheduled_for: scheduledFor,
+              ai_generated_metadata: video.aiGenerated,
+              status: 'scheduled',
+              is_short: video.isShort,
+            })
+            .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, is_short')
+            .single();
+
+          if (insertDbError) throw insertDbError;
+          if (inserted) newlyScheduledRows.push(inserted);
 
           await supabase.functions.invoke('increment-usage', {
             body: { usageType: 'video_uploads' }
           });
 
+          successfulLocalIds.push(video.id);
           updateVideo(video.id, { status: 'scheduled', progress: 100 });
         } catch (error) {
           console.error('Error uploading video:', error);
@@ -428,18 +440,19 @@ const YouTubeUploadStudio = () => {
         }
       }
 
-      const successCount = videos.filter(v => v.status === 'scheduled').length;
       toast({
         title: "Upload Complete!",
-        description: `${successCount}/${videos.length} videos scheduled successfully`,
+        description: `${successfulLocalIds.length}/${videos.length} videos scheduled successfully`,
       });
 
-      // Refresh the scheduled videos list
-      fetchScheduledVideos();
-      
-      // Clear successfully uploaded videos from queue
-      setVideos(prev => prev.filter(v => v.status !== 'scheduled'));
+      // Show immediately, then sync from DB
+      if (newlyScheduledRows.length) {
+        setScheduledVideos(prev => [...newlyScheduledRows, ...prev]);
+      }
+      await fetchScheduledVideos();
 
+      // Clear only the ones that actually succeeded
+      setVideos(prev => prev.filter(v => !successfulLocalIds.includes(v.id)));
     } catch (error) {
       console.error('Error in batch upload:', error);
       toast({ title: "Error", description: "Upload failed", variant: "destructive" });
