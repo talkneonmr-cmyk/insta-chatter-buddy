@@ -46,6 +46,17 @@ interface ChannelInfo {
   channel_id: string;
 }
 
+interface ScheduledVideo {
+  id: string;
+  title: string;
+  description: string | null;
+  scheduled_for: string;
+  status: string | null;
+  privacy_status: string | null;
+  youtube_video_id: string | null;
+  upload_error: string | null;
+}
+
 interface ScheduleSettings {
   mode: 'auto' | 'manual';
   dailyTime: string;
@@ -79,9 +90,14 @@ const YouTubeUploadStudio = () => {
   // Usage tracking
   const [channelsUsage, setChannelsUsage] = useState(0);
   const [resetAt, setResetAt] = useState("");
+  
+  // Scheduled videos from database
+  const [scheduledVideos, setScheduledVideos] = useState<ScheduledVideo[]>([]);
+  const [loadingScheduled, setLoadingScheduled] = useState(false);
 
   useEffect(() => {
     checkChannelConnection();
+    fetchScheduledVideos();
     
     // Handle OAuth callback
     const urlParams = new URLSearchParams(window.location.search);
@@ -93,6 +109,29 @@ const YouTubeUploadStudio = () => {
       handleOAuthCallback(code, state);
     }
   }, []);
+
+  const fetchScheduledVideos = async () => {
+    try {
+      setLoadingScheduled(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('scheduled_videos')
+        .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error')
+        .eq('user_id', user.id)
+        .order('scheduled_for', { ascending: true })
+        .limit(50);
+
+      if (!error && data) {
+        setScheduledVideos(data);
+      }
+    } catch (error) {
+      console.error('Error fetching scheduled videos:', error);
+    } finally {
+      setLoadingScheduled(false);
+    }
+  };
 
   const checkChannelConnection = async () => {
     try {
@@ -389,6 +428,12 @@ const YouTubeUploadStudio = () => {
         title: "Upload Complete!",
         description: `${successCount}/${videos.length} videos scheduled successfully`,
       });
+
+      // Refresh the scheduled videos list
+      fetchScheduledVideos();
+      
+      // Clear successfully uploaded videos from queue
+      setVideos(prev => prev.filter(v => v.status !== 'scheduled'));
 
     } catch (error) {
       console.error('Error in batch upload:', error);
@@ -740,6 +785,95 @@ const YouTubeUploadStudio = () => {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Scheduled Videos from Database */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5" />
+                      Scheduled & Uploaded Videos
+                    </CardTitle>
+                    <CardDescription>Your videos in queue or already uploaded</CardDescription>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={fetchScheduledVideos} disabled={loadingScheduled}>
+                    <RefreshCw className={`h-4 w-4 ${loadingScheduled ? 'animate-spin' : ''}`} />
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {loadingScheduled ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : scheduledVideos.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Clock className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No scheduled videos yet</p>
+                      <p className="text-xs mt-1">Upload videos above to schedule them</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[400px] pr-4">
+                      <div className="space-y-3">
+                        {scheduledVideos.map((video) => (
+                          <div 
+                            key={video.id} 
+                            className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge 
+                                  variant={
+                                    video.status === 'uploaded' ? 'default' :
+                                    video.status === 'processing' ? 'secondary' :
+                                    video.status === 'failed' ? 'destructive' :
+                                    'outline'
+                                  }
+                                  className={
+                                    video.status === 'uploaded' ? 'bg-green-500' :
+                                    video.status === 'processing' ? 'bg-yellow-500' :
+                                    ''
+                                  }
+                                >
+                                  {video.status === 'uploaded' && <CheckCircle className="h-3 w-3 mr-1" />}
+                                  {video.status === 'processing' && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                                  {video.status === 'failed' && <AlertCircle className="h-3 w-3 mr-1" />}
+                                  {video.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                                  {video.status === 'scheduled' && <Calendar className="h-3 w-3 mr-1" />}
+                                  {video.status || 'pending'}
+                                </Badge>
+                                {video.title.includes('#shorts') && (
+                                  <Badge variant="outline" className="text-purple-600">
+                                    <Film className="h-3 w-3 mr-1" />Short
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="font-medium text-sm truncate">{video.title}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {format(new Date(video.scheduled_for), 'MMM dd, yyyy h:mm a')}
+                              </p>
+                              {video.upload_error && (
+                                <p className="text-xs text-destructive mt-1">{video.upload_error}</p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 ml-3">
+                              {video.youtube_video_id && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => window.open(`https://youtube.com/watch?v=${video.youtube_video_id}`, '_blank')}
+                                >
+                                  <Play className="h-3 w-3 mr-1" />
+                                  Watch
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
             {/* Right Column - Schedule Settings */}
@@ -878,7 +1012,7 @@ const YouTubeUploadStudio = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-xs text-muted-foreground space-y-2">
-                  <p>• Include "short" in filename to auto-detect Shorts</p>
+                  <p>• Use the purple button for Shorts, red for long videos</p>
                   <p>• Use AI to generate optimized titles & descriptions</p>
                   <p>• Schedule consistently for better algorithm performance</p>
                   <p>• Add custom thumbnails to increase click-through rate</p>
