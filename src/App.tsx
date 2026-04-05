@@ -48,42 +48,43 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Auth route without layout or maintenance guard */}
-          <Route path="/auth" element={<Auth />} />
+          {/* Auth and admin-login routes without guards */}
+          <Route path="/auth" element={<WebsiteClosedGuard><Auth /></WebsiteClosedGuard>} />
+          <Route path="/admin-login" element={<AdminLogin />} />
           
-          {/* All other routes with sidebar layout and maintenance guard */}
-          <Route path="/" element={<MaintenanceGuard><Layout><Index /></Layout></MaintenanceGuard>} />
-          <Route path="/about" element={<MaintenanceGuard><Layout><About /></Layout></MaintenanceGuard>} />
-          <Route path="/press" element={<MaintenanceGuard><Layout><Press /></Layout></MaintenanceGuard>} />
-          <Route path="/settings" element={<MaintenanceGuard><Layout><Settings /></Layout></MaintenanceGuard>} />
-          <Route path="/caption-generator" element={<MaintenanceGuard><Layout><CaptionGenerator /></Layout></MaintenanceGuard>} />
-          <Route path="/thumbnail-generator" element={<MaintenanceGuard><Layout><ThumbnailGenerator /></Layout></MaintenanceGuard>} />
-          <Route path="/script-writer" element={<MaintenanceGuard><Layout><ScriptWriter /></Layout></MaintenanceGuard>} />
-          <Route path="/youtube-manager" element={<MaintenanceGuard><Layout><YouTubeManager /></Layout></MaintenanceGuard>} />
-          <Route path="/youtube-upload-studio" element={<MaintenanceGuard><Layout><YouTubeUploadStudio /></Layout></MaintenanceGuard>} />
-          <Route path="/music-generator" element={<MaintenanceGuard><Layout><MusicGenerator /></Layout></MaintenanceGuard>} />
-          <Route path="/trend-analyzer" element={<MaintenanceGuard><Layout><TrendAnalyzer /></Layout></MaintenanceGuard>} />
-          <Route path="/seo-optimizer" element={<MaintenanceGuard><Layout><SEOOptimizer /></Layout></MaintenanceGuard>} />
-          <Route path="/hashtag-generator" element={<MaintenanceGuard><Layout><HashtagGenerator /></Layout></MaintenanceGuard>} />
-          <Route path="/shorts-factory" element={<MaintenanceGuard><Layout><ShortsFactory /></Layout></MaintenanceGuard>} />
-          <Route path="/comment-auto-responder" element={<MaintenanceGuard><Layout><CommentAutoResponder /></Layout></MaintenanceGuard>} />
-          <Route path="/background-removal" element={<MaintenanceGuard><Layout><BackgroundRemoval /></Layout></MaintenanceGuard>} />
-          <Route path="/speech-to-text" element={<MaintenanceGuard><Layout><SpeechToText /></Layout></MaintenanceGuard>} />
-          <Route path="/text-summarizer" element={<MaintenanceGuard><Layout><TextSummarizer /></Layout></MaintenanceGuard>} />
-          <Route path="/image-enhancement" element={<MaintenanceGuard><Layout><ImageEnhancement /></Layout></MaintenanceGuard>} />
-          <Route path="/voice-cloning" element={<MaintenanceGuard><Layout><VoiceCloning /></Layout></MaintenanceGuard>} />
-          <Route path="/text-to-speech" element={<MaintenanceGuard><Layout><TextToSpeech /></Layout></MaintenanceGuard>} />
-          <Route path="/dubbing" element={<MaintenanceGuard><Layout><Dubbing /></Layout></MaintenanceGuard>} />
-          <Route path="/ai-agents" element={<MaintenanceGuard><Layout><AIAgents /></Layout></MaintenanceGuard>} />
-          <Route path="/creator-helper-bot" element={<MaintenanceGuard><Layout><CreatorHelperBot /></Layout></MaintenanceGuard>} />
-          <Route path="/you-research" element={<MaintenanceGuard><Layout><YouResearch /></Layout></MaintenanceGuard>} />
-          <Route path="/face-swap" element={<MaintenanceGuard><Layout><FaceSwap /></Layout></MaintenanceGuard>} />
-          <Route path="/pricing" element={<MaintenanceGuard><Layout><Pricing /></Layout></MaintenanceGuard>} />
-          <Route path="/payment-success" element={<MaintenanceGuard><Layout><PaymentSuccess /></Layout></MaintenanceGuard>} />
-          <Route path="/admin" element={<MaintenanceGuard><Layout><Admin /></Layout></MaintenanceGuard>} />
+          {/* All other routes with sidebar layout, website closed guard, and maintenance guard */}
+          <Route path="/" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><Index /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/about" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><About /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/press" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><Press /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/settings" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><Settings /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/caption-generator" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><CaptionGenerator /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/thumbnail-generator" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><ThumbnailGenerator /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/script-writer" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><ScriptWriter /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/youtube-manager" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><YouTubeManager /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/youtube-upload-studio" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><YouTubeUploadStudio /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/music-generator" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><MusicGenerator /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/trend-analyzer" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><TrendAnalyzer /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/seo-optimizer" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><SEOOptimizer /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/hashtag-generator" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><HashtagGenerator /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/shorts-factory" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><ShortsFactory /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/comment-auto-responder" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><CommentAutoResponder /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/background-removal" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><BackgroundRemoval /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/speech-to-text" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><SpeechToText /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/text-summarizer" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><TextSummarizer /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/image-enhancement" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><ImageEnhancement /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/voice-cloning" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><VoiceCloning /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/text-to-speech" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><TextToSpeech /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/dubbing" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><Dubbing /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/ai-agents" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><AIAgents /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/creator-helper-bot" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><CreatorHelperBot /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/you-research" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><YouResearch /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/face-swap" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><FaceSwap /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/pricing" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><Pricing /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/payment-success" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><PaymentSuccess /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/admin" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><Admin /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<MaintenanceGuard><Layout><NotFound /></Layout></MaintenanceGuard>} />
+          <Route path="*" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><NotFound /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
