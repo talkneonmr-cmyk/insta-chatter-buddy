@@ -13,6 +13,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ActivityLogs from "@/components/ActivityLogs";
 import AnnouncementsManager from "@/components/admin/AnnouncementsManager";
 import MaintenanceToggle from "@/components/admin/MaintenanceToggle";
+import WebsiteClosedToggle from "@/components/admin/WebsiteClosedToggle";
 
 interface UserData {
   id: string;
