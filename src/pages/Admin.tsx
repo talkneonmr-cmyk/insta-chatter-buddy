@@ -562,6 +562,7 @@ export default function Admin() {
 
         {/* Maintenance Mode Toggle */}
         <MaintenanceToggle />
+        <WebsiteClosedToggle />
 
         {/* Tabs for Users, Tester Keys, Announcements and Activity Logs */}
         <Tabs defaultValue="users" className="w-full">
