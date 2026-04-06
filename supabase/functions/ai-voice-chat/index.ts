@@ -43,28 +43,24 @@ serve(async (req) => {
 
     let reply: string;
 
-    if (OPENAI_API_KEY) {
-      console.log("Processing voice chat with OpenAI GPT-4o...");
+    // Try providers in order, fall through on failure
+    const providers = [
+      { key: OPENAI_API_KEY, name: "OpenAI", fn: callOpenAI },
+      { key: OPENROUTER_API_KEY, name: "OpenRouter", fn: callOpenRouter },
+      { key: LOVABLE_API_KEY, name: "Lovable AI", fn: callLovableAI },
+    ].filter(p => p.key);
+
+    if (providers.length === 0) throw new Error("No AI API key configured");
+
+    for (const provider of providers) {
       try {
-        reply = await callOpenAI(OPENAI_API_KEY, message);
+        console.log(`Processing voice chat with ${provider.name}...`);
+        reply = await provider.fn(provider.key!, message);
+        break;
       } catch (e) {
-        console.error("OpenAI failed:", e);
-        if (OPENROUTER_API_KEY) {
-          reply = await callOpenRouter(OPENROUTER_API_KEY, message);
-        } else if (LOVABLE_API_KEY) {
-          reply = await callLovableAI(LOVABLE_API_KEY, message);
-        } else {
-          throw e;
-        }
+        console.error(`${provider.name} failed:`, e);
+        if (provider === providers[providers.length - 1]) throw e;
       }
-    } else if (OPENROUTER_API_KEY) {
-      console.log("Processing voice chat with OpenRouter...");
-      reply = await callOpenRouter(OPENROUTER_API_KEY, message);
-    } else if (LOVABLE_API_KEY) {
-      console.log("Processing voice chat with Lovable AI (fallback)...");
-      reply = await callLovableAI(LOVABLE_API_KEY, message);
-    } else {
-      throw new Error("No AI API key configured");
     }
 
     return new Response(
