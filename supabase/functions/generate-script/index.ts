@@ -94,34 +94,27 @@ Write ONLY the words to speak. Make it flow naturally like talking to a friend. 
     let scriptContent: string;
     let modelUsed: string;
 
-    if (ANTHROPIC_API_KEY) {
-      console.log("Generating script with Anthropic Claude (best writing quality)...");
+    const providers = [
+      { key: ANTHROPIC_API_KEY, name: "Anthropic Claude", model: "claude-sonnet-4-20250514", fn: (k: string) => callAnthropic(k, systemPrompt, userPrompt) },
+      { key: OPENAI_API_KEY, name: "OpenAI", model: "gpt-4o", fn: (k: string) => callOpenAIScript(k, systemPrompt, userPrompt) },
+      { key: LOVABLE_API_KEY, name: "Lovable AI", model: "google/gemini-2.5-flash", fn: (k: string) => callLovableAIScript(k, systemPrompt, userPrompt) },
+    ].filter(p => p.key);
+
+    if (providers.length === 0) throw new Error('No AI API key configured');
+
+    let scriptContent: string = '';
+    let modelUsed: string = '';
+
+    for (const provider of providers) {
       try {
-        const result = await callAnthropic(ANTHROPIC_API_KEY, systemPrompt, userPrompt);
-        scriptContent = result;
-        modelUsed = 'claude-sonnet-4-20250514';
+        console.log(`Generating script with ${provider.name}...`);
+        scriptContent = await provider.fn(provider.key!);
+        modelUsed = provider.model;
+        break;
       } catch (e) {
-        console.error("Anthropic failed, falling back:", e);
-        if (OPENAI_API_KEY) {
-          scriptContent = await callOpenAIScript(OPENAI_API_KEY, systemPrompt, userPrompt);
-          modelUsed = 'gpt-4o';
-        } else if (LOVABLE_API_KEY) {
-          scriptContent = await callLovableAIScript(LOVABLE_API_KEY, systemPrompt, userPrompt);
-          modelUsed = 'google/gemini-2.5-flash';
-        } else {
-          throw e;
-        }
+        console.error(`${provider.name} failed:`, e);
+        if (provider === providers[providers.length - 1]) throw e;
       }
-    } else if (OPENAI_API_KEY) {
-      console.log("Generating script with OpenAI GPT-4o...");
-      scriptContent = await callOpenAIScript(OPENAI_API_KEY, systemPrompt, userPrompt);
-      modelUsed = 'gpt-4o';
-    } else if (LOVABLE_API_KEY) {
-      console.log("Generating script with Lovable AI...");
-      scriptContent = await callLovableAIScript(LOVABLE_API_KEY, systemPrompt, userPrompt);
-      modelUsed = 'google/gemini-2.5-flash';
-    } else {
-      throw new Error('No AI API key configured');
     }
 
     if (!scriptContent) {
