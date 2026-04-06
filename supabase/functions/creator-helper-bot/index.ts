@@ -65,30 +65,24 @@ serve(async (req) => {
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
-    let reply: string;
+    const providers = [
+      { key: GROQ_API_KEY, name: "Groq", fn: (k: string, m: string) => callGroq(k, m) },
+      { key: OPENAI_API_KEY, name: "OpenAI", fn: (k: string, m: string) => callOpenAI(k, m) },
+      { key: LOVABLE_API_KEY, name: "Lovable AI", fn: (k: string, m: string) => callLovableAI(k, m) },
+    ].filter(p => p.key);
 
-    if (GROQ_API_KEY) {
-      console.log("Processing with Groq (ultra-fast)...");
+    if (providers.length === 0) throw new Error('No AI API key configured');
+
+    let reply: string = '';
+    for (const provider of providers) {
       try {
-        reply = await callGroq(GROQ_API_KEY, message);
+        console.log(`Processing with ${provider.name}...`);
+        reply = await provider.fn(provider.key!, message);
+        break;
       } catch (e) {
-        console.error("Groq failed, falling back:", e);
-        if (OPENAI_API_KEY) {
-          reply = await callOpenAI(OPENAI_API_KEY, message);
-        } else if (LOVABLE_API_KEY) {
-          reply = await callLovableAI(LOVABLE_API_KEY, message);
-        } else {
-          throw e;
-        }
+        console.error(`${provider.name} failed:`, e);
+        if (provider === providers[providers.length - 1]) throw e;
       }
-    } else if (OPENAI_API_KEY) {
-      console.log("Processing with OpenAI...");
-      reply = await callOpenAI(OPENAI_API_KEY, message);
-    } else if (LOVABLE_API_KEY) {
-      console.log("Processing with Lovable AI...");
-      reply = await callLovableAI(LOVABLE_API_KEY, message);
-    } else {
-      throw new Error('No AI API key configured');
     }
 
     // Remove markdown formatting
