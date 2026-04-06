@@ -6,36 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Process base64 in chunks to prevent memory issues
-function processBase64Chunks(base64String: string, chunkSize = 32768) {
-  const chunks: Uint8Array[] = [];
-  let position = 0;
-  
-  while (position < base64String.length) {
-    const chunk = base64String.slice(position, position + chunkSize);
-    const binaryChunk = atob(chunk);
-    const bytes = new Uint8Array(binaryChunk.length);
-    
-    for (let i = 0; i < binaryChunk.length; i++) {
-      bytes[i] = binaryChunk.charCodeAt(i);
-    }
-    
-    chunks.push(bytes);
-    position += chunkSize;
-  }
-
-  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-
-  for (const chunk of chunks) {
-    result.set(chunk, offset);
-    offset += chunk.length;
-  }
-
-  return result;
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -58,69 +28,69 @@ serve(async (req) => {
       throw new Error("No audio data provided");
     }
 
+    // Try Deepgram first (faster, more accurate), fall back to ElevenLabs
+    const DEEPGRAM_API_KEY = Deno.env.get("DEEPGRAM_API_KEY");
     const ELEVEN_LABS_API_KEY = Deno.env.get("ELEVEN_LABS_API_KEY");
-    if (!ELEVEN_LABS_API_KEY) {
-      throw new Error("ELEVEN_LABS_API_KEY is not configured");
+
+    // Decode base64 audio
+    const binaryString = atob(audio);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
     }
 
-    console.log("Processing audio transcription with ElevenLabs...");
+    let transcriptionText: string;
 
-    // Process audio in chunks
-    const binaryAudio = processBase64Chunks(audio);
-    
-    // Prepare form data for ElevenLabs
-    const formData = new FormData();
-    const blob = new Blob([binaryAudio], { type: "audio/webm" });
-    formData.append("file", blob, "audio.webm");
-    formData.append("model_id", "scribe_v1");
+    if (DEEPGRAM_API_KEY) {
+      console.log("Processing audio transcription with Deepgram (primary)...");
+      
+      const response = await fetch(
+        "https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&punctuate=true&diarize=true&language=en",
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Token ${DEEPGRAM_API_KEY}`,
+            "Content-Type": "audio/webm",
+          },
+          body: bytes,
+        }
+      );
 
-    // Send to ElevenLabs Speech to Text API
-    const response = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
-      method: "POST",
-      headers: {
-        "xi-api-key": ELEVEN_LABS_API_KEY,
-      },
-      body: formData,
-    });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Deepgram error:", response.status, errorText);
+        
+        if (response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded. Please try again in a minute." }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
 
-    if (!response.ok) {
-      let status = response.status;
-      let detail: any = null;
-      const raw = await response.text();
-      try { detail = JSON.parse(raw); } catch { /* ignore parse error */ }
-      const message = detail?.detail?.message || detail?.error || raw || 'Unknown error';
-
-      // Map specific ElevenLabs conditions to clearer HTTP statuses
-      if (detail?.detail?.status === 'detected_unusual_activity') {
-        return new Response(JSON.stringify({ error: message, code: 'detected_unusual_activity' }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        // Fall back to ElevenLabs if Deepgram fails
+        if (ELEVEN_LABS_API_KEY) {
+          console.log("Deepgram failed, falling back to ElevenLabs...");
+          transcriptionText = await transcribeWithElevenLabs(ELEVEN_LABS_API_KEY, bytes);
+        } else {
+          throw new Error(`Deepgram API error: ${errorText}`);
+        }
+      } else {
+        const result = await response.json();
+        transcriptionText = result.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
+        
+        if (!transcriptionText) {
+          throw new Error("No transcription generated");
+        }
       }
-      if (status === 429 || detail?.detail?.status === 'rate_limited') {
-        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again in a minute.' }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (detail?.detail?.status === 'invalid_parameters' || detail?.detail?.status === 'invalid_model_id') {
-        return new Response(JSON.stringify({ error: message }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      console.error("ElevenLabs API error:", raw);
-      return new Response(JSON.stringify({ error: message }), {
-        status: status || 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    } else if (ELEVEN_LABS_API_KEY) {
+      console.log("Processing audio transcription with ElevenLabs (fallback)...");
+      transcriptionText = await transcribeWithElevenLabs(ELEVEN_LABS_API_KEY, bytes);
+    } else {
+      throw new Error("No speech-to-text API key configured (DEEPGRAM_API_KEY or ELEVEN_LABS_API_KEY)");
     }
-
-    const result = await response.json();
 
     return new Response(
-      JSON.stringify({ text: result.text }),
+      JSON.stringify({ text: transcriptionText! }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
@@ -137,3 +107,27 @@ serve(async (req) => {
     );
   }
 });
+
+async function transcribeWithElevenLabs(apiKey: string, audioBytes: Uint8Array): Promise<string> {
+  const formData = new FormData();
+  const blob = new Blob([audioBytes], { type: "audio/webm" });
+  formData.append("file", blob, "audio.webm");
+  formData.append("model_id", "scribe_v1");
+
+  const response = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
+    method: "POST",
+    headers: {
+      "xi-api-key": apiKey,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const raw = await response.text();
+    console.error("ElevenLabs API error:", raw);
+    throw new Error(`ElevenLabs transcription failed: ${raw}`);
+  }
+
+  const result = await response.json();
+  return result.text || "";
+}
