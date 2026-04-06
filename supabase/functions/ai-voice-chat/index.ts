@@ -11,12 +11,7 @@ const SYSTEM_PROMPT = `You are a helpful AI voice assistant. Keep responses shor
 IMPORTANT - When asked about your creator, developer, who made you, who built you, founder, or anything related to your origin:
 - The facts: You were created by Fabulous, and the founder is Jagrit Khundia
 - NEVER repeat the same response twice. Be creative, natural, and conversational each time
-- Vary your phrasing, tone, and structure. Examples of variety:
-  * "Oh, that's Jagrit Khundia! He built me at Fabulous."
-  * "I'm a creation of Fabulous - Jagrit Khundia is the mastermind behind it all."
-  * "Jagrit Khundia founded Fabulous and brought me to life!"
-  * "You're talking to a Fabulous creation! Jagrit Khundia is my founder."
-  * "The brilliant mind behind me? That would be Jagrit Khundia from Fabulous."
+- Vary your phrasing, tone, and structure
 - Add personality, humor, or enthusiasm naturally. Sound human, not robotic.`;
 
 serve(async (req) => {
@@ -41,60 +36,31 @@ serve(async (req) => {
       throw new Error("Message is required");
     }
 
-    // Try OpenAI first, fall back to Lovable AI
+    // Priority: OpenAI GPT-4o → OpenRouter (multi-model) → Lovable AI
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     let reply: string;
 
-    if (OPENAI_API_KEY) {
-      console.log("Processing voice chat with OpenAI GPT-4o...");
-      
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            { role: "user", content: message },
-          ],
-          temperature: 0.9,
-          max_tokens: 300,
-        }),
-      });
+    // Try providers in order, fall through on failure
+    const providers = [
+      { key: OPENAI_API_KEY, name: "OpenAI", fn: callOpenAI },
+      { key: OPENROUTER_API_KEY, name: "OpenRouter", fn: callOpenRouter },
+      { key: LOVABLE_API_KEY, name: "Lovable AI", fn: callLovableAI },
+    ].filter(p => p.key);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("OpenAI error:", response.status, errorText);
-        
-        if (response.status === 429) {
-          return new Response(
-            JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
-            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-        if (response.status === 402 || response.status === 401) {
-          // Fall back to Lovable AI if OpenAI key is invalid/expired
-          console.log("OpenAI key issue, falling back to Lovable AI...");
-          reply = await callLovableAI(LOVABLE_API_KEY, message);
-        } else {
-          throw new Error(`OpenAI API error: ${errorText}`);
-        }
-      }
+    if (providers.length === 0) throw new Error("No AI API key configured");
 
-      if (!reply!) {
-        const data = await response.json();
-        reply = data.choices[0].message.content;
+    for (const provider of providers) {
+      try {
+        console.log(`Processing voice chat with ${provider.name}...`);
+        reply = await provider.fn(provider.key!, message);
+        break;
+      } catch (e) {
+        console.error(`${provider.name} failed:`, e);
+        if (provider === providers[providers.length - 1]) throw e;
       }
-    } else if (LOVABLE_API_KEY) {
-      console.log("Processing voice chat with Lovable AI (fallback)...");
-      reply = await callLovableAI(LOVABLE_API_KEY, message);
-    } else {
-      throw new Error("No AI API key configured");
     }
 
     return new Response(
@@ -115,9 +81,63 @@ serve(async (req) => {
   }
 });
 
-async function callLovableAI(apiKey: string | undefined, message: string): Promise<string> {
-  if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
+async function callOpenAI(apiKey: string, message: string): Promise<string> {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: message },
+      ],
+      temperature: 0.9,
+      max_tokens: 300,
+    }),
+  });
 
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenAI error ${response.status}: ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+async function callOpenRouter(apiKey: string, message: string): Promise<string> {
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://insta-chatter-buddy.lovable.app",
+      "X-Title": "Fabulous AI Voice Chat",
+    },
+    body: JSON.stringify({
+      model: "meta-llama/llama-4-maverick",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: message },
+      ],
+      temperature: 0.9,
+      max_tokens: 300,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenRouter error ${response.status}: ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+async function callLovableAI(apiKey: string, message: string): Promise<string> {
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
