@@ -20,7 +20,7 @@ import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import fabulousLogo from "@/assets/fabulous-logo.png";
 const mainItems = [
-  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "YouTube Manager", url: "/youtube-manager", icon: Youtube },
   { title: "Upload Studio", url: "/youtube-upload-studio", icon: Upload },
   { title: "You Research", url: "/you-research", icon: Globe },

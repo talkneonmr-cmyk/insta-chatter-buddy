@@ -37,7 +37,7 @@ const Auth = () => {
     // Then check regular auth
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session && !urlParams.get('reset')) {
-        navigate('/');
+        navigate('/dashboard');
       }
     });
 
@@ -45,7 +45,7 @@ const Auth = () => {
       if (event === 'PASSWORD_RECOVERY') {
         setShowForgotPassword(true);
       } else if (session && !urlParams.get('reset')) {
-        navigate('/');
+        navigate('/dashboard');
       }
     });
 
@@ -89,7 +89,7 @@ const Auth = () => {
         description: "You're now signed in",
       });
 
-      navigate("/");
+      navigate("/dashboard");
     } catch (error: any) {
       console.error('Error signing in:', error);
       
@@ -175,7 +175,7 @@ const Auth = () => {
         email: email,
         password: storedPassword || password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/dashboard`,
         }
       });
 
@@ -192,7 +192,7 @@ const Auth = () => {
         description: "Account created successfully",
       });
 
-      navigate("/");
+      navigate("/dashboard");
     } catch (error: any) {
       console.error('Error verifying OTP:', error);
       toast({
@@ -234,7 +234,7 @@ const Auth = () => {
       });
 
       // Force reload to apply tester session
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     } catch (error: any) {
       console.error('Error with tester key:', error);
       toast({
@@ -294,7 +294,7 @@ const Auth = () => {
       // Clear the reset parameter and navigate to login
       window.history.replaceState({}, '', '/auth');
       setShowForgotPassword(false);
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Error resetting password:', error);
       toast({
