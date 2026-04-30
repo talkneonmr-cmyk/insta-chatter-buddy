@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { MaintenanceGuard } from "./components/MaintenanceGuard";
 import { WebsiteClosedGuard } from "./components/WebsiteClosedGuard";
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminLogin from "./pages/AdminLogin";
@@ -48,12 +49,15 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public landing page */}
+          <Route path="/" element={<LandingPage />} />
+          
           {/* Auth and admin-login routes without guards */}
           <Route path="/auth" element={<WebsiteClosedGuard><Auth /></WebsiteClosedGuard>} />
           <Route path="/admin-login" element={<AdminLogin />} />
           
           {/* All other routes with sidebar layout, website closed guard, and maintenance guard */}
-          <Route path="/" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><Index /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
+          <Route path="/dashboard" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><Index /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
           <Route path="/about" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><About /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
           <Route path="/press" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><Press /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
           <Route path="/settings" element={<WebsiteClosedGuard><MaintenanceGuard><Layout><Settings /></Layout></MaintenanceGuard></WebsiteClosedGuard>} />
