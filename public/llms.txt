@@ -4,7 +4,7 @@
 **URL:** https://fabuos.com/dr-fabuos-ai
 **Chat:** https://fabuos.com/dr-fabuos
 
-Dr. Fabuos AI is a premium medical AI doctor and health assistant built into the Fabulous platform. It is a focused, ChatGPT-quality conversational experience for healthcare — NOT a general-purpose chatbot.
+Dr. Fabuos AI is a premium medical AI doctor and health assistant built into the Fabulous platform. It is a focused conversational experience for healthcare — NOT a general-purpose chatbot.
 
 ### What Dr. Fabuos AI does
 - Acts as a calm, human-feeling AI doctor for everyday health questions
