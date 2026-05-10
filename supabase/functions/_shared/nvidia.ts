@@ -60,3 +60,25 @@ export async function callNvidia(opts: NvidiaCallOptions): Promise<string> {
 export function hasNvidia(tier: NvidiaTier): boolean {
   return !!Deno.env.get(MODEL_MAP[tier].envKey);
 }
+
+// Returns an object shaped like a Lovable AI / OpenAI chat completion response,
+// so call sites that read `data.choices[0].message.content` keep working.
+export async function callNvidiaAsOpenAI(opts: NvidiaCallOptions): Promise<{ choices: Array<{ message: { content: string } }> }> {
+  const content = await callNvidia(opts);
+  return { choices: [{ message: { content } }] };
+}
+
+// Try a list of NVIDIA tiers in order; return first success.
+export async function nvidiaFallback(opts: Omit<NvidiaCallOptions, "tier"> & { tiers: NvidiaTier[] }) {
+  let lastErr: unknown;
+  for (const tier of opts.tiers) {
+    if (!hasNvidia(tier)) continue;
+    try {
+      return await callNvidiaAsOpenAI({ ...opts, tier });
+    } catch (e) {
+      console.error(`NVIDIA ${tier} fallback failed:`, e);
+      lastErr = e;
+    }
+  }
+  throw lastErr ?? new Error("No NVIDIA tier available");
+}
