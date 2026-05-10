@@ -269,11 +269,23 @@ export default function DrFabuos() {
             )}
           </ScrollArea>
 
-          {!authed && (
-            <div className="absolute bottom-0 inset-x-0 p-3 border-t border-border/50 text-xs text-muted-foreground">
-              Guest: {guestUsage.count}/{guestLimit} messages today
-            </div>
-          )}
+          <div className="absolute bottom-0 inset-x-0 p-3 border-t border-border/50 text-xs text-muted-foreground space-y-2">
+            {!authed ? (
+              <div>Guest: {guestUsage.count}/{guestLimit} messages today</div>
+            ) : isPaid ? (
+              <div className="flex items-center justify-between">
+                <span className="text-emerald-600 font-medium capitalize">{plan.plan} active</span>
+                <span className="text-[10px]">until {plan.current_period_end ? new Date(plan.current_period_end).toLocaleDateString() : ''}</span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div>Free: {todayCount}/{FREE_LIMIT} today</div>
+                <Button size="sm" className="w-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white" onClick={() => setPaywallOpen(true)}>
+                  Upgrade · ₹99 trial
+                </Button>
+              </div>
+            )}
+          </div>
         </aside>
 
         {/* Main */}
