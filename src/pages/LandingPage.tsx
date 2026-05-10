@@ -169,7 +169,7 @@ const LandingPage = () => {
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-8">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-sm font-medium text-primary animate-fade-in">
-            <Zap className="w-3.5 h-3.5" />
+            <Icon name="zap" className="w-3.5 h-3.5" />
             AI-Powered Content Creation Platform
           </div>
 
@@ -186,34 +186,31 @@ const LandingPage = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.4s" }}>
-            <Button
-              size="lg"
+            <button
               onClick={() => navigate("/auth")}
-              className="text-base px-8 py-6 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 shadow-2xl shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all duration-300 group"
+              className="inline-flex items-center justify-center rounded-md text-base font-medium px-8 py-4 bg-gradient-to-r from-primary via-secondary to-accent text-primary-foreground hover:opacity-90 shadow-2xl shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all duration-300 group"
             >
               Start Creating Free
-              <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
+              <Icon name="arrow" className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
               onClick={() => scrollTo("features")}
-              className="text-base px-8 py-6 border-border/60 hover:bg-accent/5 group"
+              className="inline-flex items-center justify-center rounded-md border border-border/60 bg-background text-base font-medium px-8 py-4 hover:bg-accent/5 transition-all group"
             >
-              <Play className="w-4 h-4 mr-1" />
+              <Icon name="play" className="w-4 h-4 mr-1" />
               See What's Possible
-            </Button>
+            </button>
           </div>
 
           {/* Trust signals */}
           <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 pt-4 text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "0.6s" }}>
             {[
-              { icon: Star, label: "4.9/5 Rating" },
-              { icon: Zap, label: "10K+ Creators" },
-              { icon: Shield, label: "No Credit Card" },
-            ].map(({ icon: Icon, label }) => (
+              { icon: "star" as const, label: "4.9/5 Rating" },
+              { icon: "zap" as const, label: "10K+ Creators" },
+              { icon: "shield" as const, label: "No Credit Card" },
+            ].map(({ icon, label }) => (
               <span key={label} className="flex items-center gap-1.5">
-                <Icon className="w-4 h-4 text-primary" />
+                <Icon name={icon} className="w-4 h-4 text-primary" />
                 {label}
               </span>
             ))}
@@ -225,7 +222,7 @@ const LandingPage = () => {
           onClick={() => scrollTo("features")}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors animate-bounce"
         >
-          <ChevronDown className="w-6 h-6" />
+          <Icon name="down" className="w-6 h-6" />
         </button>
       </section>
 
