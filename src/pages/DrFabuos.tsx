@@ -547,6 +547,3 @@ export default function DrFabuos() {
     </>
   );
 }
-    </>
-  );
-}
