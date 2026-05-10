@@ -38,6 +38,8 @@ const SUGGESTED = [
   { icon: Pill, label: "Medicine info", prompt: "What is this medicine for and how should I take it?" },
 ];
 
+type Plan = { plan: 'free' | 'trial' | 'pro'; current_period_end: string | null };
+
 export default function DrFabuos() {
   const navigate = useNavigate();
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -46,6 +48,10 @@ export default function DrFabuos() {
   const [input, setInput] = useState("");
   const [pending, setPending] = useState<Attachment[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<null | 'trial' | 'pro'>(null);
+  const [plan, setPlan] = useState<Plan>({ plan: 'free', current_period_end: null });
+  const [todayCount, setTodayCount] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +68,73 @@ export default function DrFabuos() {
       setConversationId(id);
       loadConversations();
     },
+    onLimitReached: () => setPaywallOpen(true),
   });
+
+  const loadPlan = async () => {
+    if (!authed) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase
+      .from('dr_fabuos_subscriptions')
+      .select('plan, current_period_end')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (data) {
+      setPlan({ plan: data.plan as any, current_period_end: data.current_period_end });
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: u } = await supabase
+      .from('dr_fabuos_daily_usage')
+      .select('count')
+      .eq('user_id', user.id)
+      .eq('usage_date', today)
+      .maybeSingle();
+    setTodayCount(u?.count ?? 0);
+  };
+
+  useEffect(() => { if (authed) loadPlan(); }, [authed, isStreaming]);
+
+  // Handle Razorpay redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('dr_payment')) return;
+    const linkId = params.get('razorpay_payment_link_id') || localStorage.getItem('dr_fabuos_payment_link_id');
+    if (!linkId) return;
+    (async () => {
+      const { data, error } = await supabase.functions.invoke('dr-fabuos-verify', {
+        body: { paymentLinkId: linkId },
+      });
+      if (!error && data?.success) {
+        toast.success(data.plan === 'pro' ? 'Pro activated. Unlimited chats unlocked.' : 'Trial activated. Enjoy 30 days unlimited.');
+        localStorage.removeItem('dr_fabuos_payment_link_id');
+        loadPlan();
+      } else if (data?.paymentStatus && data.paymentStatus !== 'paid') {
+        toast.error('Payment not completed.');
+      }
+      window.history.replaceState({}, '', '/dr-fabuos');
+    })();
+  }, [authed]);
+
+  const startCheckout = async (planType: 'trial' | 'pro') => {
+    if (!authed) { navigate('/auth'); return; }
+    try {
+      setCheckoutLoading(planType);
+      const { data, error } = await supabase.functions.invoke('dr-fabuos-subscribe', { body: { planType } });
+      if (error) throw error;
+      if (data?.shortUrl && data?.paymentLinkId) {
+        localStorage.setItem('dr_fabuos_payment_link_id', data.paymentLinkId);
+        window.location.href = data.shortUrl;
+      }
+    } catch (e: any) {
+      toast.error(e?.message || 'Could not start checkout.');
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const isPaid = plan.plan !== 'free' && plan.current_period_end && new Date(plan.current_period_end) > new Date();
+  const FREE_LIMIT = 20;
 
   const loadConversations = async () => {
     if (!authed) return;
