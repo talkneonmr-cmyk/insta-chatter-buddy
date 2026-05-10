@@ -1,5 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense } from "react";
@@ -7,6 +5,8 @@ import { Route, Routes } from "react-router-dom";
 import { AppStatusGuard } from "./components/AppStatusGuard";
 import { Layout } from "./components/Layout";
 
+const Toaster = lazy(() => import("@/components/ui/toaster").then((m) => ({ default: m.Toaster })));
+const Sonner = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
@@ -66,8 +66,10 @@ export default function AppRoutes() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
+        <Suspense fallback={null}>
+          <Toaster />
+          <Sonner />
+        </Suspense>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/auth" element={<AppStatusGuard checkMaintenance={false}><Auth /></AppStatusGuard>} />
