@@ -84,12 +84,6 @@ const LandingPage = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard");
-    });
-  }, [navigate]);
-
-  useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
@@ -128,20 +122,20 @@ const LandingPage = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" onClick={() => navigate("/auth")} className="text-sm">
+            <button onClick={() => navigate("/auth")} className="inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-all">
               Log in
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={() => { navigate("/auth"); }}
-              className="text-sm bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-lg shadow-primary/25"
+              className="inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:opacity-90 shadow-lg shadow-primary/25 transition-all"
             >
               Get Started Free
-            </Button>
+            </button>
           </div>
 
           {/* Mobile toggle */}
           <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            <Icon name={mobileMenuOpen ? "x" : "menu"} className="w-5 h-5" />
           </button>
         </div>
 
@@ -155,8 +149,8 @@ const LandingPage = () => {
                 </button>
               ))}
               <div className="flex gap-3 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => navigate("/auth")}>Log in</Button>
-                <Button className="flex-1 bg-gradient-to-r from-primary to-secondary" onClick={() => navigate("/auth")}>Sign Up</Button>
+                <button className="flex-1 inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-all" onClick={() => navigate("/auth")}>Log in</button>
+                <button className="flex-1 inline-flex h-10 items-center justify-center rounded-md bg-gradient-to-r from-primary to-secondary px-4 py-2 text-sm font-medium text-primary-foreground transition-all" onClick={() => navigate("/auth")}>Sign Up</button>
               </div>
             </div>
           </div>
