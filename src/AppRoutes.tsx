@@ -72,7 +72,7 @@ export default function AppRoutes() {
         </Suspense>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
-            <Route path="/auth" element={<AppStatusGuard checkMaintenance={false}><Auth /></AppStatusGuard>} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
