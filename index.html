@@ -11,10 +11,11 @@
     <link rel="canonical" href="https://fabuos.com/" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     
-    <!-- Premium Fonts -->
+    <!-- Premium Fonts: load asynchronously so first paint is not blocked -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" /></noscript>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -31,6 +32,38 @@
     <meta name="twitter:title" content="Fabulous Creators - AI-Powered Content Studio" />
     <meta name="twitter:description" content="Professional AI-powered content creation platform for YouTube creators. Generate captions, scripts, music, thumbnails and more." />
     <meta name="twitter:image" content="https://fabuos.com/og-image.png" />
+
+
+
+
+
+
+  </head>
+
+  <body>
+    <style>
+      #root:empty{min-height:100vh;background:hsl(0 0% 100%)}
+      #startup-home{min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:hsl(0 0% 100%);color:hsl(220 13% 13%);font-family:Inter,system-ui,-apple-system,sans-serif;padding:64px 20px 32px;position:relative}
+      #startup-home:before{content:"";position:absolute;inset:-20%;background:radial-gradient(circle at 20% 20%,hsl(262 83% 58% / .16),transparent 32%),radial-gradient(circle at 80% 25%,hsl(340 82% 58% / .14),transparent 30%),radial-gradient(circle at 50% 80%,hsl(24 95% 58% / .12),transparent 34%)}
+      #startup-home .startup-inner{position:relative;z-index:1;max-width:880px;text-align:center}
+      #startup-home .startup-brand{position:fixed;top:18px;left:20px;display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+      #startup-home .startup-brand img{width:36px;height:36px;border-radius:12px}
+      #startup-home .startup-pill{display:inline-flex;align-items:center;border:1px solid hsl(262 83% 58% / .3);background:hsl(262 83% 58% / .06);color:hsl(262 83% 45%);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;margin-bottom:24px}
+      #startup-home h1{font-family:'Plus Jakarta Sans',Inter,system-ui,sans-serif;font-size:clamp(42px,9vw,72px);line-height:1.04;margin:0 0 20px;font-weight:900;letter-spacing:0}
+      #startup-home .startup-gradient{background:linear-gradient(135deg,hsl(262 83% 58%),hsl(340 82% 58%),hsl(24 95% 58%));-webkit-background-clip:text;background-clip:text;color:transparent}
+      #startup-home p{font-size:clamp(17px,4vw,21px);line-height:1.6;color:hsl(220 9% 46%);margin:0 auto;max-width:680px}
+      @media (prefers-color-scheme: dark){#root:empty,#startup-home{background:hsl(220 13% 9%);color:hsl(220 9% 95%)}#startup-home p{color:hsl(220 9% 65%)}#startup-home .startup-pill{color:hsl(262 83% 73%);background:hsl(262 83% 63% / .12)}}
+    </style>
+    <div id="root">
+      <main id="startup-home" aria-label="Fabuos loading preview">
+        <div class="startup-brand"><img src="/favicon.png" alt="" />Fabuos</div>
+        <div class="startup-inner">
+          <div class="startup-pill">AI-Powered Content Creation Platform</div>
+          <h1>Create Content That<br /><span class="startup-gradient">Breaks the Internet</span></h1>
+          <p>15+ AI tools in one platform for scripts, thumbnails, music, voiceovers, shorts, and growth.</p>
+        </div>
+      </main>
+    </div>
 
     <!-- Structured Data - Organization -->
     <script type="application/ld+json">
@@ -243,32 +276,7 @@
       }
     }
     </script>
-  </head>
 
-  <body>
-    <style>
-      #root:empty{min-height:100vh;background:hsl(0 0% 100%)}
-      #startup-home{min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:hsl(0 0% 100%);color:hsl(220 13% 13%);font-family:Inter,system-ui,-apple-system,sans-serif;padding:64px 20px 32px;position:relative}
-      #startup-home:before{content:"";position:absolute;inset:-20%;background:radial-gradient(circle at 20% 20%,hsl(262 83% 58% / .16),transparent 32%),radial-gradient(circle at 80% 25%,hsl(340 82% 58% / .14),transparent 30%),radial-gradient(circle at 50% 80%,hsl(24 95% 58% / .12),transparent 34%)}
-      #startup-home .startup-inner{position:relative;z-index:1;max-width:880px;text-align:center}
-      #startup-home .startup-brand{position:fixed;top:18px;left:20px;display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
-      #startup-home .startup-brand img{width:36px;height:36px;border-radius:12px}
-      #startup-home .startup-pill{display:inline-flex;align-items:center;border:1px solid hsl(262 83% 58% / .3);background:hsl(262 83% 58% / .06);color:hsl(262 83% 45%);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;margin-bottom:24px}
-      #startup-home h1{font-family:'Plus Jakarta Sans',Inter,system-ui,sans-serif;font-size:clamp(42px,9vw,72px);line-height:1.04;margin:0 0 20px;font-weight:900;letter-spacing:0}
-      #startup-home .startup-gradient{background:linear-gradient(135deg,hsl(262 83% 58%),hsl(340 82% 58%),hsl(24 95% 58%));-webkit-background-clip:text;background-clip:text;color:transparent}
-      #startup-home p{font-size:clamp(17px,4vw,21px);line-height:1.6;color:hsl(220 9% 46%);margin:0 auto;max-width:680px}
-      @media (prefers-color-scheme: dark){#root:empty,#startup-home{background:hsl(220 13% 9%);color:hsl(220 9% 95%)}#startup-home p{color:hsl(220 9% 65%)}#startup-home .startup-pill{color:hsl(262 83% 73%);background:hsl(262 83% 63% / .12)}}
-    </style>
-    <div id="root">
-      <main id="startup-home" aria-label="Fabuos loading preview">
-        <div class="startup-brand"><img src="/favicon.png" alt="" />Fabuos</div>
-        <div class="startup-inner">
-          <div class="startup-pill">AI-Powered Content Creation Platform</div>
-          <h1>Create Content That<br /><span class="startup-gradient">Breaks the Internet</span></h1>
-          <p>15+ AI tools in one platform for scripts, thumbnails, music, voiceovers, shorts, and growth.</p>
-        </div>
-      </main>
-    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
