@@ -247,31 +247,28 @@
 
   <body>
     <style>
-      #initial-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#fff;font-family:Inter,system-ui,sans-serif;z-index:9999;transition:opacity .3s ease}
-      #initial-loader.hide{opacity:0;pointer-events:none}
-      #initial-loader .spinner{width:42px;height:42px;border-radius:50%;border:3px solid #ececec;border-top-color:#6366f1;animation:fab-spin .8s linear infinite}
-      #initial-loader .label{font-size:13px;color:#6b7280;letter-spacing:.02em}
-      @keyframes fab-spin{to{transform:rotate(360deg)}}
-      @media (prefers-color-scheme: dark){#initial-loader{background:#0a0a0a} #initial-loader .label{color:#9ca3af} #initial-loader .spinner{border-color:#1f1f1f;border-top-color:#a78bfa}}
+      #root:empty{min-height:100vh;background:hsl(0 0% 100%)}
+      #startup-home{min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:hsl(0 0% 100%);color:hsl(220 13% 13%);font-family:Inter,system-ui,-apple-system,sans-serif;padding:64px 20px 32px;position:relative}
+      #startup-home:before{content:"";position:absolute;inset:-20%;background:radial-gradient(circle at 20% 20%,hsl(262 83% 58% / .16),transparent 32%),radial-gradient(circle at 80% 25%,hsl(340 82% 58% / .14),transparent 30%),radial-gradient(circle at 50% 80%,hsl(24 95% 58% / .12),transparent 34%)}
+      #startup-home .startup-inner{position:relative;z-index:1;max-width:880px;text-align:center}
+      #startup-home .startup-brand{position:fixed;top:18px;left:20px;display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+      #startup-home .startup-brand img{width:36px;height:36px;border-radius:12px}
+      #startup-home .startup-pill{display:inline-flex;align-items:center;border:1px solid hsl(262 83% 58% / .3);background:hsl(262 83% 58% / .06);color:hsl(262 83% 45%);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;margin-bottom:24px}
+      #startup-home h1{font-family:'Plus Jakarta Sans',Inter,system-ui,sans-serif;font-size:clamp(42px,9vw,72px);line-height:1.04;margin:0 0 20px;font-weight:900;letter-spacing:0}
+      #startup-home .startup-gradient{background:linear-gradient(135deg,hsl(262 83% 58%),hsl(340 82% 58%),hsl(24 95% 58%));-webkit-background-clip:text;background-clip:text;color:transparent}
+      #startup-home p{font-size:clamp(17px,4vw,21px);line-height:1.6;color:hsl(220 9% 46%);margin:0 auto;max-width:680px}
+      @media (prefers-color-scheme: dark){#root:empty,#startup-home{background:hsl(220 13% 9%);color:hsl(220 9% 95%)}#startup-home p{color:hsl(220 9% 65%)}#startup-home .startup-pill{color:hsl(262 83% 73%);background:hsl(262 83% 63% / .12)}}
     </style>
-    <div id="root"></div>
-    <div id="initial-loader" aria-hidden="true">
-      <div class="spinner"></div>
-      <div class="label">Loading Fabulous…</div>
+    <div id="root">
+      <main id="startup-home" aria-label="Fabuos loading preview">
+        <div class="startup-brand"><img src="/favicon.png" alt="" />Fabuos</div>
+        <div class="startup-inner">
+          <div class="startup-pill">AI-Powered Content Creation Platform</div>
+          <h1>Create Content That<br /><span class="startup-gradient">Breaks the Internet</span></h1>
+          <p>15+ AI tools in one platform for scripts, thumbnails, music, voiceovers, shorts, and growth.</p>
+        </div>
+      </main>
     </div>
-    <script>
-      window.addEventListener('load', function(){
-        var t = setInterval(function(){
-          var r = document.getElementById('root');
-          if (r && r.childElementCount > 0){
-            var l = document.getElementById('initial-loader');
-            if (l){ l.classList.add('hide'); setTimeout(function(){ l.remove(); }, 300); }
-            clearInterval(t);
-          }
-        }, 50);
-        setTimeout(function(){ clearInterval(t); var l=document.getElementById('initial-loader'); if(l) l.remove(); }, 8000);
-      });
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
