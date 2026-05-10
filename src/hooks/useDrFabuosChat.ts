@@ -37,8 +37,8 @@ function bumpGuestUsage() {
   return next;
 }
 
-export function useDrFabuosChat(opts: { isAuthed: boolean; conversationId: string | null; onConversationCreated?: (id: string) => void }) {
-  const { isAuthed, conversationId, onConversationCreated } = opts;
+export function useDrFabuosChat(opts: { isAuthed: boolean; conversationId: string | null; onConversationCreated?: (id: string) => void; onLimitReached?: () => void }) {
+  const { isAuthed, conversationId, onConversationCreated, onLimitReached } = opts;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [guestUsage, setGuestUsage] = useState(getGuestUsage());
