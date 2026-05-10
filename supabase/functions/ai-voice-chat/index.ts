@@ -49,6 +49,10 @@ serve(async (req) => {
       { key: OPENAI_API_KEY, name: "OpenAI", fn: callOpenAI },
       { key: OPENROUTER_API_KEY, name: "OpenRouter", fn: callOpenRouter },
       { key: LOVABLE_API_KEY, name: "Lovable AI", fn: callLovableAI },
+      { key: hasNvidia("nano") ? "1" : undefined, name: "NVIDIA Nemotron Nano",
+        fn: (_k: string, m: string) => callNvidia({ tier: "nano", systemPrompt: SYSTEM_PROMPT, userPrompt: m, temperature: 0.9, maxTokens: 300 }) },
+      { key: hasNvidia("8b") ? "1" : undefined, name: "NVIDIA Llama 8B",
+        fn: (_k: string, m: string) => callNvidia({ tier: "8b", systemPrompt: SYSTEM_PROMPT, userPrompt: m, temperature: 0.9, maxTokens: 300 }) },
     ].filter(p => p.key);
 
     if (providers.length === 0) throw new Error("No AI API key configured");
