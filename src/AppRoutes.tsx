@@ -4,9 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
+import { AppStatusGuard } from "./components/AppStatusGuard";
 import { Layout } from "./components/Layout";
-import { MaintenanceGuard } from "./components/MaintenanceGuard";
-import { WebsiteClosedGuard } from "./components/WebsiteClosedGuard";
 
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -58,11 +57,9 @@ const RouteFallback = () => (
 );
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
-  <WebsiteClosedGuard>
-    <MaintenanceGuard>
-      <Layout>{children}</Layout>
-    </MaintenanceGuard>
-  </WebsiteClosedGuard>
+  <AppStatusGuard>
+    <Layout>{children}</Layout>
+  </AppStatusGuard>
 );
 
 export default function AppRoutes() {
@@ -73,7 +70,7 @@ export default function AppRoutes() {
         <Sonner />
         <Suspense fallback={<RouteFallback />}>
           <Routes>
-            <Route path="/auth" element={<WebsiteClosedGuard><Auth /></WebsiteClosedGuard>} />
+            <Route path="/auth" element={<AppStatusGuard checkMaintenance={false}><Auth /></AppStatusGuard>} />
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
