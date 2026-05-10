@@ -310,12 +310,19 @@ export default function DrFabuos() {
                 Beta
               </span>
             </div>
-            {!authed && (
+            {!authed ? (
               <Button size="sm" variant="outline" onClick={() => navigate("/auth")} className="gap-1.5">
                 <LogIn className="h-3.5 w-3.5" /> Sign in
               </Button>
+            ) : isPaid ? (
+              <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 capitalize">
+                {plan.plan}
+              </span>
+            ) : (
+              <Button size="sm" onClick={() => setPaywallOpen(true)} className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" /> Upgrade
+              </Button>
             )}
-            {authed && <div className="w-8" />}
           </header>
 
           {/* Chat area */}
