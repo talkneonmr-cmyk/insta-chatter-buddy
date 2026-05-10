@@ -37,8 +37,8 @@ function bumpGuestUsage() {
   return next;
 }
 
-export function useDrFabuosChat(opts: { isAuthed: boolean; conversationId: string | null; onConversationCreated?: (id: string) => void }) {
-  const { isAuthed, conversationId, onConversationCreated } = opts;
+export function useDrFabuosChat(opts: { isAuthed: boolean; conversationId: string | null; onConversationCreated?: (id: string) => void; onLimitReached?: () => void }) {
+  const { isAuthed, conversationId, onConversationCreated, onLimitReached } = opts;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [guestUsage, setGuestUsage] = useState(getGuestUsage());
@@ -170,11 +170,13 @@ export function useDrFabuosChat(opts: { isAuthed: boolean; conversationId: strin
 
       try {
         const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dr-fabuos-chat`;
+        const { data: { session } } = await supabase.auth.getSession();
         const resp = await fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
           body: JSON.stringify({ messages: apiMessages, guest: !isAuthed }),
           signal: controller.signal,
@@ -182,6 +184,13 @@ export function useDrFabuosChat(opts: { isAuthed: boolean; conversationId: strin
 
         if (!resp.ok || !resp.body) {
           const err = await resp.json().catch(() => ({}));
+          if (resp.status === 402 && err?.error === "limit_reached") {
+            // Roll back the optimistic user message so they can retry after upgrading
+            setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+            onLimitReached?.();
+            setIsStreaming(false);
+            return;
+          }
           toast.error(err.error || "Could not reach Dr. Fabuos right now.");
           setIsStreaming(false);
           return;

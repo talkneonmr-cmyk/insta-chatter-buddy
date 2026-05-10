@@ -23,6 +23,7 @@ import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useDrFabuosChat, Attachment } from "@/hooks/useDrFabuosChat";
 import { toast } from "sonner";
@@ -37,6 +38,8 @@ const SUGGESTED = [
   { icon: Pill, label: "Medicine info", prompt: "What is this medicine for and how should I take it?" },
 ];
 
+type Plan = { plan: 'free' | 'trial' | 'pro'; current_period_end: string | null };
+
 export default function DrFabuos() {
   const navigate = useNavigate();
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -45,6 +48,10 @@ export default function DrFabuos() {
   const [input, setInput] = useState("");
   const [pending, setPending] = useState<Attachment[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<null | 'trial' | 'pro'>(null);
+  const [plan, setPlan] = useState<Plan>({ plan: 'free', current_period_end: null });
+  const [todayCount, setTodayCount] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +68,73 @@ export default function DrFabuos() {
       setConversationId(id);
       loadConversations();
     },
+    onLimitReached: () => setPaywallOpen(true),
   });
+
+  const loadPlan = async () => {
+    if (!authed) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase
+      .from('dr_fabuos_subscriptions')
+      .select('plan, current_period_end')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (data) {
+      setPlan({ plan: data.plan as any, current_period_end: data.current_period_end });
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: u } = await supabase
+      .from('dr_fabuos_daily_usage')
+      .select('count')
+      .eq('user_id', user.id)
+      .eq('usage_date', today)
+      .maybeSingle();
+    setTodayCount(u?.count ?? 0);
+  };
+
+  useEffect(() => { if (authed) loadPlan(); }, [authed, isStreaming]);
+
+  // Handle Razorpay redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('dr_payment')) return;
+    const linkId = params.get('razorpay_payment_link_id') || localStorage.getItem('dr_fabuos_payment_link_id');
+    if (!linkId) return;
+    (async () => {
+      const { data, error } = await supabase.functions.invoke('dr-fabuos-verify', {
+        body: { paymentLinkId: linkId },
+      });
+      if (!error && data?.success) {
+        toast.success(data.plan === 'pro' ? 'Pro activated. Unlimited chats unlocked.' : 'Trial activated. Enjoy 30 days unlimited.');
+        localStorage.removeItem('dr_fabuos_payment_link_id');
+        loadPlan();
+      } else if (data?.paymentStatus && data.paymentStatus !== 'paid') {
+        toast.error('Payment not completed.');
+      }
+      window.history.replaceState({}, '', '/dr-fabuos');
+    })();
+  }, [authed]);
+
+  const startCheckout = async (planType: 'trial' | 'pro') => {
+    if (!authed) { navigate('/auth'); return; }
+    try {
+      setCheckoutLoading(planType);
+      const { data, error } = await supabase.functions.invoke('dr-fabuos-subscribe', { body: { planType } });
+      if (error) throw error;
+      if (data?.shortUrl && data?.paymentLinkId) {
+        localStorage.setItem('dr_fabuos_payment_link_id', data.paymentLinkId);
+        window.location.href = data.shortUrl;
+      }
+    } catch (e: any) {
+      toast.error(e?.message || 'Could not start checkout.');
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const isPaid = plan.plan !== 'free' && plan.current_period_end && new Date(plan.current_period_end) > new Date();
+  const FREE_LIMIT = 20;
 
   const loadConversations = async () => {
     if (!authed) return;
@@ -196,11 +269,23 @@ export default function DrFabuos() {
             )}
           </ScrollArea>
 
-          {!authed && (
-            <div className="absolute bottom-0 inset-x-0 p-3 border-t border-border/50 text-xs text-muted-foreground">
-              Guest: {guestUsage.count}/{guestLimit} messages today
-            </div>
-          )}
+          <div className="absolute bottom-0 inset-x-0 p-3 border-t border-border/50 text-xs text-muted-foreground space-y-2">
+            {!authed ? (
+              <div>Guest: {guestUsage.count}/{guestLimit} messages today</div>
+            ) : isPaid ? (
+              <div className="flex items-center justify-between">
+                <span className="text-emerald-600 font-medium capitalize">{plan.plan} active</span>
+                <span className="text-[10px]">until {plan.current_period_end ? new Date(plan.current_period_end).toLocaleDateString() : ''}</span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div>Free: {todayCount}/{FREE_LIMIT} today</div>
+                <Button size="sm" className="w-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white" onClick={() => setPaywallOpen(true)}>
+                  Upgrade · ₹99 trial
+                </Button>
+              </div>
+            )}
+          </div>
         </aside>
 
         {/* Main */}
@@ -225,12 +310,19 @@ export default function DrFabuos() {
                 Beta
               </span>
             </div>
-            {!authed && (
+            {!authed ? (
               <Button size="sm" variant="outline" onClick={() => navigate("/auth")} className="gap-1.5">
                 <LogIn className="h-3.5 w-3.5" /> Sign in
               </Button>
+            ) : isPaid ? (
+              <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 capitalize">
+                {plan.plan}
+              </span>
+            ) : (
+              <Button size="sm" onClick={() => setPaywallOpen(true)} className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" /> Upgrade
+              </Button>
             )}
-            {authed && <div className="w-8" />}
           </header>
 
           {/* Chat area */}
@@ -401,6 +493,57 @@ export default function DrFabuos() {
           </div>
         </div>
       </div>
+
+      <Dialog open={paywallOpen} onOpenChange={setPaywallOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-emerald-600" /> Unlock unlimited Dr. Fabuos
+            </DialogTitle>
+            <DialogDescription>
+              {!authed
+                ? "Sign in to get 20 free messages a day, then upgrade for unlimited."
+                : `You've used ${todayCount}/${FREE_LIMIT} free messages today. Pick a plan to keep chatting without limits.`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {!authed ? (
+            <Button className="w-full" onClick={() => navigate('/auth')}>Sign in</Button>
+          ) : (
+            <div className="grid gap-3 mt-2">
+              <button
+                onClick={() => startCheckout('trial')}
+                disabled={!!checkoutLoading}
+                className="text-left rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/5 p-4 hover:border-emerald-500 transition relative"
+              >
+                <span className="absolute -top-2 right-3 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-600 text-white">Best value</span>
+                <div className="flex items-baseline justify-between">
+                  <div className="font-semibold">1 Month Trial</div>
+                  <div className="text-2xl font-bold">₹99</div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Unlimited chats, image analysis, prescription scans for 30 days.</p>
+                <p className="text-[11px] text-muted-foreground mt-2">After trial: ₹399/month</p>
+              </button>
+
+              <button
+                onClick={() => startCheckout('pro')}
+                disabled={!!checkoutLoading}
+                className="text-left rounded-2xl border border-border p-4 hover:border-emerald-500/60 transition"
+              >
+                <div className="flex items-baseline justify-between">
+                  <div className="font-semibold">Monthly</div>
+                  <div className="text-xl font-bold">₹399<span className="text-xs font-normal text-muted-foreground">/mo</span></div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Unlimited everything. Cancel anytime.</p>
+              </button>
+
+              {checkoutLoading && (
+                <p className="text-xs text-center text-muted-foreground">Redirecting to secure payment…</p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
