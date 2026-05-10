@@ -241,8 +241,8 @@ const LandingPage = () => {
             {features.map((f, i) => (
               <Section key={f.title} delay={i * 80}>
                 <div className="group relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-1 h-full">
-                  <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${f.color} mb-4`}>
-                    <f.icon className="w-5 h-5 text-white" />
+                  <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-primary via-secondary to-accent mb-4 text-primary-foreground">
+                    <Icon name={f.icon} className="w-5 h-5" />
                   </div>
                   <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">{f.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
@@ -291,7 +291,7 @@ const LandingPage = () => {
                 <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:border-primary/30 transition-all duration-300 h-full flex flex-col">
                   <div className="flex gap-1 mb-4">
                     {[...Array(5)].map((_, j) => (
-                      <Star key={j} className="w-4 h-4 fill-primary text-primary" />
+                      <Icon key={j} name="star" className="w-4 h-4 text-primary" />
                     ))}
                   </div>
                   <p className="text-sm leading-relaxed flex-1 mb-4">"{t.text}"</p>
@@ -324,14 +324,13 @@ const LandingPage = () => {
               <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
                 Join thousands of creators who are already using Fabuos to produce world-class content.
               </p>
-              <Button
-                size="lg"
+              <button
                 onClick={() => navigate("/auth")}
-                className="text-base px-10 py-6 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 shadow-2xl shadow-primary/30 hover:scale-105 transition-all duration-300 group"
+                className="inline-flex items-center justify-center rounded-md text-base font-medium px-10 py-4 bg-gradient-to-r from-primary via-secondary to-accent text-primary-foreground hover:opacity-90 shadow-2xl shadow-primary/30 hover:scale-105 transition-all duration-300 group"
               >
                 Get Started — It's Free
-                <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-              </Button>
+                <Icon name="arrow" className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
           </div>
         </Section>
