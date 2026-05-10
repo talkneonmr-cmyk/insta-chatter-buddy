@@ -1,12 +1,33 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Sparkles, Wand2, Music, Image, Mic, Video, TrendingUp, Globe,
-  ArrowRight, ChevronDown, Star, Zap, Shield, Menu, X, Play,
-} from "lucide-react";
 import fabulousLogo from "@/assets/fabulous-logo.png";
+
+type IconName = "sparkles" | "wand" | "music" | "image" | "mic" | "video" | "trend" | "globe" | "arrow" | "down" | "star" | "zap" | "shield" | "menu" | "x" | "play";
+
+const iconPaths: Record<IconName, ReactNode> = {
+  sparkles: <path d="M12 2l1.7 5.1L19 9l-5.3 1.9L12 16l-1.7-5.1L5 9l5.3-1.9L12 2Zm7 11 1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3ZM5 14l.8 2.2L8 17l-2.2.8L5 20l-.8-2.2L2 17l2.2-.8L5 14Z" />,
+  wand: <path d="m14 4 6 6M4 20l10.5-10.5M13 5l6 6M5 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Zm14 10 .8 1.7 1.7.8-1.7.8L19 19l-.8-1.7-1.7-.8 1.7-.8L19 14Z" />,
+  music: <path d="M9 18V5l11-2v13M9 18a3 3 0 1 1-2-2.8M20 16a3 3 0 1 1-2-2.8M9 9l11-2" />,
+  image: <path d="M4 5h16v14H4V5Zm3 10 3.5-4 2.5 3 2-2.3L19 16M8 9h.01" />,
+  mic: <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Zm7 8a7 7 0 0 1-14 0m7 7v3m-4 0h8" />,
+  video: <path d="M4 6h12v12H4V6Zm12 4 5-3v10l-5-3" />,
+  trend: <path d="m3 17 6-6 4 4 8-8m0 0v6m0-6h-6" />,
+  globe: <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0c2.5-2.4 4-5.4 4-9s-1.5-6.6-4-9c-2.5 2.4-4 5.4-4 9s1.5 6.6 4 9Zm-8-9h16" />,
+  arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
+  down: <path d="m6 9 6 6 6-6" />,
+  star: <path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6-4.4-4.3 6.1-.9L12 3Z" />,
+  zap: <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" />,
+  shield: <path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z" />,
+  menu: <path d="M4 6h16M4 12h16M4 18h16" />,
+  x: <path d="M6 6l12 12M18 6 6 18" />,
+  play: <path d="M8 5v14l11-7L8 5Z" />,
+};
+
+const Icon = ({ name, className = "" }: { name: IconName; className?: string }) => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill={name === "star" ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    {iconPaths[name]}
+  </svg>
+);
 
 const useInView = (threshold = 0.15) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -21,7 +42,7 @@ const useInView = (threshold = 0.15) => {
   return { ref, inView };
 };
 
-const Section = ({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => {
+const Section = ({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) => {
   const { ref, inView } = useInView();
   return (
     <div
@@ -35,14 +56,14 @@ const Section = ({ children, className = "", delay = 0 }: { children: React.Reac
 };
 
 const features = [
-  { icon: Wand2, title: "AI Script Writer", desc: "Generate engaging scripts for any platform in seconds", color: "from-violet-500 to-purple-600" },
-  { icon: Music, title: "Music Generator", desc: "Create royalty-free background music with AI", color: "from-blue-500 to-cyan-500" },
-  { icon: Image, title: "Thumbnail Designer", desc: "Design scroll-stopping thumbnails that convert", color: "from-pink-500 to-rose-500" },
-  { icon: Mic, title: "Voice Cloning", desc: "Clone any voice and generate natural speech", color: "from-amber-500 to-orange-500" },
-  { icon: Video, title: "Shorts Factory", desc: "Turn long videos into viral short-form content", color: "from-emerald-500 to-green-500" },
-  { icon: TrendingUp, title: "Trend Analyzer", desc: "Discover trending topics before they peak", color: "from-indigo-500 to-blue-600" },
-  { icon: Globe, title: "SEO Optimizer", desc: "Rank higher with AI-optimized metadata", color: "from-teal-500 to-cyan-600" },
-  { icon: Sparkles, title: "Caption Generator", desc: "Write captions that boost engagement 3×", color: "from-fuchsia-500 to-pink-500" },
+  { icon: "wand" as const, title: "AI Script Writer", desc: "Generate engaging scripts for any platform in seconds" },
+  { icon: "music" as const, title: "Music Generator", desc: "Create royalty-free background music with AI" },
+  { icon: "image" as const, title: "Thumbnail Designer", desc: "Design scroll-stopping thumbnails that convert" },
+  { icon: "mic" as const, title: "Voice Cloning", desc: "Clone any voice and generate natural speech" },
+  { icon: "video" as const, title: "Shorts Factory", desc: "Turn long videos into viral short-form content" },
+  { icon: "trend" as const, title: "Trend Analyzer", desc: "Discover trending topics before they peak" },
+  { icon: "globe" as const, title: "SEO Optimizer", desc: "Rank higher with AI-optimized metadata" },
+  { icon: "sparkles" as const, title: "Caption Generator", desc: "Write captions that boost engagement 3×" },
 ];
 
 const steps = [
