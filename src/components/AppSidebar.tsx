@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, FileCheck, Wand2, Volume2, MessageSquareText, Radio, Languages, Bot, HelpCircle, Video, MessageSquare, Globe, Users, Upload } from "lucide-react";
+import { Home, Sparkles, Youtube, Music, Crown, Settings, LogOut, Image, FileText, TrendingUp, Search, Hash, Scissors, Mic, FileCheck, Wand2, Volume2, MessageSquareText, Radio, Languages, Bot, HelpCircle, Video, MessageSquare, Globe, Users, Upload, Stethoscope } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +21,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import fabulousLogo from "@/assets/fabulous-logo.png";
 const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Dr. Fabuos AI", url: "/dr-fabuos", icon: Stethoscope },
   { title: "YouTube Manager", url: "/youtube-manager", icon: Youtube },
   { title: "Upload Studio", url: "/youtube-upload-studio", icon: Upload },
   { title: "You Research", url: "/you-research", icon: Globe },
