@@ -1,6 +1,40 @@
-# Fabulous Creators - AI-Powered Content Studio
+# Fabulous Creators - AI-Powered Content Studio + Dr. Fabuos AI
 
-## Platform Overview
+## Dr. Fabuos AI (Premium Medical AI Assistant)
+**URL:** https://fabuos.com/dr-fabuos-ai
+**Chat:** https://fabuos.com/dr-fabuos
+
+Dr. Fabuos AI is a premium medical AI doctor and health assistant built into the Fabulous platform. It is a focused conversational experience for healthcare — NOT a general-purpose chatbot.
+
+### What Dr. Fabuos AI does
+- Acts as a calm, human-feeling AI doctor for everyday health questions
+- Scans and explains prescriptions from a photo (medicine names, dosages, what each treats, warnings)
+- Analyzes skin photos for visible skin concerns (rashes, acne, spots) and suggests next steps
+- Reads and summarizes lab reports, medical scans, and medical documents in plain language
+- Provides symptom guidance and triage (when to self-treat, when to see a doctor, when to go to the ER)
+- Explains medicines: what they do, how to take them, side effects, interactions
+- Detects medical emergencies and escalates with clear instructions
+
+### Languages
+Auto-detects and replies in: English, Hindi, Urdu, Arabic, Spanish, French, and many more — naturally, in the user's language.
+
+### Access model
+- **Guest mode:** No login required. 10 free messages per day. Temporary chat history stored only in the browser.
+- **Signed-in:** Unlimited messages, saved chat history, more image uploads.
+
+### Safety
+Built-in safety guardrails:
+- Emergency keyword detection with calm escalation to emergency services
+- Always recommends consulting a real doctor for serious or unclear conditions
+- Does not prescribe controlled substances or exact prescription doses
+- Disclaimers shown in-app: not a substitute for a licensed physician
+
+### SEO keywords
+ai doctor, doctor ai, medical ai, ai skin doctor, prescription ai, health chatbot, online ai doctor, dr fabuos, dr fabuos ai, fabuos doctor ai, medical assistant ai, ai prescription scanner, ai dermatology, multilingual health chatbot, ai symptom checker
+
+---
+
+
 Fabulous Creators (fabuos.com) is a professional AI-powered content creation platform designed specifically for YouTube creators. The platform provides a comprehensive suite of AI tools to streamline the entire content creation workflow.
 
 ## Owner & Founder

@@ -132,3 +132,6 @@ verify_jwt = true
 
 [functions.check-name-availability]
 verify_jwt = true
+
+[functions.dr-fabuos-chat]
+verify_jwt = false
