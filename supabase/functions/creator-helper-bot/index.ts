@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { callNvidia, hasNvidia } from "../_shared/nvidia.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -69,6 +70,12 @@ serve(async (req) => {
       { key: GROQ_API_KEY, name: "Groq", fn: (k: string, m: string) => callGroq(k, m) },
       { key: OPENAI_API_KEY, name: "OpenAI", fn: (k: string, m: string) => callOpenAI(k, m) },
       { key: LOVABLE_API_KEY, name: "Lovable AI", fn: (k: string, m: string) => callLovableAI(k, m) },
+      { key: hasNvidia("70b") ? "1" : undefined, name: "NVIDIA Llama 70B",
+        fn: (_k: string, m: string) => callNvidia({ tier: "70b", systemPrompt, userPrompt: m, maxTokens: 1024, temperature: 0.7 }) },
+      { key: hasNvidia("8b") ? "1" : undefined, name: "NVIDIA Llama 8B",
+        fn: (_k: string, m: string) => callNvidia({ tier: "8b", systemPrompt, userPrompt: m, maxTokens: 1024, temperature: 0.7 }) },
+      { key: hasNvidia("nano") ? "1" : undefined, name: "NVIDIA Nemotron Nano",
+        fn: (_k: string, m: string) => callNvidia({ tier: "nano", systemPrompt, userPrompt: m, maxTokens: 1024, temperature: 0.7 }) },
     ].filter(p => p.key);
 
     if (providers.length === 0) throw new Error('No AI API key configured');

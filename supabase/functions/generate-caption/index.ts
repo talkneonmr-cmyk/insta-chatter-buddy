@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
+import { nvidiaFallback, hasNvidia } from "../_shared/nvidia.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -154,32 +155,49 @@ Make it ${brandVoice}, targeted at ${targetAudience}, and optimized for maximum 
       }),
     });
 
+    let resultText: string | undefined;
+
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('Lovable AI error:', aiResponse.status, errorText);
-      
-      if (aiResponse.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Too many requests. Please try again later.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+
+      if (hasNvidia("8b") || hasNvidia("70b") || hasNvidia("nano")) {
+        try {
+          const nv = await nvidiaFallback({
+            tiers: ["8b", "70b", "nano"],
+            systemPrompt,
+            userPrompt,
+            temperature: 0.8,
+            maxTokens: 1000,
+          });
+          resultText = nv.choices[0]?.message?.content;
+        } catch (e) {
+          console.error('NVIDIA fallback failed:', e);
+        }
       }
 
-      if (aiResponse.status === 402) {
+      if (!resultText) {
+        if (aiResponse.status === 429) {
+          return new Response(
+            JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (aiResponse.status === 402) {
+          return new Response(
+            JSON.stringify({ error: 'Service temporarily unavailable. Please try again later.' }),
+            { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
         return new Response(
-          JSON.stringify({ error: 'Service temporarily unavailable. Please try again later.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Failed to generate caption. Please try again.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
-      return new Response(
-        JSON.stringify({ error: 'Failed to generate caption. Please try again.' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    } else {
+      const aiData = await aiResponse.json();
+      resultText = aiData.choices?.[0]?.message?.content;
     }
-
-    const aiData = await aiResponse.json();
-    let resultText = aiData.choices?.[0]?.message?.content;
 
     if (!resultText) {
       throw new Error('No response from AI');

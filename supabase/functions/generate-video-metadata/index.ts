@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { nvidiaFallback, hasNvidia } from "../_shared/nvidia.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -83,32 +84,51 @@ Focus on maximizing discoverability, engagement, and click-through rates while m
       }),
     });
 
+    let aiMessage: string | undefined;
+
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('AI API Error:', aiResponse.status, errorText);
-      
-      if (aiResponse.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Too many requests. Please try again later.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      if (aiResponse.status === 402) {
-        return new Response(
-          JSON.stringify({ error: 'Service temporarily unavailable. Please try again later.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+
+      if (hasNvidia("8b") || hasNvidia("70b") || hasNvidia("nano")) {
+        try {
+          const nv = await nvidiaFallback({
+            tiers: ["8b", "70b", "nano"],
+            systemPrompt: systemPrompt + "\n\nIMPORTANT: Respond with raw JSON only, no markdown.",
+            userPrompt,
+            temperature: 0.6,
+            maxTokens: 1500,
+          });
+          aiMessage = nv.choices[0]?.message?.content;
+          // strip markdown fences if present
+          if (aiMessage) aiMessage = aiMessage.replace(/```json\s*|\s*```/g, '').trim();
+        } catch (e) {
+          console.error('NVIDIA fallback failed:', e);
+        }
       }
 
-      return new Response(
-        JSON.stringify({ error: 'Failed to generate metadata. Please try again.' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (!aiMessage) {
+        if (aiResponse.status === 429) {
+          return new Response(
+            JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (aiResponse.status === 402) {
+          return new Response(
+            JSON.stringify({ error: 'Service temporarily unavailable. Please try again later.' }),
+            { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        return new Response(
+          JSON.stringify({ error: 'Failed to generate metadata. Please try again.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } else {
+      const aiData = await aiResponse.json();
+      aiMessage = aiData.choices?.[0]?.message?.content;
     }
-
-    const aiData = await aiResponse.json();
-    const aiMessage = aiData.choices?.[0]?.message?.content;
 
     if (!aiMessage) {
       throw new Error('No content in AI response');

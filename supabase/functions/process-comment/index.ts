@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { nvidiaFallback, hasNvidia } from "../_shared/nvidia.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -116,15 +117,33 @@ Output ONLY valid JSON in this exact format:
       }
     );
 
+    let aiContent: string | undefined;
+
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error("AI gateway error:", aiResponse.status, errorText);
-      throw new Error(`AI gateway error: ${aiResponse.status}`);
+
+      if (hasNvidia("8b") || hasNvidia("70b") || hasNvidia("nano")) {
+        try {
+          const nv = await nvidiaFallback({
+            tiers: ["8b", "70b", "nano"],
+            systemPrompt: systemPrompt + "\n\nIMPORTANT: Return raw JSON only.",
+            userPrompt: "Process this comment and return the JSON result.",
+            temperature: 0.3,
+            maxTokens: 800,
+          });
+          aiContent = nv.choices[0]?.message?.content;
+        } catch (e) {
+          console.error("NVIDIA fallback failed:", e);
+        }
+      }
+
+      if (!aiContent) throw new Error(`AI gateway error: ${aiResponse.status}`);
+    } else {
+      const aiData = await aiResponse.json();
+      aiContent = aiData.choices[0].message.content;
     }
 
-    const aiData = await aiResponse.json();
-    const aiContent = aiData.choices[0].message.content;
-    
     console.log("AI raw response:", aiContent);
 
     // Parse the JSON response from AI

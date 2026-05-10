@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
+import { nvidiaFallback, hasNvidia } from "../_shared/nvidia.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -89,28 +90,46 @@ Total: 30 hashtags optimized for maximum reach and engagement.`;
       }),
     });
 
+    let hashtagsContent: string | undefined;
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Lovable AI error:', response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: 'AI credits depleted. Please contact support.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+
+      if (hasNvidia("8b") || hasNvidia("70b") || hasNvidia("nano")) {
+        try {
+          const nv = await nvidiaFallback({
+            tiers: ["8b", "70b", "nano"],
+            systemPrompt,
+            userPrompt,
+            temperature: 0.7,
+            maxTokens: 800,
+          });
+          hashtagsContent = nv.choices[0]?.message?.content;
+        } catch (e) {
+          console.error('NVIDIA fallback failed:', e);
+        }
       }
 
-      throw new Error(`AI generation failed: ${errorText}`);
+      if (!hashtagsContent) {
+        if (response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (response.status === 402) {
+          return new Response(
+            JSON.stringify({ error: 'AI credits depleted. Please contact support.' }),
+            { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        throw new Error(`AI generation failed: ${errorText}`);
+      }
+    } else {
+      const data = await response.json();
+      hashtagsContent = data.choices?.[0]?.message?.content;
     }
-
-    const data = await response.json();
-    const hashtagsContent = data.choices?.[0]?.message?.content;
 
     if (!hashtagsContent) {
       throw new Error('No hashtags generated');

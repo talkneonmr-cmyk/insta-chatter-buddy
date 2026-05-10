@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
+import { callNvidia, hasNvidia } from "../_shared/nvidia.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -98,6 +99,12 @@ Write ONLY the words to speak. Make it flow naturally like talking to a friend. 
       { key: ANTHROPIC_API_KEY, name: "Anthropic Claude", model: "claude-sonnet-4-20250514", fn: (k: string) => callAnthropic(k, systemPrompt, userPrompt) },
       { key: OPENAI_API_KEY, name: "OpenAI", model: "gpt-4o", fn: (k: string) => callOpenAIScript(k, systemPrompt, userPrompt) },
       { key: LOVABLE_API_KEY, name: "Lovable AI", model: "google/gemini-2.5-flash", fn: (k: string) => callLovableAIScript(k, systemPrompt, userPrompt) },
+      { key: hasNvidia("70b") ? "1" : undefined, name: "NVIDIA Llama 70B", model: "meta/llama-3.1-70b-instruct",
+        fn: () => callNvidia({ tier: "70b", systemPrompt, userPrompt, maxTokens: 2048, temperature: 0.7 }) },
+      { key: hasNvidia("8b") ? "1" : undefined, name: "NVIDIA Llama 8B", model: "meta/llama-3.1-8b-instruct",
+        fn: () => callNvidia({ tier: "8b", systemPrompt, userPrompt, maxTokens: 2048, temperature: 0.7 }) },
+      { key: hasNvidia("nano") ? "1" : undefined, name: "NVIDIA Nemotron Nano", model: "nvidia/llama-3.1-nemotron-nano-8b-v1",
+        fn: () => callNvidia({ tier: "nano", systemPrompt, userPrompt, maxTokens: 2048, temperature: 0.7 }) },
     ].filter(p => p.key);
 
     if (providers.length === 0) throw new Error('No AI API key configured');
