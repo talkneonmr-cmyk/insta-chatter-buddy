@@ -493,6 +493,60 @@ export default function DrFabuos() {
           </div>
         </div>
       </div>
+
+      <Dialog open={paywallOpen} onOpenChange={setPaywallOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-emerald-600" /> Unlock unlimited Dr. Fabuos
+            </DialogTitle>
+            <DialogDescription>
+              {!authed
+                ? "Sign in to get 20 free messages a day, then upgrade for unlimited."
+                : `You've used ${todayCount}/${FREE_LIMIT} free messages today. Pick a plan to keep chatting without limits.`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {!authed ? (
+            <Button className="w-full" onClick={() => navigate('/auth')}>Sign in</Button>
+          ) : (
+            <div className="grid gap-3 mt-2">
+              <button
+                onClick={() => startCheckout('trial')}
+                disabled={!!checkoutLoading}
+                className="text-left rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/5 p-4 hover:border-emerald-500 transition relative"
+              >
+                <span className="absolute -top-2 right-3 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-600 text-white">Best value</span>
+                <div className="flex items-baseline justify-between">
+                  <div className="font-semibold">1 Month Trial</div>
+                  <div className="text-2xl font-bold">₹99</div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Unlimited chats, image analysis, prescription scans for 30 days.</p>
+                <p className="text-[11px] text-muted-foreground mt-2">After trial: ₹399/month</p>
+              </button>
+
+              <button
+                onClick={() => startCheckout('pro')}
+                disabled={!!checkoutLoading}
+                className="text-left rounded-2xl border border-border p-4 hover:border-emerald-500/60 transition"
+              >
+                <div className="flex items-baseline justify-between">
+                  <div className="font-semibold">Monthly</div>
+                  <div className="text-xl font-bold">₹399<span className="text-xs font-normal text-muted-foreground">/mo</span></div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Unlimited everything. Cancel anytime.</p>
+              </button>
+
+              {checkoutLoading && (
+                <p className="text-xs text-center text-muted-foreground">Redirecting to secure payment…</p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
     </>
   );
 }
