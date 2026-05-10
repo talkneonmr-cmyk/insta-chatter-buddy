@@ -93,29 +93,47 @@ serve(async (req) => {
       }),
     });
 
+    let summary: string | undefined;
+    const summarizePrompt = `Summarize the following text in a ${lengthGuidance} way (approximately ${maxLength} words). Focus on the key points and main ideas. Return ONLY the summary text, no additional commentary:\n\n${text}`;
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Lovable AI error:', response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: 'AI credits depleted. Please add credits to continue.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+
+      // Try NVIDIA fallback before failing
+      if (hasNvidia("70b") || hasNvidia("8b") || hasNvidia("nano")) {
+        try {
+          const nv = await nvidiaFallback({
+            tiers: ["70b", "8b", "nano"],
+            userPrompt: summarizePrompt,
+            maxTokens: Math.min(maxLength * 5, 1000),
+            temperature: 0.5,
+          });
+          summary = nv.choices[0]?.message?.content;
+        } catch (e) {
+          console.error('NVIDIA fallback failed:', e);
+        }
       }
 
-      throw new Error(`AI API error: ${errorText}`);
+      if (!summary) {
+        if (response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (response.status === 402) {
+          return new Response(
+            JSON.stringify({ error: 'AI credits depleted. Please add credits to continue.' }),
+            { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        throw new Error(`AI API error: ${errorText}`);
+      }
+    } else {
+      const data = await response.json();
+      summary = data.choices?.[0]?.message?.content;
     }
-
-    const data = await response.json();
-    const summary = data.choices?.[0]?.message?.content;
 
     if (!summary) {
       throw new Error('No summary generated');
