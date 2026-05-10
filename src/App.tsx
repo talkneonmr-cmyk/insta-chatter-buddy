@@ -1,8 +1,19 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 
 const AppRoutes = lazy(() => import("./AppRoutes"));
+
+const LegacyIndexRedirect = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    navigate(`/dashboard${location.search}${location.hash}`, { replace: true });
+  }, [location.hash, location.search, navigate]);
+
+  return <RouteFallback />;
+};
 
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background">
@@ -15,6 +26,7 @@ const App = () => (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/index" element={<LegacyIndexRedirect />} />
         <Route path="*" element={<AppRoutes />} />
       </Routes>
     </Suspense>
