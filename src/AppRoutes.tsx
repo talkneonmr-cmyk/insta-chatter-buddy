@@ -1,13 +1,12 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
+import { AppStatusGuard } from "./components/AppStatusGuard";
 import { Layout } from "./components/Layout";
-import { MaintenanceGuard } from "./components/MaintenanceGuard";
-import { WebsiteClosedGuard } from "./components/WebsiteClosedGuard";
 
+const Toaster = lazy(() => import("@/components/ui/toaster").then((m) => ({ default: m.Toaster })));
+const Sonner = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
@@ -58,22 +57,22 @@ const RouteFallback = () => (
 );
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
-  <WebsiteClosedGuard>
-    <MaintenanceGuard>
-      <Layout>{children}</Layout>
-    </MaintenanceGuard>
-  </WebsiteClosedGuard>
+  <AppStatusGuard>
+    <Layout>{children}</Layout>
+  </AppStatusGuard>
 );
 
 export default function AppRoutes() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
+        <Suspense fallback={null}>
+          <Toaster />
+          <Sonner />
+        </Suspense>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
-            <Route path="/auth" element={<WebsiteClosedGuard><Auth /></WebsiteClosedGuard>} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />

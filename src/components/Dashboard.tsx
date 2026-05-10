@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, Youtube, Music, Video, TrendingUp, Zap, Crown, ArrowRight, Activity, Image, FileText, Hash, Badge as BadgeIcon } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Badge } from "@/components/ui/badge";
-import UsageStats from "./UsageStats";
+
 import DashboardSkeleton from "./DashboardSkeleton";
+
+const UsageStats = lazy(() => import("./UsageStats"));
 
 interface DashboardStats {
   totalUploads: number;
@@ -21,7 +22,6 @@ interface DashboardStats {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
@@ -373,7 +373,17 @@ const Dashboard = () => {
 
           {/* Usage Stats Sidebar */}
           <div className="lg:col-span-1">
-            <UsageStats />
+            <Suspense fallback={
+              <Card className="animate-pulse border-2">
+                <CardHeader><div className="h-6 bg-muted rounded w-1/3" /></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="h-16 bg-muted rounded" />
+                  <div className="h-16 bg-muted rounded" />
+                </CardContent>
+              </Card>
+            }>
+              <UsageStats />
+            </Suspense>
           </div>
         </div>
       </div>
