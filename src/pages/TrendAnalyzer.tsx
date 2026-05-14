@@ -205,9 +205,9 @@ export default function TrendAnalyzer() {
               </CardContent>
             </Card>
           )}
+          </div>
         </div>
       </SubscriptionGuard>
-      </TesterGuard>
-    
+    </TesterGuard>
   );
 }
