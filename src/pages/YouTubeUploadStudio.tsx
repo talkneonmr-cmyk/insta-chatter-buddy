@@ -352,18 +352,20 @@ const YouTubeUploadStudio = () => {
   };
 
   const calculateScheduleDates = useCallback(() => {
-    const { dailyTime, startDate, videosPerDay, mode } = scheduleSettings;
-    const [hours, minutes] = dailyTime.split(':').map(Number);
-    
+    const { dailyTime, startDate, videosPerDay, mode, smartTime } = scheduleSettings;
+    // Smart time picks 18:00 (peak engagement window) when enabled.
+    const baseTime = smartTime ? '18:00' : dailyTime;
+    const [hours, minutes] = baseTime.split(':').map(Number);
+
     return videos.map((video, index) => {
       if (mode === 'manual') {
         return video.scheduledFor;
       }
-      
+
       const dayOffset = Math.floor(index / videosPerDay);
       const date = addDays(new Date(startDate), dayOffset);
       const scheduledDate = setMinutes(setHours(date, hours), minutes);
-      
+
       return scheduledDate.toISOString();
     });
   }, [scheduleSettings, videos]);
@@ -375,8 +377,15 @@ const YouTubeUploadStudio = () => {
   };
 
   const handleScheduleAll = async () => {
-    if (!channelInfo) {
-      toast({ title: "Error", description: "Connect your YouTube channel first", variant: "destructive" });
+    const needsYT = videos.some(v => v.target === 'youtube' || v.target === 'both');
+    const needsIG = videos.some(v => v.target === 'instagram' || v.target === 'both');
+
+    if (needsYT && !channelInfo) {
+      toast({ title: "Connect YouTube", description: "Connect your YouTube channel for YouTube uploads", variant: "destructive" });
+      return;
+    }
+    if (needsIG && !instagramInfo) {
+      toast({ title: "Connect Instagram", description: "Connect Instagram in Settings to publish Reels", variant: "destructive" });
       return;
     }
 
