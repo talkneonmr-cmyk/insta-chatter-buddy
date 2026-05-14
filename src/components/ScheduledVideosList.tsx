@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Clock, CheckCircle, AlertCircle, Upload, Copy, ExternalLink, Loader2 } from "lucide-react";
+import { Trash2, Clock, CheckCircle, AlertCircle, Upload, Copy, ExternalLink, Loader2, Instagram } from "lucide-react";
 import { format } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 
@@ -25,7 +25,31 @@ const ScheduledVideosList = () => {
   const [videos, setVideos] = useState<ScheduledVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [reelPostingId, setReelPostingId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const handleCrossPostReel = async (id: string, title: string) => {
+    setReelPostingId(id);
+    try {
+      const { data, error } = await supabase.functions.invoke("instagram-publish-reel", {
+        body: { scheduledVideoId: id, caption: title },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({
+        title: "Reel published!",
+        description: data?.permalink ? "View it on Instagram" : "Posted to Reels successfully",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Reel post failed",
+        description: err?.message || "Could not post to Instagram",
+        variant: "destructive",
+      });
+    } finally {
+      setReelPostingId(null);
+    }
+  };
 
   useEffect(() => {
     fetchVideos();
@@ -245,6 +269,21 @@ const ScheduledVideosList = () => {
                     <Upload className="h-4 w-4 mr-1" />
                     Upload Now
                   </>
+                )}
+              </Button>
+            )}
+            {status === 'uploaded' && isShortVideo(video) && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleCrossPostReel(video.id, video.title)}
+                disabled={reelPostingId === video.id}
+                title="Cross-post this Short to Instagram Reels"
+              >
+                {reelPostingId === video.id ? (
+                  <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Posting...</>
+                ) : (
+                  <><Instagram className="h-4 w-4 mr-1" />To Reels</>
                 )}
               </Button>
             )}

@@ -663,6 +663,51 @@ export type Database = {
         }
         Relationships: []
       }
+      instagram_reel_posts: {
+        Row: {
+          caption: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          ig_media_id: string | null
+          ig_permalink: string | null
+          instagram_account_id: string
+          scheduled_video_id: string | null
+          source_video_path: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          ig_media_id?: string | null
+          ig_permalink?: string | null
+          instagram_account_id: string
+          scheduled_video_id?: string | null
+          source_video_path?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          ig_media_id?: string | null
+          ig_permalink?: string | null
+          instagram_account_id?: string
+          scheduled_video_id?: string | null
+          source_video_path?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       monitored_posts: {
         Row: {
           created_at: string | null

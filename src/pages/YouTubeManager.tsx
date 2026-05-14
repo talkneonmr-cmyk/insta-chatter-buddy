@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Youtube, Upload, ExternalLink } from "lucide-react";
 import ScheduledVideosList from "@/components/ScheduledVideosList";
 import YouTubeAccountConnect from "@/components/YouTubeAccountConnect";
+import InstagramAccountConnect from "@/components/InstagramAccountConnect";
 import UploadHistory from "@/components/UploadHistory";
 import YouTubeChannelAnalytics from "@/components/YouTubeChannelAnalytics";
 import YouTubeVideoManager from "@/components/YouTubeVideoManager";
@@ -55,6 +56,7 @@ const YouTubeManager = () => {
 
         {/* YouTube Account Connection */}
         <YouTubeAccountConnect />
+        <InstagramAccountConnect />
 
         {/* Main Content */}
         <Card className="p-3 md:p-6">
