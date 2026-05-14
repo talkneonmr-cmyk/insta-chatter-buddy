@@ -1,32 +1,49 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Dna, Sparkles, Lightbulb, PenLine, Activity, TrendingUp,
-  Users, Clock, Target, Gauge, Lock, ArrowRight, Loader2, RefreshCw, CheckCircle2, AlertTriangle,
+  Dna,
+  Sparkles,
+  Lightbulb,
+  PenLine,
+  Activity,
+  TrendingUp,
+  Users,
+  Clock,
+  Target,
+  Gauge,
+  Lock,
+  ArrowRight,
+  Loader2,
+  RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-type Module = {
+interface GrowthModule {
   id: string;
   title: string;
   description: string;
-  icon: any;
+  icon: typeof Dna;
   to?: string;
   status: "ready" | "soon";
-};
+}
 
-const modules: Module[] = [
-  { id: "dna",        title: "Channel DNA",          description: "Deep scan of your channel — niche, audience, viral patterns, weaknesses, content pillars.", icon: Dna,         status: "ready" },
-  { id: "viral",      title: "Viral Intelligence",   description: "Reverse-engineer your top videos. What exactly made them work — hook, pacing, emotion.",    icon: Sparkles,    status: "soon" },
-  { id: "ideas",      title: "Content Strategist",   description: "Personalized video, Reel and Short ideas — not generic AI fluff.",                          icon: Lightbulb,   status: "soon" },
-  { id: "optimizer",  title: "Title & Hook Optimizer", description: "Paste a title or hook, get high-CTR rewrites scored against your DNA.",                   icon: PenLine,     status: "soon" },
-  { id: "retention",  title: "Retention Improver",   description: "Find drop-off points and exactly what to fix — slow intros, weak transitions, lost moments.", icon: Activity,    status: "soon" },
-  { id: "trends",     title: "Smart Trend Matching", description: "Trends filtered by YOUR niche — and how to use each one.",                                   icon: TrendingUp,  status: "soon" },
-  { id: "competitor", title: "Competitor Intel",     description: "Track competitors, find opportunities they're missing.",                                    icon: Users,       status: "soon" },
-  { id: "upload",     title: "Upload Optimizer",     description: "Best posting times, days, frequency — based on your audience activity.",                    icon: Clock,       status: "soon" },
-  { id: "gap",        title: "Content Gap Detector", description: "Important content you should be making — but aren't.",                                      icon: Target,      status: "soon" },
-  { id: "score",      title: "Growth Score",         description: "One number, one bottleneck, one clear next action.",                                        icon: Gauge,       status: "soon" },
+const modules: GrowthModule[] = [
+  { id: "dna", title: "Channel DNA", description: "Deep scan of your channel: niche, audience, viral patterns, weaknesses, and content pillars.", icon: Dna, status: "ready" },
+  { id: "viral", title: "Viral Intelligence", description: "Reverse-engineer your top videos: hook, pacing, emotion, and what made them work.", icon: Sparkles, status: "soon" },
+  { id: "ideas", title: "Content Strategist", description: "Personalized video, Reel, and Short ideas built around your real channel data.", icon: Lightbulb, status: "soon" },
+  { id: "optimizer", title: "Title & Hook Optimizer", description: "Paste a title or hook and get stronger rewrites scored against your DNA.", icon: PenLine, status: "soon" },
+  { id: "retention", title: "Retention Improver", description: "Find weak intros, slow transitions, and moments that lose viewers.", icon: Activity, status: "soon" },
+  { id: "trends", title: "Smart Trend Matching", description: "Trends filtered by your niche with clear ways to use each one.", icon: TrendingUp, status: "soon" },
+  { id: "competitor", title: "Competitor Intel", description: "Track competitors and find opportunities they are missing.", icon: Users, status: "soon" },
+  { id: "upload", title: "Upload Optimizer", description: "Best posting times, days, and frequency based on audience activity.", icon: Clock, status: "soon" },
+  { id: "gap", title: "Content Gap Detector", description: "Important content your channel should be making but is not yet covering.", icon: Target, status: "soon" },
+  { id: "score", title: "Growth Score", description: "One number, one bottleneck, and one clear next action.", icon: Gauge, status: "soon" },
 ];
 
 export default function Growth() {
@@ -37,21 +54,47 @@ export default function Growth() {
   const [scanning, setScanning] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setLoading(false); return; }
-      const [{ data: acc }, { data: existing }] = await Promise.all([
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!mounted) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const [{ data: account }, { data: existing }] = await Promise.all([
         supabase.from("youtube_accounts").select("id").eq("user_id", user.id).maybeSingle(),
-        supabase.from("channel_dna_profiles").select("*").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase
+          .from("channel_dna_profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
       ]);
-      setHasChannel(!!acc);
+
+      if (!mounted) return;
+      setHasChannel(!!account);
       setDna(existing);
       setLoading(false);
     })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const runScan = async () => {
-    if (!hasChannel) { navigate("/youtube-manager"); return; }
+    if (!hasChannel) {
+      navigate("/youtube-manager");
+      return;
+    }
+
     setScanning(true);
     try {
       const { data, error } = await supabase.functions.invoke("scan-channel-dna");
@@ -59,89 +102,119 @@ export default function Growth() {
       if (data?.error) throw new Error(data.error);
       setDna(data.dna);
       toast.success("Channel DNA scan complete");
-    } catch (e: any) {
-      toast.error(e.message || "Scan failed");
+    } catch (error: any) {
+      toast.error(error.message || "Scan failed");
     } finally {
       setScanning(false);
     }
   };
 
   return (
-    <div className="min-h-screen ucs-surface-0 ucs-text">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12">
-
-        {/* Header */}
-        <div className="mb-10">
-          <span className="ucs-chip mb-4">GROWTH ENGINE · v1</span>
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight leading-[1.05] mb-3">
-            A genius creator coach<br/>
-            <span className="ucs-text-muted">that actually understands your channel.</span>
-          </h1>
-          <p className="ucs-text-muted text-base sm:text-lg max-w-2xl">
-            Connect your YouTube channel and the AI will scan your content, learn your DNA, and tell you exactly what to do next to grow.
-          </p>
-        </div>
-
-        {/* Step / DNA card */}
-        {!dna ? (
-          <div className="ucs-card p-6 sm:p-8 mb-10 relative overflow-hidden">
-            <div className="ucs-grid-bg absolute inset-0 opacity-30 pointer-events-none" />
-            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 space-y-6 sm:space-y-8 animate-fade-in">
+        <section className="relative overflow-hidden rounded-2xl border-2 border-primary/20 p-4 sm:p-6 md:p-8 lg:p-12 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary)/0.1),transparent_50%),radial-gradient(circle_at_70%_50%,hsl(var(--secondary)/0.1),transparent_50%)]" />
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="space-y-3 max-w-3xl">
+              <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">
+                Growth Engine · v1
+              </Badge>
               <div>
-                <div className="text-sm ucs-accent font-semibold mb-1">Step 1</div>
-                <div className="text-xl font-bold mb-1">
-                  {hasChannel ? "Run your Channel DNA scan" : "Connect your YouTube channel"}
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text leading-tight">
+                  Channel DNA Growth Coach
+                </h1>
+                <p className="text-muted-foreground text-sm sm:text-base md:text-lg mt-3 max-w-2xl">
+                  Connect your YouTube channel and Fabuos will scan your content, learn your patterns, and tell you what to do next to grow.
+                </p>
+              </div>
+            </div>
+            <Button
+              size="lg"
+              onClick={runScan}
+              disabled={scanning || loading}
+              className="bg-gradient-to-r from-primary via-secondary to-accent text-white border-0 hover:opacity-90 transition-opacity shadow-lg w-full sm:w-auto"
+            >
+              {scanning ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Scanning...
+                </>
+              ) : hasChannel ? (
+                <>
+                  Run DNA Scan
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </>
+              ) : (
+                <>
+                  Connect YouTube
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </>
+              )}
+            </Button>
+          </div>
+        </section>
+
+        {!dna ? (
+          <Card className="card-3d border-2 overflow-hidden">
+            <CardHeader>
+              <div className="flex items-start gap-3">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10">
+                  <Dna className="w-6 h-6 text-primary" />
                 </div>
-                <div className="text-sm ucs-text-muted">
-                  {hasChannel
-                    ? "We'll analyze your last 50 videos to build your Channel DNA. ~60 seconds."
-                    : "Link YouTube first, then we'll scan your last 50 videos."}
+                <div>
+                  <CardTitle>{hasChannel ? "Run your Channel DNA scan" : "Connect your YouTube channel"}</CardTitle>
+                  <CardDescription className="mt-1">
+                    {hasChannel
+                      ? "We'll analyze your latest videos to build your creator profile. This usually takes about a minute."
+                      : "Link YouTube first, then the Growth Engine can analyze your channel."}
+                  </CardDescription>
                 </div>
               </div>
-              <button
-                onClick={runScan}
-                disabled={scanning || loading}
-                className="ucs-accent-bg text-white font-semibold px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity inline-flex items-center gap-2 shrink-0 disabled:opacity-50"
-              >
-                {scanning ? <><Loader2 className="w-4 h-4 animate-spin" /> Scanning…</> :
-                 hasChannel ? <>Run DNA scan <ArrowRight className="w-4 h-4" /></> :
-                 <>Connect channel <ArrowRight className="w-4 h-4" /></>}
-              </button>
-            </div>
-          </div>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={runScan} disabled={scanning || loading} className="bg-gradient-to-r from-primary to-secondary text-white">
+                {scanning ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                {hasChannel ? "Analyze my channel" : "Go to YouTube Manager"}
+              </Button>
+            </CardContent>
+          </Card>
         ) : (
           <DnaPanel dna={dna} onRescan={runScan} scanning={scanning} />
         )}
 
-        {/* Modules grid */}
-        <div className="mb-4 flex items-baseline justify-between">
-          <h2 className="text-xl font-bold">10 systems. One brain.</h2>
-          <span className="text-xs ucs-text-dim ucs-mono">{dna ? "DNA ACTIVE" : "UNLOCKS AFTER DNA SCAN"}</span>
-        </div>
+        <section className="space-y-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold">Growth Systems</h2>
+            <p className="text-muted-foreground text-xs sm:text-sm">The first system is live. The rest unlock as the Growth Engine expands.</p>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {modules.map((m) => (
-            <button
-              key={m.id}
-              onClick={() => m.to && navigate(m.to)}
-              disabled={m.status === "soon"}
-              className="ucs-card p-5 text-left disabled:cursor-not-allowed group relative"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-9 h-9 rounded-lg ucs-accent-soft flex items-center justify-center">
-                  <m.icon className="w-[18px] h-[18px] ucs-accent" />
-                </div>
-                {m.status === "soon" && <Lock className="w-3.5 h-3.5 ucs-text-dim" />}
-              </div>
-              <div className="text-[15px] font-semibold mb-1.5 leading-snug">{m.title}</div>
-              <div className="text-[13px] ucs-text-muted leading-relaxed">{m.description}</div>
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-12 text-center text-xs ucs-text-dim">
-          v1 focuses on real, measurable creator growth. No dashboards full of vanity metrics.
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            {modules.map((module) => (
+              <Card
+                key={module.id}
+                className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all"
+              >
+                <CardContent className="p-4 sm:p-5">
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 group-hover:from-primary/20 group-hover:to-secondary/20 transition-all">
+                      <module.icon className="w-5 h-5 text-primary" />
+                    </div>
+                    {module.status === "soon" ? (
+                      <Badge variant="outline" className="text-xs gap-1">
+                        <Lock className="w-3 h-3" />
+                        Soon
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/10">Live</Badge>
+                    )}
+                  </div>
+                  <h3 className="font-semibold mb-1.5">{module.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{module.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
@@ -149,111 +222,119 @@ export default function Growth() {
 
 function DnaPanel({ dna, onRescan, scanning }: { dna: any; onRescan: () => void; scanning: boolean }) {
   const score = dna.growth_score ?? 0;
+
   return (
-    <div className="space-y-3 mb-10">
-      {/* Hero score row */}
-      <div className="ucs-card p-6 sm:p-8 relative overflow-hidden">
-        <div className="ucs-grid-bg absolute inset-0 opacity-30 pointer-events-none" />
-        <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-          <div>
-            <div className="text-xs ucs-text-dim ucs-mono mb-2">CHANNEL DNA</div>
-            <div className="text-2xl font-bold mb-1">{dna.channel_title}</div>
-            <div className="text-sm ucs-text-muted">
-              {dna.niche}{dna.sub_niche ? ` · ${dna.sub_niche}` : ""} · {dna.videos_analyzed} videos analyzed
+    <section className="space-y-4">
+      <Card className="card-3d border-2 overflow-hidden">
+        <CardContent className="p-4 sm:p-6 md:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+            <div className="space-y-1">
+              <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">Channel DNA</Badge>
+              <h2 className="text-2xl sm:text-3xl font-bold">{dna.channel_title}</h2>
+              <p className="text-muted-foreground text-sm">
+                {dna.niche}{dna.sub_niche ? ` · ${dna.sub_niche}` : ""} · {dna.videos_analyzed} videos analyzed
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-5xl font-bold gradient-text tabular-nums">{score}</div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">Growth Score</p>
+                <p className="text-sm text-muted-foreground">out of 100</p>
+              </div>
+            </div>
+            <div className="flex lg:justify-end">
+              <Button variant="outline" onClick={onRescan} disabled={scanning}>
+                {scanning ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                Re-scan
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-5xl font-bold ucs-accent tabular-nums">{score}</div>
-            <div>
-              <div className="text-xs ucs-text-dim ucs-mono">GROWTH SCORE</div>
-              <div className="text-sm ucs-text-muted">out of 100</div>
-            </div>
-          </div>
-          <div className="flex lg:justify-end">
-            <button
-              onClick={onRescan}
-              disabled={scanning}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 hover:bg-white/5 text-sm disabled:opacity-50"
-            >
-              {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-              Re-scan
-            </button>
-          </div>
-        </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="card-3d border-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <AlertTriangle className="w-4 h-4 text-accent" />
+              Primary Bottleneck
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm leading-relaxed">{dna.bottleneck || "—"}</CardContent>
+        </Card>
+        <Card className="card-3d border-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <CheckCircle2 className="w-4 h-4 text-primary" />
+              Next Action
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm leading-relaxed">{dna.next_action || "—"}</CardContent>
+        </Card>
       </div>
 
-      {/* Bottleneck + next action */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="ucs-card p-5">
-          <div className="flex items-center gap-2 text-xs ucs-text-dim ucs-mono mb-2"><AlertTriangle className="w-3.5 h-3.5" /> BOTTLENECK</div>
-          <div className="text-[15px] leading-relaxed">{dna.bottleneck || "—"}</div>
-        </div>
-        <div className="ucs-card p-5">
-          <div className="flex items-center gap-2 text-xs ucs-accent ucs-mono mb-2"><CheckCircle2 className="w-3.5 h-3.5" /> NEXT ACTION</div>
-          <div className="text-[15px] leading-relaxed">{dna.next_action || "—"}</div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <ListCard title="Content Pillars" items={dna.content_pillars} />
+        <ListCard title="Strengths" items={dna.strengths} />
+        <ListCard title="Weaknesses" items={dna.weaknesses} />
       </div>
 
-      {/* Pillars / Strengths / Weaknesses */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <ListCard title="CONTENT PILLARS" items={dna.content_pillars} />
-        <ListCard title="STRENGTHS" items={dna.strengths} />
-        <ListCard title="WEAKNESSES" items={dna.weaknesses} />
-      </div>
-
-      {/* Viral patterns */}
       {Array.isArray(dna.viral_patterns) && dna.viral_patterns.length > 0 && (
-        <div className="ucs-card p-5">
-          <div className="text-xs ucs-text-dim ucs-mono mb-3">VIRAL PATTERNS</div>
-          <div className="space-y-3">
-            {dna.viral_patterns.map((p: any, i: number) => (
-              <div key={i} className="border-l-2 ucs-accent-border pl-3">
-                <div className="text-[14px] font-medium">{p.pattern}</div>
-                <div className="text-xs ucs-text-muted mt-0.5">{p.evidence}</div>
+        <Card className="card-3d border-2">
+          <CardHeader>
+            <CardTitle>Viral Patterns</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            {dna.viral_patterns.map((pattern: any, index: number) => (
+              <div key={index} className="border-l-4 border-primary pl-3">
+                <p className="text-sm font-medium">{pattern.pattern}</p>
+                <p className="text-xs text-muted-foreground mt-1">{pattern.evidence}</p>
               </div>
             ))}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Recommendations */}
       {Array.isArray(dna.recommendations) && dna.recommendations.length > 0 && (
-        <div className="ucs-card p-5">
-          <div className="text-xs ucs-text-dim ucs-mono mb-3">RECOMMENDATIONS</div>
-          <div className="space-y-2">
-            {dna.recommendations.map((r: any, i: number) => (
-              <div key={i} className="flex gap-3 items-start">
-                <span className={`text-[10px] ucs-mono px-1.5 py-0.5 rounded ${
-                  r.priority === "high" ? "bg-red-500/15 text-red-400" :
-                  r.priority === "medium" ? "bg-yellow-500/15 text-yellow-400" :
-                  "bg-white/5 ucs-text-muted"
-                }`}>{(r.priority || "med").toUpperCase()}</span>
+        <Card className="card-3d border-2">
+          <CardHeader>
+            <CardTitle>Recommendations</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            {dna.recommendations.map((recommendation: any, index: number) => (
+              <div key={index} className="flex gap-3 items-start">
+                <Badge variant="outline" className="capitalize shrink-0">{recommendation.priority || "medium"}</Badge>
                 <div>
-                  <div className="text-[14px]">{r.action}</div>
-                  <div className="text-xs ucs-text-muted mt-0.5">{r.why}</div>
+                  <p className="text-sm font-medium">{recommendation.action}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{recommendation.why}</p>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </section>
   );
 }
 
 function ListCard({ title, items }: { title: string; items?: any[] }) {
   if (!Array.isArray(items) || items.length === 0) return null;
+
   return (
-    <div className="ucs-card p-5">
-      <div className="text-xs ucs-text-dim ucs-mono mb-3">{title}</div>
-      <ul className="space-y-2">
-        {items.map((it, i) => (
-          <li key={i} className="text-[13px] ucs-text leading-relaxed flex gap-2">
-            <span className="ucs-accent">·</span>
-            <span>{typeof it === "string" ? it : JSON.stringify(it)}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Card className="card-3d border-2">
+      <CardHeader>
+        <CardTitle className="text-base">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <ul className="space-y-2">
+          {items.map((item, index) => (
+            <li key={index} className="text-sm text-muted-foreground leading-relaxed flex gap-2">
+              <span className="text-primary">•</span>
+              <span>{typeof item === "string" ? item : JSON.stringify(item)}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
   );
 }
