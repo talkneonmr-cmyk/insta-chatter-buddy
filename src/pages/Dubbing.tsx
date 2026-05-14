@@ -62,8 +62,10 @@ export default function Dubbing() {
 
       let audioUrl = "";
       if (audioFile) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
         const fileExt = audioFile.name.split('.').pop();
-        const fileName = `dub-${Date.now()}.${fileExt}`;
+        const fileName = `${user.id}/dub-${Date.now()}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
           .from('voice-samples')
           .upload(fileName, audioFile);
