@@ -73,7 +73,7 @@ const Settings = () => {
   }
 
   return (
-    <div className="min-h-screen ucs-surface-0 ucs-text">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
       {/* Top Navigation */}
       <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">

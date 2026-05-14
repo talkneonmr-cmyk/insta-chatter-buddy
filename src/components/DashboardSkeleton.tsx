@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const DashboardSkeleton = () => {
   return (
-    <div className="min-h-screen ucs-surface-0 ucs-text animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background animate-fade-in">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 space-y-4 sm:space-y-6 md:space-y-8">
         
         {/* Hero Section Skeleton */}

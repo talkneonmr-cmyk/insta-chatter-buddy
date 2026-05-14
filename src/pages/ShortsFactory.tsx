@@ -9,8 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Copy, Clock, TrendingUp, Download, Calendar, ExternalLink } from "lucide-react";
-import ToolHeader from "@/components/ToolHeader";
+import { ArrowLeft, Sparkles, Copy, Clock, TrendingUp, Download, Calendar, ExternalLink } from "lucide-react";
 import TesterGuard from "@/components/TesterGuard";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 
@@ -188,14 +187,28 @@ const ShortsFactory = () => {
   return (
     <TesterGuard>
       <SubscriptionGuard>
-        <div className="min-h-screen ucs-surface-0 ucs-text">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-6">
-            <ToolHeader
-              icon={Sparkles}
-              title="AI Shorts Factory"
-              subtitle="Turn one video into multiple viral shorts automatically."
-              badge="CREATE"
-            />
+        <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-3 md:p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/")}
+                className="shrink-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg float-animation shrink-0">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <h1 className="text-3xl font-bold gradient-text">AI Shorts Factory</h1>
+                  <p className="text-sm text-muted-foreground">Turn one video into multiple viral shorts automatically</p>
+                </div>
+              </div>
+            </div>
 
             {/* Input Section */}
             <Card>

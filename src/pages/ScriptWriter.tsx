@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { FileText, Sparkles, Loader2, Copy, Check } from "lucide-react";
-import ToolHeader from "@/components/ToolHeader";
+import { ArrowLeft, FileText, Sparkles, Loader2, Copy, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ScriptHistory from "@/components/ScriptHistory";
@@ -165,14 +164,26 @@ const ScriptWriter = () => {
   };
 
   return (
-    <div className="min-h-screen ucs-surface-0 ucs-text">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-8">
-        <ToolHeader
-          icon={FileText}
-          title="AI Script Writer"
-          subtitle="Generate professional video scripts with AI."
-          badge="CREATE"
-        />
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-4 md:p-8">
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate("/")} 
+        className="mb-6"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
+
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
+            <FileText className="h-10 w-10" />
+            AI Script Writer
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Generate professional video scripts with AI
+          </p>
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
