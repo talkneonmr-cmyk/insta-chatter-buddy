@@ -163,7 +163,7 @@ const LandingPage = () => {
       </nav>
 
       {/* ─── Hero ─── */}
-      <section id="hero" className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+      <section id="hero" className="relative flex items-center justify-center pt-28 sm:pt-32 pb-20 sm:pb-28 overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/15 rounded-full blur-[120px] animate-float" />
