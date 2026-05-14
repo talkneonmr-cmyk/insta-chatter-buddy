@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Search, Edit, Trash2, Copy } from "lucide-react";
+import { Search, Edit, Trash2, Copy, Film, Video as VideoIcon, Eye, ThumbsUp, MessageCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +24,10 @@ interface Video {
   thumbnailUrl: string;
   publishedAt: string;
   viewCount: string;
+  likeCount?: string;
+  commentCount?: string;
+  durationSec?: number;
+  isShort?: boolean;
 }
 
 const YouTubeVideoManager = () => {
