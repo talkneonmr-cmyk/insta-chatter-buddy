@@ -111,6 +111,7 @@ const YouTubeUploadStudio = () => {
 
   useEffect(() => {
     checkChannelConnection();
+    checkInstagramConnection();
     fetchScheduledVideos();
     
     // Handle OAuth callback
