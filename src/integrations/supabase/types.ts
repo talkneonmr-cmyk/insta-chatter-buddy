@@ -1017,18 +1017,24 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          instagram_account_id: string | null
+          instagram_caption: string | null
+          instagram_error: string | null
+          instagram_media_id: string | null
+          instagram_permalink: string | null
           is_short: boolean | null
           privacy_status: string | null
           scheduled_for: string
           status: string | null
           tags: string[] | null
+          target_platform: string
           thumbnail_path: string | null
           title: string
           updated_at: string | null
           upload_error: string | null
           user_id: string
           video_file_path: string
-          youtube_account_id: string
+          youtube_account_id: string | null
           youtube_video_id: string | null
         }
         Insert: {
@@ -1037,18 +1043,24 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          instagram_account_id?: string | null
+          instagram_caption?: string | null
+          instagram_error?: string | null
+          instagram_media_id?: string | null
+          instagram_permalink?: string | null
           is_short?: boolean | null
           privacy_status?: string | null
           scheduled_for: string
           status?: string | null
           tags?: string[] | null
+          target_platform?: string
           thumbnail_path?: string | null
           title: string
           updated_at?: string | null
           upload_error?: string | null
           user_id: string
           video_file_path: string
-          youtube_account_id: string
+          youtube_account_id?: string | null
           youtube_video_id?: string | null
         }
         Update: {
@@ -1057,21 +1069,35 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          instagram_account_id?: string | null
+          instagram_caption?: string | null
+          instagram_error?: string | null
+          instagram_media_id?: string | null
+          instagram_permalink?: string | null
           is_short?: boolean | null
           privacy_status?: string | null
           scheduled_for?: string
           status?: string | null
           tags?: string[] | null
+          target_platform?: string
           thumbnail_path?: string | null
           title?: string
           updated_at?: string | null
           upload_error?: string | null
           user_id?: string
           video_file_path?: string
-          youtube_account_id?: string
+          youtube_account_id?: string | null
           youtube_video_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_videos_instagram_account_id_fkey"
+            columns: ["instagram_account_id"]
+            isOneToOne: false
+            referencedRelation: "instagram_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       seo_optimizations: {
         Row: {
