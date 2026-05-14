@@ -8,7 +8,7 @@ const DrFabuosAI = lazy(() => import("./pages/DrFabuosAI"));
 const DrFabuos = lazy(() => import("./pages/DrFabuos"));
 
 const RouteFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background">
+  <div className="min-h-screen flex items-center justify-center ucs-surface-0 ucs-text">
     <div className="h-8 w-8 rounded-full border-2 border-muted border-t-primary animate-spin" />
   </div>
 );

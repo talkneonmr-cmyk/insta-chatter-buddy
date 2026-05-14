@@ -84,7 +84,7 @@ export default function Pricing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+    <div className="min-h-screen ucs-surface-0 ucs-text">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12 slide-in">
           <h1 className="text-4xl font-bold mb-4 gradient-text">Choose Your Plan</h1>
