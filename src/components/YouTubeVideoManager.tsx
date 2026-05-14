@@ -105,6 +105,21 @@ const YouTubeVideoManager = () => {
     video.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const isShort = (v: Video) =>
+    typeof v.isShort === "boolean"
+      ? v.isShort
+      : (v.durationSec ?? 0) > 0 && (v.durationSec ?? 0) <= 60;
+
+  const shorts = filteredVideos.filter(isShort);
+  const longs = filteredVideos.filter((v) => !isShort(v));
+
+  const formatDuration = (sec?: number) => {
+    if (!sec) return "";
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -114,6 +129,74 @@ const YouTubeVideoManager = () => {
       </div>
     );
   }
+
+  const renderCard = (video: Video) => (
+    <Card key={video.id} className="p-4">
+      <div className="flex gap-4">
+        <div className="relative shrink-0">
+          <img
+            src={video.thumbnailUrl}
+            alt={video.title}
+            className="w-40 h-24 object-cover rounded"
+          />
+          {video.durationSec ? (
+            <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded">
+              {formatDuration(video.durationSec)}
+            </span>
+          ) : null}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold truncate">{video.title}</h3>
+            {isShort(video) && (
+              <Badge variant="secondary" className="shrink-0">
+                <Film className="h-3 w-3 mr-1" /> Short
+              </Badge>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+            {video.description}
+          </p>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Eye className="h-3 w-3" />
+              {parseInt(video.viewCount || "0").toLocaleString()}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <ThumbsUp className="h-3 w-3" />
+              {parseInt(video.likeCount || "0").toLocaleString()}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <MessageCircle className="h-3 w-3" />
+              {parseInt(video.commentCount || "0").toLocaleString()}
+            </span>
+            <span>{new Date(video.publishedAt).toLocaleDateString()}</span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(video)}>
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              navigator.clipboard.writeText(`https://youtube.com/watch?v=${video.id}`);
+              toast.success("Video link copied to clipboard");
+            }}
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+
+  const emptyState = (label: string) => (
+    <div className="text-center py-8 text-sm text-muted-foreground">
+      No {label} found.
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -127,48 +210,31 @@ const YouTubeVideoManager = () => {
         />
       </div>
 
-      <div className="space-y-4">
-        {filteredVideos.map((video) => (
-          <Card key={video.id} className="p-4">
-            <div className="flex gap-4">
-              <img
-                src={video.thumbnailUrl}
-                alt={video.title}
-                className="w-40 h-24 object-cover rounded"
-              />
-              <div className="flex-1">
-                <h3 className="font-semibold mb-1">{video.title}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                  {video.description}
-                </p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>{parseInt(video.viewCount).toLocaleString()} views</span>
-                  <span>{new Date(video.publishedAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEdit(video)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    navigator.clipboard.writeText(`https://youtube.com/watch?v=${video.id}`);
-                    toast.success("Video link copied to clipboard");
-                  }}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList>
+          <TabsTrigger value="all">
+            All <Badge variant="secondary" className="ml-2">{filteredVideos.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="shorts">
+            <Film className="h-3 w-3 mr-1" /> Shorts
+            <Badge variant="secondary" className="ml-2">{shorts.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="long">
+            <VideoIcon className="h-3 w-3 mr-1" /> Long
+            <Badge variant="secondary" className="ml-2">{longs.length}</Badge>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="mt-4 space-y-4">
+          {filteredVideos.length === 0 ? emptyState("videos") : filteredVideos.map(renderCard)}
+        </TabsContent>
+        <TabsContent value="shorts" className="mt-4 space-y-4">
+          {shorts.length === 0 ? emptyState("Shorts") : shorts.map(renderCard)}
+        </TabsContent>
+        <TabsContent value="long" className="mt-4 space-y-4">
+          {longs.length === 0 ? emptyState("long videos") : longs.map(renderCard)}
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={!!editingVideo} onOpenChange={() => setEditingVideo(null)}>
         <DialogContent>
