@@ -12,6 +12,7 @@ import { Loader2, TrendingUp, Sparkles } from "lucide-react";
 
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import TesterGuard from "@/components/TesterGuard";
+import ToolHeader from "@/components/ToolHeader";
 
 export default function TrendAnalyzer() {
   const [niche, setNiche] = useState("");
@@ -118,19 +119,16 @@ export default function TrendAnalyzer() {
   };
 
   return (
-    
-      <TesterGuard featureName="Trend Analyzer">
-        <SubscriptionGuard>
-          <div className="max-w-6xl mx-auto p-4 space-y-8">
-          <div className="text-center space-y-2 slide-in">
-            <h1 className="text-4xl font-bold gradient-text flex items-center justify-center gap-2">
-              <TrendingUp className="h-10 w-10" />
-              AI Trend Analyzer
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Discover trending topics and viral opportunities in your niche
-            </p>
-          </div>
+    <TesterGuard featureName="Trend Analyzer">
+      <SubscriptionGuard>
+        <div className="min-h-screen ucs-surface-0 ucs-text">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-8">
+            <ToolHeader
+              icon={TrendingUp}
+              title="AI Trend Analyzer"
+              subtitle="Discover trending topics and viral opportunities in your niche."
+              badge="GROWTH"
+            />
 
           <Card className="card-3d border-2">
             <CardHeader>
@@ -205,9 +203,9 @@ export default function TrendAnalyzer() {
               </CardContent>
             </Card>
           )}
+          </div>
         </div>
       </SubscriptionGuard>
-      </TesterGuard>
-    
+    </TesterGuard>
   );
 }

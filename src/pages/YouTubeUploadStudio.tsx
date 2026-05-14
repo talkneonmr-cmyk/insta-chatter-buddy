@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  ArrowLeft, Upload, Youtube, CheckCircle, AlertCircle, Sparkles, 
+  Upload, Youtube, CheckCircle, AlertCircle, Sparkles, 
   Clock, Calendar, Trash2, Play, Settings, Film, Video, 
   Loader2, Plus, X, RefreshCw, Zap, FileVideo
 } from "lucide-react";
@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { format, addDays, setHours, setMinutes } from "date-fns";
 import UsageResetCountdown from "@/components/UsageResetCountdown";
+import ToolHeader from "@/components/ToolHeader";
 
 interface UploadedVideo {
   id: string;
@@ -471,23 +472,16 @@ const YouTubeUploadStudio = () => {
   const longScheduledVideos = scheduledVideos.filter((v) => !isShortScheduledVideo(v));
 
   return (
-    <div className="min-h-screen ucs-surface-0 ucs-text p-3 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/youtube-manager")}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-500/10 rounded-lg">
-              <Upload className="h-6 w-6 text-red-500" />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold gradient-text">Upload Studio</h1>
-              <p className="text-sm text-muted-foreground">Bulk upload & smart scheduling for YouTube</p>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen ucs-surface-0 ucs-text">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-6">
+        <ToolHeader
+          icon={Upload}
+          title="Upload Studio"
+          subtitle="Bulk upload & smart scheduling for YouTube."
+          badge="YOUTUBE"
+          backTo="/youtube-manager"
+          iconAccent="text-red-500"
+        />
 
         {/* Channel Connection */}
         {channelLoading ? (

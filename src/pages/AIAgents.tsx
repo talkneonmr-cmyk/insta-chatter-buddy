@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Bot, Mic, MicOff, Loader2, Volume2, Trash2 } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -400,13 +401,12 @@ export default function AIAgents() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] container mx-auto p-4 sm:p-6 max-w-4xl">
-      {/* Header */}
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-2 gradient-text">AI Voice Agent</h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          Have a natural voice conversation with AI • 100% Free
-        </p>
-      </div>
+      <ToolHeader
+        icon={Bot}
+        title="AI Voice Agent"
+        subtitle="Have a natural voice conversation with AI · 100% Free."
+        badge="AI TOOLS"
+      />
 
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Voice Control Card */}

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Crown, Zap, History, Sparkles } from "lucide-react";
+import { Crown, Zap, History, Sparkles } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProTemplateSelector } from "@/components/thumbnail-editor/ProTemplateSelector";
 import { BackgroundRemover } from "@/components/thumbnail-editor/BackgroundRemover";
@@ -12,36 +12,15 @@ const ThumbnailGenerator = () => {
 
   return (
     <SubscriptionGuard featureName="AI Thumbnail Generator">
-      <div className="min-h-screen ucs-surface-0 ucs-text p-4 md:p-8">
-      <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Dashboard
-      </Button>
-
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="text-center space-y-3">
-          <h1 className="text-4xl md:text-6xl font-bold flex items-center justify-center gap-3">
-            <Crown className="h-12 w-12 text-yellow-500 animate-pulse" />
-            Pro Thumbnail Studio
-          </h1>
-          <p className="text-muted-foreground text-lg md:text-xl">
-            Create viral YouTube thumbnails in 2 simple steps
-          </p>
-          <div className="flex items-center justify-center gap-4 text-sm flex-wrap">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-yellow-500" />
-              <span>AI-Powered</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Crown className="h-4 w-4 text-yellow-500" />
-              <span>MrBeast Quality</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-yellow-500" />
-              <span>Viral Templates</span>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen ucs-surface-0 ucs-text">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-6">
+        <ToolHeader
+          icon={Crown}
+          title="Pro Thumbnail Studio"
+          subtitle="Create viral YouTube thumbnails in 2 simple steps."
+          badge="CREATE"
+          iconAccent="text-yellow-500"
+        />
 
         <Tabs defaultValue="create" className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">

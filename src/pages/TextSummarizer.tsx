@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, FileText, Loader2, Copy, Sparkles, Check, FileCheck } from "lucide-react";
+import { FileText, Loader2, Copy, Sparkles, Check, FileCheck } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -116,26 +117,14 @@ const TextSummarizer = () => {
   };
 
   return (
-    <div className="min-h-screen ucs-surface-0 ucs-text p-4 md:p-8">
-      <Button 
-        variant="ghost" 
-        onClick={() => navigate("/")} 
-        className="mb-6"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Dashboard
-      </Button>
-
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
-            <FileCheck className="h-10 w-10" />
-            AI Text Summarizer
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Condense long texts into concise summaries
-          </p>
-        </div>
+    <div className="min-h-screen ucs-surface-0 ucs-text">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-8">
+        <ToolHeader
+          icon={FileCheck}
+          title="AI Text Summarizer"
+          subtitle="Condense long texts into concise summaries."
+          badge="AI TOOLS"
+        />
 
         <Card>
           <CardHeader>

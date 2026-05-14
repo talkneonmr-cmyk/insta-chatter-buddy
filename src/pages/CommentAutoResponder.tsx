@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowLeft, Video, Trash2, Play, Youtube, Sparkles } from "lucide-react";
+import { Loader2, MessageSquare, CheckCircle, XCircle, AlertCircle, Video, Trash2, Play, Youtube, Sparkles } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 import UsageResetCountdown from "@/components/UsageResetCountdown";
@@ -468,21 +469,15 @@ export default function CommentAutoResponder() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/youtube-manager")}
-          className="mb-4"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to YouTube Manager
-        </Button>
-        <h1 className="text-4xl font-bold mb-2">AI Comment Auto-Responder</h1>
-        <p className="text-muted-foreground">
-          Automatically respond to YouTube comments with AI-powered replies
-        </p>
-      </div>
+    <div className="min-h-screen ucs-surface-0 ucs-text">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-10 py-8 max-w-6xl">
+        <ToolHeader
+          icon={MessageSquare}
+          title="AI Comment Auto-Responder"
+          subtitle="Automatically respond to YouTube comments with AI-powered replies."
+          badge="YOUTUBE"
+          backTo="/youtube-manager"
+        />
 
       {/* YouTube Connection Alert */}
       {!youtubeConnected && (
@@ -800,6 +795,7 @@ export default function CommentAutoResponder() {
           </Table>
         )}
       </Card>
+      </div>
     </div>
   );
 }

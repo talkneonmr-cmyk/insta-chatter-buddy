@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, Download, Loader2, ImageIcon, Sparkles, Zap, Wand2, ArrowLeft } from "lucide-react";
+import { Upload, Download, Loader2, ImageIcon, Sparkles, Zap, Wand2 } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
@@ -121,34 +122,14 @@ const ImageEnhancement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-4 sm:py-6 lg:py-8 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/dashboard")}
-            className="h-8 sm:h-9 px-2 sm:px-3"
-          >
-            <ArrowLeft className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Back</span>
-          </Button>
-        </div>
-
-        {/* Title Section */}
-        <div className="text-center mb-6 sm:mb-8 px-2">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/10 rounded-full mb-3 sm:mb-4">
-            <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary animate-pulse" />
-            <span className="text-xs sm:text-sm font-medium text-primary">AI-Powered</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
-            AI Image Enhancement
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
-            Professional upscaling & enhancement in seconds
-          </p>
-        </div>
+    <div className="min-h-screen ucs-surface-0 ucs-text">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-10 py-8 max-w-7xl">
+        <ToolHeader
+          icon={Wand2}
+          title="AI Image Enhancement"
+          subtitle="Professional upscaling & enhancement in seconds."
+          badge="AI TOOLS"
+        />
 
         {/* Main Content - Stack on mobile, side by side on larger screens */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
