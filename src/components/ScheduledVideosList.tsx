@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Clock, CheckCircle, AlertCircle, Upload, Copy, ExternalLink, Loader2 } from "lucide-react";
+import { Trash2, Clock, CheckCircle, AlertCircle, Upload, Copy, ExternalLink, Loader2, Instagram } from "lucide-react";
 import { format } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 
