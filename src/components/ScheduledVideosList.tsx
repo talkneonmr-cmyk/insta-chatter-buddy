@@ -272,6 +272,21 @@ const ScheduledVideosList = () => {
                 )}
               </Button>
             )}
+            {status === 'uploaded' && isShortVideo(video) && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleCrossPostReel(video.id, video.title)}
+                disabled={reelPostingId === video.id}
+                title="Cross-post this Short to Instagram Reels"
+              >
+                {reelPostingId === video.id ? (
+                  <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Posting...</>
+                ) : (
+                  <><Instagram className="h-4 w-4 mr-1" />To Reels</>
+                )}
+              </Button>
+            )}
             <Button size="sm" variant="ghost" onClick={() => handleDelete(video.id)}>
               <Trash2 className="h-4 w-4" />
             </Button>
