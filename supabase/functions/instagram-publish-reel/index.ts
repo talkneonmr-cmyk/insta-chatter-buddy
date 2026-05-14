@@ -13,7 +13,7 @@ interface PublishRequest {
   shareToFeed?: boolean;
 }
 
-const FB_GRAPH = 'https://graph.facebook.com/v18.0';
+const FB_GRAPH = 'https://graph.instagram.com/v21.0';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
