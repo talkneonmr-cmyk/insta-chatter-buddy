@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, Download, Loader2, ImageIcon } from "lucide-react";
+import { Upload, Download, Loader2, ImageIcon, Scissors } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -123,14 +124,13 @@ const BackgroundRemoval = () => {
   };
 
   return (
-    
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Background Removal</h1>
-          <p className="text-muted-foreground">
-            Professional background removal powered by AI - Perfect for YouTube thumbnails!
-          </p>
-        </div>
+    <div className="space-y-6">
+      <ToolHeader
+        icon={Scissors}
+        title="Background Removal"
+        subtitle="Professional background removal powered by AI — perfect for thumbnails."
+        badge="AI TOOLS"
+      />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Upload Section */}

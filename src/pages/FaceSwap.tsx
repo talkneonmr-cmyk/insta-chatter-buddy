@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, Download, Loader2, ImageIcon, Users, ArrowRight } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -141,12 +142,12 @@ const FaceSwap = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">AI Face Swap</h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Swap faces between two photos instantly with AI
-        </p>
-      </div>
+      <ToolHeader
+        icon={Users}
+        title="AI Face Swap"
+        subtitle="Swap faces between two photos instantly with AI."
+        badge="AI TOOLS"
+      />
 
       {/* Instructions - Responsive */}
       <Card className="p-3 sm:p-4 bg-primary/5 border-primary/20">

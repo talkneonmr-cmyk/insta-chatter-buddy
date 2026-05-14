@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Languages, Upload, Download, Loader2, FileAudio } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -109,15 +110,12 @@ export default function Dubbing() {
 
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 flex items-center gap-2">
-          <Languages className="h-7 w-7 sm:h-8 sm:w-8" />
-          AI Dubbing
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Translate and dub your audio to different languages
-        </p>
-      </div>
+      <ToolHeader
+        icon={Languages}
+        title="AI Dubbing"
+        subtitle="Translate and dub your audio to different languages."
+        badge="AI TOOLS"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Input Section */}

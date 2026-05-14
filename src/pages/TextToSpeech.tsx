@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Play, Download, Loader2, Volume2 } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -213,12 +214,12 @@ const TextToSpeech = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Text to Speech</h1>
-        <p className="text-muted-foreground">
-          Convert text to natural-sounding speech in your browser - Powered by AI
-        </p>
-      </div>
+      <ToolHeader
+        icon={Volume2}
+        title="Text to Speech"
+        subtitle="Convert text to natural-sounding speech in your browser."
+        badge="AI TOOLS"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Input Section */}

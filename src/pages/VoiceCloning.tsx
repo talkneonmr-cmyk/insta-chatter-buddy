@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, Download, Loader2, Mic, Volume2 } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -97,15 +98,12 @@ const VoiceCloning = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 flex items-center gap-2">
-          <Volume2 className="h-7 w-7 sm:h-8 sm:w-8" />
-          Voice Cloning
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Clone any voice with AI - Upload a sample and generate speech
-        </p>
-      </div>
+      <ToolHeader
+        icon={Volume2}
+        title="Voice Cloning"
+        subtitle="Clone any voice with AI — upload a sample and generate speech."
+        badge="AI TOOLS"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Upload Section */}
