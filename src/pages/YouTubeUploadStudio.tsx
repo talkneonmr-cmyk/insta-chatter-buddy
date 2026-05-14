@@ -775,6 +775,38 @@ const YouTubeUploadStudio = () => {
                                     </div>
                                   </div>
 
+
+                                  {/* Platform Target */}
+                                  <div>
+                                    <Label className="text-xs">Publish To</Label>
+                                    <Select
+                                      value={video.target}
+                                      onValueChange={(v: PlatformTarget) => updateVideo(video.id, { target: v })}
+                                    >
+                                      <SelectTrigger className="mt-1">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="youtube" disabled={!channelInfo}>YouTube{!channelInfo ? ' (not connected)' : ''}</SelectItem>
+                                        <SelectItem value="instagram" disabled={!instagramInfo}>Instagram Reel{!instagramInfo ? ' (not connected)' : ''}</SelectItem>
+                                        <SelectItem value="both" disabled={!channelInfo || !instagramInfo}>Both</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+
+                                  {(video.target === 'instagram' || video.target === 'both') && (
+                                    <div>
+                                      <Label className="text-xs">Instagram Caption</Label>
+                                      <Textarea
+                                        value={video.instagramCaption}
+                                        onChange={(e) => updateVideo(video.id, { instagramCaption: e.target.value })}
+                                        placeholder="Reel caption (defaults to description)"
+                                        rows={2}
+                                        className="mt-1"
+                                      />
+                                    </div>
+                                  )}
+
                                   {/* Short/Long Toggle */}
                                   <div className="flex items-center gap-3">
                                     <Switch
@@ -782,9 +814,10 @@ const YouTubeUploadStudio = () => {
                                       onCheckedChange={(checked) => updateVideo(video.id, { isShort: checked })}
                                     />
                                     <Label className="text-xs">
-                                      {video.isShort ? 'YouTube Short (vertical)' : 'Long-form video'}
+                                      {video.isShort ? 'YouTube Short / Reel (vertical)' : 'Long-form video'}
                                     </Label>
                                   </div>
+
 
                                   {/* Thumbnail */}
                                   <div>
