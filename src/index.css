@@ -232,6 +232,7 @@ All colors MUST be HSL.
   .ucs-accent     { color: hsl(258 90% 66%); }
   .ucs-accent-bg  { background-color: hsl(258 90% 66%); }
   .ucs-accent-soft{ background-color: hsl(258 90% 66% / 0.10); }
+  .ucs-accent-border { border-color: hsl(258 90% 66%); }
   .ucs-mono       { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-feature-settings: 'tnum' 1; }
   .ucs-card {
     background-color: hsl(240 8% 7%);
