@@ -102,7 +102,7 @@ serve(async (req) => {
         authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl');
         authUrl.searchParams.set('access_type', 'offline');
         authUrl.searchParams.set('prompt', 'consent');
-        authUrl.searchParams.set('state', user.id);
+        authUrl.searchParams.set('state', issuedState!);
 
         return new Response(
           JSON.stringify({ authUrl: authUrl.toString() }),
@@ -142,7 +142,7 @@ serve(async (req) => {
       authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl');
       authUrl.searchParams.set('access_type', 'offline');
       authUrl.searchParams.set('prompt', 'consent');
-      authUrl.searchParams.set('state', user.id);
+      authUrl.searchParams.set('state', issuedState!);
 
       console.log('OAuth redirect URI:', redirectUri);
 
