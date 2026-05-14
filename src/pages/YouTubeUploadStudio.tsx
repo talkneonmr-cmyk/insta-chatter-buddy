@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { format, addDays, setHours, setMinutes } from "date-fns";
 import UsageResetCountdown from "@/components/UsageResetCountdown";
+import ToolHeader from "@/components/ToolHeader";
 
 interface UploadedVideo {
   id: string;

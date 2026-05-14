@@ -469,21 +469,15 @@ export default function CommentAutoResponder() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/youtube-manager")}
-          className="mb-4"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to YouTube Manager
-        </Button>
-        <h1 className="text-4xl font-bold mb-2">AI Comment Auto-Responder</h1>
-        <p className="text-muted-foreground">
-          Automatically respond to YouTube comments with AI-powered replies
-        </p>
-      </div>
+    <div className="min-h-screen ucs-surface-0 ucs-text">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-10 py-8 max-w-6xl">
+        <ToolHeader
+          icon={MessageSquare}
+          title="AI Comment Auto-Responder"
+          subtitle="Automatically respond to YouTube comments with AI-powered replies."
+          badge="YOUTUBE"
+          backTo="/youtube-manager"
+        />
 
       {/* YouTube Connection Alert */}
       {!youtubeConnected && (
