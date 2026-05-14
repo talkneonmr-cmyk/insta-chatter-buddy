@@ -12,6 +12,7 @@ import { Loader2, TrendingUp, Sparkles } from "lucide-react";
 
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import TesterGuard from "@/components/TesterGuard";
+import ToolHeader from "@/components/ToolHeader";
 
 export default function TrendAnalyzer() {
   const [niche, setNiche] = useState("");
