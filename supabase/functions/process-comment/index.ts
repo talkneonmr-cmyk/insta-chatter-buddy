@@ -54,6 +54,23 @@ serve(async (req) => {
       rule_keywords,
     }: CommentProcessingRequest = requestBody;
 
+    // Input validation
+    const isStr = (v: unknown, max: number) => typeof v === 'string' && v.length <= max;
+    if (!isStr(comment_text, 5000) || comment_text.trim().length === 0 ||
+        !isStr(username, 200) ||
+        !isStr(post_title, 500) ||
+        !isStr(post_url, 1000) ||
+        !isStr(creator_name, 200) ||
+        !isStr(tone, 100) ||
+        !isStr(goal, 200) ||
+        !isStr(rule_keywords, 1000) ||
+        (first_name !== undefined && !isStr(first_name, 200))) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input: missing fields or exceeded length limits' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     console.log("Processing comment:", { comment_text, username, goal });
 
     // Build the system prompt for AI
