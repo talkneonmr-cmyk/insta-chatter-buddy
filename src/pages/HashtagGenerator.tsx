@@ -309,9 +309,9 @@ export default function HashtagGenerator() {
               )}
             </div>
           )}
+          </div>
         </div>
       </SubscriptionGuard>
-      </TesterGuard>
-    
+    </TesterGuard>
   );
 }

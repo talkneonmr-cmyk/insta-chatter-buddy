@@ -298,9 +298,9 @@ export default function SEOOptimizer() {
               )}
             </div>
           )}
+          </div>
         </div>
       </SubscriptionGuard>
-      </TesterGuard>
-    
+    </TesterGuard>
   );
 }
