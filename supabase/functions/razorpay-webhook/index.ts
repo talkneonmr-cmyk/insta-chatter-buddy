@@ -58,19 +58,30 @@ Deno.serve(async (req) => {
     const signature = req.headers.get('x-razorpay-signature');
     const body = await req.text();
 
-    // Verify webhook signature
-    if (webhookSecret && signature) {
-      const expectedSignature = createHmac('sha256', webhookSecret)
-        .update(body)
-        .digest('hex');
-
-      if (signature !== expectedSignature) {
-        console.error('Invalid webhook signature');
-        return new Response(
-          JSON.stringify({ error: 'Invalid signature' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+    // Verify webhook signature — REQUIRED. Reject if secret missing or signature invalid/absent.
+    if (!webhookSecret) {
+      console.error('RAZORPAY_WEBHOOK_SECRET is not configured');
+      return new Response(
+        JSON.stringify({ error: 'Webhook secret not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    if (!signature) {
+      console.error('Missing x-razorpay-signature header');
+      return new Response(
+        JSON.stringify({ error: 'Missing signature' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const expectedSignature = createHmac('sha256', webhookSecret)
+      .update(body)
+      .digest('hex');
+    if (signature !== expectedSignature) {
+      console.error('Invalid webhook signature');
+      return new Response(
+        JSON.stringify({ error: 'Invalid signature' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const event = JSON.parse(body);
