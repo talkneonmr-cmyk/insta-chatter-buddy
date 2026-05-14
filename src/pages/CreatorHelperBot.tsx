@@ -179,6 +179,7 @@ const CreatorHelperBot = () => {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };
