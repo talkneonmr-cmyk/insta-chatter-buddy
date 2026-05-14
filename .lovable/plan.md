@@ -1,121 +1,106 @@
-## Dr. Fabuos AI — Premium Medical AI Assistant
+# Ultimate Creator Studio — Phased Rebuild
 
-A new standalone, ChatGPT-style medical AI experience inside the platform, accessible at `/dr-fabuos` (and a public landing at `/dr-fabuos-ai`).
+Renaming the app from "Fabuos Creators / YT Manager" to **Ultimate Creator Studio**, rebuilding the shell, IA, and dashboard, then layering the Growth Engine + AI Channel Intelligence on top. **No working features get broken** — Instagram OAuth, YouTube upload, payments, all AI tools stay intact. We just reorganize, redesign, and add new growth surfaces.
 
-### 1. Routes & Pages
-
-- `**/dr-fabuos-ai**` — Public SEO landing page (intro, features, FAQ, schema markup). Crawlable, no auth needed.
-- `**/dr-fabuos**` — The chat app itself. Works in **guest mode** (no auth) AND logged-in mode.
-- Add link in sidebar (logged-in users) and on landing page hero.
-
-### 2. Guest Mode (ChatGPT-style)
-
-- No login required to start chatting.
-- Guest chats stored in `localStorage` only (temporary, no server save).
-- Daily message limit for guests: **10 messages / 24h** (tracked via localStorage + IP-based soft limit in edge function).
-- Image upload limited to **2/day** for guests.
-- Soft upsell: after limit hit → modal "Sign in to continue + save chats + unlimited".
-- Logged-in users: unlimited (subject to plan), full history saved to DB.
-
-### 3. Database (logged-in users only)
-
-New tables:
-
-- `dr_fabuos_conversations` — id, user_id, title, created_at, updated_at
-- `dr_fabuos_messages` — id, conversation_id, user_id, role (user/assistant), content, attachments (jsonb), created_at
-
-RLS: users only see their own. No table for guests.
-
-### 4. Edge Function: `dr-fabuos-chat`
-
-- Streams responses (SSE) for ChatGPT-like typing feel.
-- System prompt enforces: medical-only scope, natural human-doctor tone, concise replies, multilingual auto-detect, safety disclaimers, emergency detection.
-- Off-topic guard: politely redirects non-medical questions back to health topics.
-- Vision support for prescription/skin/report image analysis.
-- Provider chain (resilience): Lovable AI Gateway (`google/gemini-2.5-flash` for speed, `gemini-2.5-pro` for vision/complex) → OpenAI → NVIDIA Llama 70B fallback.
-- Guest rate limiting via IP + a simple in-memory/edge counter.
-
-### 5. UI / UX (premium)
-
-- Dedicated layout — NOT wrapped in the existing `Layout` sidebar.
-- Custom premium shell: collapsible chat-history sidebar (logged-in), centered chat area, sticky composer.
-- Welcome screen: greeting, suggested prompts ("Explain my prescription", "Skin concern check", "Symptom guidance", "Medicine info"), quick action chips.
-- Medical category pills (Skin, Symptoms, Medicines, Reports, General).
-- Composer: text input, image upload (paperclip), voice input button (Web Speech API), send.
-- Streaming markdown responses (`react-markdown`) with smooth token-by-token rendering.
-- Typing indicator, message animations (fade-in/slide-up), glassmorphism cards.
-- Image preview thumbnails inline in messages.
-- Disclaimer banner at bottom: "Dr. Fabuos AI provides general guidance, not a substitute for a licensed physician. For emergencies call local services."
-- Dark/light mode toggle.
-- Mobile-first responsive.
-- Premium branding: stethoscope/cross icon, gradient accent, clean serif/sans pairing distinct from rest of app.
-
-### 6. Safety Layer
-
-- Emergency keyword detector (chest pain, suicide, severe bleeding, etc.) → highlighted red banner with emergency numbers.
-- Persistent footer disclaimer.
-- System prompt: never prescribe controlled substances, always recommend consulting a real doctor for serious symptoms, but stay helpful (not over-restrictive).
-
-### 7. Multilingual
-
-- System prompt: "Detect the user's language from their message and reply in the SAME language naturally. Support Hindi, English, Urdu, Arabic, Spanish, etc. Match cultural tone."
-- No UI language switcher needed — auto.
-
-### 8. SEO & AI Discoverability
-
-- `/dr-fabuos-ai` landing page: semantic HTML, single H1, meta title/description, OG tags, canonical, JSON-LD (`MedicalWebPage` + `FAQPage` + `SoftwareApplication`).
-- Update `public/sitemap.xml` with new URLs.
-- Update `public/llms.txt` with full Dr. Fabuos AI section (what it is, capabilities, languages, scanning features).
-- FAQ section on landing page (also schema'd).
-- Keywords targeted: "ai doctor", "doctor ai", "medical ai chatbot", "ai skin doctor", "prescription ai", "dr fabuos ai", etc.
-
-### 9. Performance
-
-- Lazy-load chat route in `AppRoutes.tsx`.
-- Stream responses (no waiting for full reply).
-- Lazy image previews, code-split markdown lib.
-- Skeleton loaders.
-- Optimistic UI on message send.
-
-### 10. Files to Create / Edit
-
-**Create:**
-
-- `src/pages/DrFabuosAI.tsx` — public landing page (SEO).
-- `src/pages/DrFabuos.tsx` — chat app shell.
-- `src/components/dr-fabuos/ChatInterface.tsx`
-- `src/components/dr-fabuos/MessageList.tsx`
-- `src/components/dr-fabuos/Composer.tsx`
-- `src/components/dr-fabuos/HistorySidebar.tsx`
-- `src/components/dr-fabuos/WelcomeScreen.tsx`
-- `src/components/dr-fabuos/EmergencyBanner.tsx`
-- `src/hooks/useDrFabuosChat.ts` — streaming + guest/auth logic
-- `supabase/functions/dr-fabuos-chat/index.ts`
-
-**Edit:**
-
-- `src/AppRoutes.tsx` — add routes (landing public, chat allowed both guest+auth so NOT inside ProtectedRoute).
-- `src/App.tsx` — register the public landing route directly so it loads instantly.
-- `src/components/AppSidebar.tsx` — add nav link.
-- `public/sitemap.xml` — add URLs.
-- `public/llms.txt` — add Dr. Fabuos AI section.
-- `index.html` — no change needed (per-page meta via React Helmet-style direct DOM update or simple `<title>` updates in component).
-
-**Migration:** create the two tables + RLS.
-
-### 11. Future Scaling Recommendations (delivered post-build)
-
-- Add real voice (TTS) playback via existing `text-to-speech` function.
-- Add saved "medical profile" (allergies, conditions) per user for personalized replies.
-- Add doctor-verified content library + RAG.
-- Add file types: PDF reports parsing.
-- Add per-conversation memory summaries to keep token costs low.
-- Add admin moderation for flagged messages.
+You picked: phased rebuild, keep all existing tools (only declutter inside the YT Studio area), no specific aesthetic. I'll use a **Linear / Notion-grade dark minimal** system as the default since you specifically named those products as the bar.
 
 ---
 
-Ready to build this. I'll start with the migration, then edge function, then UI.  
-  
-dont mention chatgpt ok pls i mean jus users cant see
+## Visual System (locked Phase 1, used everywhere after)
 
-&nbsp;
+- **Surfaces:** near-black `hsl(240 10% 4%)` base, raised `hsl(240 8% 7%)` cards, hairline `hsl(240 6% 14%)` borders
+- **Accent:** electric violet `hsl(258 90% 66%)` — single accent, used sparingly
+- **Type:** Inter Tight for headings, Inter for body, JetBrains Mono for numbers/metrics
+- **Density:** 8px grid, generous whitespace, 12px radii on cards, 8px on inputs
+- **Motion:** 120ms ease-out for hover/press, 240ms cubic-bezier for route enter, no bounce
+- **Components:** rebuild via shadcn variants — no per-component custom colors
+
+---
+
+## Phase 1 — Foundation (this loop)
+
+Goal: app *feels* like a different product the moment you load it. Zero backend changes.
+
+1. **Rename** "Fabuos Creators" → **Ultimate Creator Studio** in the sidebar, page titles, meta tags
+2. **New design tokens** in `index.css` + `tailwind.config.ts` (the system above)
+3. **Rebuilt sidebar** with smart grouping:
+   - **Growth** *(new)* — Dashboard, Growth Engine, Channel DNA, Trends
+   - **YouTube** — Manager, Upload Studio, Comments
+   - **Instagram** — Manager, Auto-DM
+   - **Create** — Thumbnails, Scripts, Captions, Hashtags, SEO, Music
+   - **AI Tools** — TTS, Voice Cloning, Dubbing, Speech-to-Text, BG Remove, Image Enhance, Face Swap, Summarizer, Helper Bot, You Research, Dr. Fabuos
+   - **Account** — Settings, Pricing
+4. **Redesigned dashboard** (`/dashboard`) — clean hero with Growth Score placeholder, 3 connected-account cards (YouTube / Instagram / status), "What to do next" action cards, recent activity
+5. **Growth Engine landing** (`/growth`) — 10 module cards (DNA, Viral Intel, Strategist, Title/Hook, Retention, Trend Match, Competitor, Upload Optimizer, Gap Detector, Score). All show "Connect channel to unlock" until Phase 3.
+
+Acceptance: nothing existing breaks, sidebar groups are obvious, dashboard loads instantly with skeletons, app reads as "Ultimate Creator Studio" everywhere.
+
+---
+
+## Phase 2 — Tool page polish + perf (next loop)
+
+- Apply the new design system to every existing tool page (consistent headers, empty states, skeletons)
+- Declutter **YouTube Manager**: collapse 7 tabs → 4 (Library, Schedule, Bulk, Analytics); move Performance into Analytics
+- Add route-level code-split prefetching, optimistic loading, React Query stale-while-revalidate everywhere
+- Fix the slow-load complaints: skeleton states on every page, no more blank flashes
+
+---
+
+## Phase 3 — Growth Engine v1 (the real product)
+
+Build the 10 systems you specified, all driven by **one shared backend brain**:
+
+### New backend
+- **`channel_dna_profiles` table** — niche, sub-niches, content style, audience, viral patterns, weaknesses, strongest topics, best upload times, best length, best hooks, best title styles, content pillars (all JSONB)
+- **`competitor_channels` table** — user-added competitor list per user
+- **`growth_scores` table** — CTR / retention / consistency / thumbnail / hook / trend / engagement / SEO scores + biggest bottleneck text
+- **`content_recommendations` table** — generated ideas with viral-potential score, topic, format, hook, status (new/saved/dismissed)
+
+### New edge functions (all use Lovable AI Gateway, gemini-3-flash-preview default, gpt-5 for deep analysis)
+- `analyze-channel-dna` — pulls last 50 videos via YouTube Data API + IG media, runs structured-output extraction → writes to `channel_dna_profiles`
+- `viral-video-intelligence` — picks top 5 videos, asks AI to extract success patterns
+- `generate-content-strategy` — produces personalized ideas using DNA + trends
+- `optimize-title-hook` — paste a title/hook, get 5 alternatives scored against the user's DNA
+- `analyze-retention` — uses YT Analytics API retention curves to find drop-off points + fixes
+- `match-trends` — trend feed filtered by DNA niche
+- `competitor-intel` — periodically scans saved competitors for what's working
+- `compute-growth-score` — runs nightly cron, writes scores + bottleneck
+
+### New pages
+- `/growth/dna` — Channel DNA Profile (clean readable summary, not a dashboard)
+- `/growth/intel` — Success Pattern Report
+- `/growth/ideas` — AI Content Strategist (idea feed, save/dismiss)
+- `/growth/optimizer` — Title/Hook/Thumbnail rewriter
+- `/growth/retention` — retention drop-off finder
+- `/growth/trends` — trend matching
+- `/growth/competitors` — add competitors, see opportunities
+- `/growth/score` — Growth Score with the one-line bottleneck call-out
+
+UX rule: **every screen ends with one specific action**, never raw analytics dumps.
+
+---
+
+## Phase 4 — Polish + intelligence loop
+
+- Onboarding flow: connect YT → wait while DNA computes → land on personalized dashboard
+- Weekly "Growth Report" email via Resend
+- Notification when Growth Score changes meaningfully
+- Mobile pass on every page
+
+---
+
+## Out of scope (not building)
+
+- Removing any existing AI tools (you said keep them)
+- Replacing payments / auth / Instagram OAuth
+- Any agentic auto-posting beyond what already exists
+
+---
+
+## Risks I'm watching
+
+- **YouTube Data API quota** — DNA analyzer pulls a lot; cache aggressively in `channel_dna_profiles` and only re-run weekly
+- **Lovable AI cost** — DNA + viral intel use long context; gate behind explicit "Analyze my channel" button, not auto-run
+- **Bundle size** — already a concern per memory; Phase 2 includes a code-split audit
+
+After your approval I start Phase 1 immediately and ship it this loop.

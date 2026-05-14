@@ -1,394 +1,168 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Youtube, Music, Video, TrendingUp, Zap, Crown, ArrowRight, Activity, Image, FileText, Hash, Badge as BadgeIcon } from "lucide-react";
+import {
+  Sparkles, Youtube, Instagram, ArrowRight, Zap, Dna, PenLine,
+  TrendingUp, Crown, Image as ImageIcon, FileText,
+} from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Badge } from "@/components/ui/badge";
-
 import DashboardSkeleton from "./DashboardSkeleton";
-
-const UsageStats = lazy(() => import("./UsageStats"));
-
-interface DashboardStats {
-  totalUploads: number;
-  totalCaptions: number;
-  totalMusic: number;
-  totalTrends: number;
-  totalHashtags: number;
-}
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUploads: 0,
-    totalCaptions: 0,
-    totalMusic: 0,
-    totalTrends: 0,
-    totalHashtags: 0,
-  });
-  const { plan, isLoading: subscriptionLoading } = useSubscription();
+  const [ytConnected, setYtConnected] = useState(false);
+  const [igConnected, setIgConnected] = useState(false);
+  const { plan, isLoading: subLoading } = useSubscription();
 
   useEffect(() => {
-    // Regular auth flow
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    let mounted = true;
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
       setUser(session?.user ?? null);
+      if (!session) { navigate("/auth"); return; }
+      const [yt, ig] = await Promise.all([
+        supabase.from("scheduled_videos").select("id", { head: true, count: "exact" }).eq("user_id", session.user.id).limit(1),
+        supabase.from("instagram_accounts").select("id", { head: true, count: "exact" }).eq("user_id", session.user.id).limit(1),
+      ]);
+      if (!mounted) return;
+      setYtConnected((yt.count ?? 0) > 0);
+      setIgConnected((ig.count ?? 0) > 0);
       setLoading(false);
-      if (!session) {
-        navigate("/auth");
-      } else {
-        fetchDashboardStats(session.user.id);
-      }
     });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (!session) {
-        navigate("/auth");
-      } else if (session) {
-        fetchDashboardStats(session.user.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => { mounted = false; };
   }, [navigate]);
 
-  const fetchDashboardStats = async (userId: string) => {
-    try {
-      const { data: usage } = await supabase
-        .from("usage_tracking")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
+  if (loading || subLoading) return <DashboardSkeleton />;
 
-      if (usage) {
-        setStats({
-          totalUploads: usage.video_uploads_count || 0,
-          totalCaptions: usage.ai_captions_count || 0,
-          totalMusic: usage.ai_music_count || 0,
-          totalTrends: usage.ai_trends_count || 0,
-          totalHashtags: usage.ai_hashtags_count || 0,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
-    }
+  const greet = () => {
+    const h = new Date().getHours();
+    return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
   };
-
-  if (loading || subscriptionLoading) {
-    return <DashboardSkeleton />;
-  }
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
-  };
+  const name = user?.email?.split("@")[0] ?? "creator";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in">
-        
-        {/* Hero Section with Greeting */}
-        <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 p-4 sm:p-6 md:p-8 lg:p-12 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary)/0.1),transparent_50%),radial-gradient(circle_at_70%_50%,hsl(var(--secondary)/0.1),transparent_50%)]"></div>
-          <div className="relative z-10">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-xl blur-sm opacity-60"></div>
-                    <div className="relative p-2 rounded-xl bg-gradient-to-br from-primary/80 via-secondary/80 to-accent/80 backdrop-blur-sm shadow-lg">
-                      <Sparkles className="w-5 h-5 text-white" />
-                    </div>
-                  </div>
-                  {plan === "pro" && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400">
-                      <Crown className="w-3 h-3" />
-                      Pro
-                    </span>
-                  )}
-                </div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text">
-                  {getGreeting()}, {user?.email?.split("@")[0]}!
-                </h1>
-                <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-2xl">
-                  Ready to create amazing content? Your AI-powered studio is ready to help you shine.
-                </p>
+    <div className="min-h-screen ucs-surface-0 ucs-text">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 space-y-10">
+
+        {/* Hero */}
+        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <div className="text-sm ucs-text-dim mb-2">{greet()},</div>
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight capitalize">{name}</h1>
+          </div>
+          {plan !== "pro" && (
+            <button onClick={() => navigate("/pricing")} className="self-start sm:self-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg border ucs-hairline hover:bg-[hsl(240_8%_10%)] transition-colors text-sm font-medium">
+              <Crown className="w-4 h-4 ucs-accent" /> Upgrade to Pro
+            </button>
+          )}
+        </header>
+
+        {/* Growth Score hero card */}
+        <section
+          onClick={() => navigate("/growth")}
+          className="ucs-card ucs-card-interactive p-6 sm:p-8 relative overflow-hidden group"
+        >
+          <div className="ucs-grid-bg absolute inset-0 opacity-25 pointer-events-none" />
+          <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="flex-1">
+              <span className="ucs-chip mb-4"><Zap className="w-3 h-3" /> GROWTH ENGINE</span>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2 leading-tight">
+                Unlock your Channel DNA
+              </h2>
+              <p className="ucs-text-muted text-sm sm:text-base max-w-xl">
+                Connect YouTube and the AI will analyze your channel, find what's working, and tell you exactly what to fix to grow faster.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-[10px] ucs-text-dim font-mono uppercase tracking-wider">Growth Score</div>
+                <div className="text-4xl font-bold ucs-mono">—</div>
               </div>
-              {plan === "free" && (
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-primary via-secondary to-accent text-white border-0 hover:opacity-90 transition-opacity shadow-lg"
-                  onClick={() => navigate("/pricing")}
-                >
-                  <Crown className="w-4 h-4 mr-2" />
-                  Upgrade to Pro
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              )}
+              <ArrowRight className="w-6 h-6 ucs-text-muted group-hover:translate-x-1 group-hover:ucs-accent transition-all" />
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Stats Overview Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1 sm:space-y-2">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Uploads</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.totalUploads}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3 text-green-500" />
-                    <span>Videos uploaded</span>
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-red-500/10 to-red-600/10 group-hover:from-red-500/20 group-hover:to-red-600/20 transition-all">
-                  <Video className="w-6 h-6 text-red-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1 sm:space-y-2">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">AI Captions</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.totalCaptions}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Activity className="w-3 h-3 text-primary" />
-                    <span>Generated</span>
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 group-hover:from-primary/20 group-hover:to-secondary/20 transition-all">
-                  <Sparkles className="w-6 h-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 transition-all active:scale-[0.98]">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1 sm:space-y-2">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">AI Music</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.totalMusic}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-purple-500" />
-                    <span>Tracks created</span>
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 group-hover:from-purple-500/20 group-hover:to-pink-500/20 transition-all">
-                  <Music className="w-6 h-6 text-purple-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
-          
-          {/* Quick Actions */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-1">Quick Actions</h2>
-              <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">Jump into your creative workflow</p>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-              {/* YouTube Manager Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-red-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/youtube-manager")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-2 sm:pb-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2.5 rounded-xl bg-red-500/10 group-hover:bg-red-500/20 transition-all">
-                      <Youtube className="w-5 h-5 text-red-500" />
-                    </div>
-                    <CardTitle className="text-lg">YouTube Manager</CardTitle>
-                  </div>
-                  <CardDescription>Upload, schedule, and manage your video content</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{stats.totalUploads} videos uploaded</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Caption Generator Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-primary/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/caption-generator")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-2 sm:pb-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-all">
-                      <Sparkles className="w-5 h-5 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">AI Caption Generator</CardTitle>
-                  </div>
-                  <CardDescription>Generate engaging captions with AI assistance</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{stats.totalCaptions} captions created</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Music Generator Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-purple-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/music-generator")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-2 sm:pb-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2.5 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 transition-all">
-                      <Music className="w-5 h-5 text-purple-500" />
-                    </div>
-                    <CardTitle className="text-lg">AI Music Generator</CardTitle>
-                  </div>
-                  <CardDescription>Create custom music tracks for your content</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{stats.totalMusic} tracks generated</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Thumbnail Generator Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-blue-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/thumbnail-generator")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-2 sm:pb-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2.5 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-all">
-                      <Image className="w-5 h-5 text-blue-500" />
-                    </div>
-                    <CardTitle className="text-lg">AI Thumbnail Generator</CardTitle>
-                  </div>
-                  <CardDescription>Create eye-catching thumbnails with AI</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>Design stunning thumbnails</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Script Writer Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-green-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/script-writer")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-2 sm:pb-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2.5 rounded-xl bg-green-500/10 group-hover:bg-green-500/20 transition-all">
-                      <FileText className="w-5 h-5 text-green-500" />
-                    </div>
-                    <CardTitle className="text-lg">AI Script Writer</CardTitle>
-                  </div>
-                  <CardDescription>Generate engaging video scripts</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>Write perfect scripts</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Trend Analyzer Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-orange-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/trend-analyzer")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-2 sm:pb-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2.5 rounded-xl bg-orange-500/10 group-hover:bg-orange-500/20 transition-all">
-                      <TrendingUp className="w-5 h-5 text-orange-500" />
-                    </div>
-                    <CardTitle className="text-lg">AI Trend Analyzer</CardTitle>
-                  </div>
-                  <CardDescription>Discover trending topics and content ideas</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{stats.totalTrends} analyses generated</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Hashtag Generator Card */}
-              <Card className="card-3d border-2 overflow-hidden group hover:border-indigo-500/30 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/hashtag-generator")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10 pb-2 sm:pb-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2.5 rounded-xl bg-indigo-500/10 group-hover:bg-indigo-500/20 transition-all">
-                      <Hash className="w-5 h-5 text-indigo-500" />
-                    </div>
-                    <CardTitle className="text-lg">AI Hashtag Generator</CardTitle>
-                  </div>
-                  <CardDescription>Generate optimized hashtags for your content</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{stats.totalHashtags} sets generated</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Pricing/Upgrade Card */}
-              {plan === "free" && (
-                <Card className="card-3d border-2 border-yellow-500/30 overflow-hidden group hover:border-yellow-500/50 cursor-pointer bg-gradient-to-br from-yellow-500/5 to-orange-500/5 active:scale-[0.98] transition-transform" onClick={() => navigate("/pricing")}>
-                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <CardHeader className="relative z-10 pb-2 sm:pb-3">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2.5 rounded-xl bg-yellow-500/10 group-hover:bg-yellow-500/20 transition-all">
-                        <Crown className="w-5 h-5 text-yellow-500" />
-                      </div>
-                      <CardTitle className="text-lg text-yellow-600 dark:text-yellow-400">Upgrade to Pro</CardTitle>
-                    </div>
-                    <CardDescription>Unlock unlimited features and boost productivity</CardDescription>
-                  </CardHeader>
-                  <CardContent className="relative z-10">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-yellow-600 dark:text-yellow-400 font-medium">View plans</span>
-                      <ArrowRight className="w-4 h-4 text-yellow-500 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+        {/* Connected accounts */}
+        <section>
+          <div className="flex items-baseline justify-between mb-3">
+            <h3 className="text-sm font-semibold ucs-text-muted uppercase tracking-wider">Connected accounts</h3>
           </div>
-
-          {/* Usage Stats Sidebar */}
-          <div className="lg:col-span-1">
-            <Suspense fallback={
-              <Card className="animate-pulse border-2">
-                <CardHeader><div className="h-6 bg-muted rounded w-1/3" /></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="h-16 bg-muted rounded" />
-                  <div className="h-16 bg-muted rounded" />
-                </CardContent>
-              </Card>
-            }>
-              <UsageStats />
-            </Suspense>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <AccountCard
+              icon={Youtube}
+              name="YouTube"
+              connected={ytConnected}
+              accent="text-red-500"
+              onClick={() => navigate("/youtube-manager")}
+            />
+            <AccountCard
+              icon={Instagram}
+              name="Instagram"
+              connected={igConnected}
+              accent="text-pink-500"
+              onClick={() => navigate("/youtube-manager")}
+            />
           </div>
-        </div>
+        </section>
+
+        {/* What to do next */}
+        <section>
+          <div className="flex items-baseline justify-between mb-3">
+            <h3 className="text-sm font-semibold ucs-text-muted uppercase tracking-wider">What to do next</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <ActionCard icon={Dna}        title="Scan my channel"  desc="Build your Channel DNA profile." onClick={() => navigate("/growth")} />
+            <ActionCard icon={PenLine}    title="Optimize a title" desc="Get high-CTR title rewrites."   onClick={() => navigate("/seo-optimizer")} />
+            <ActionCard icon={ImageIcon}  title="Make a thumbnail" desc="AI thumbnail generator."         onClick={() => navigate("/thumbnail-generator")} />
+            <ActionCard icon={FileText}   title="Write a script"   desc="Hook → body → CTA in seconds."  onClick={() => navigate("/script-writer")} />
+            <ActionCard icon={Sparkles}   title="Generate captions" desc="Captions tuned to your voice." onClick={() => navigate("/caption-generator")} />
+            <ActionCard icon={TrendingUp} title="Find a trend"     desc="Trends matched to your niche."  onClick={() => navigate("/trend-analyzer")} />
+          </div>
+        </section>
+
       </div>
     </div>
   );
 };
+
+function AccountCard({
+  icon: Icon, name, connected, accent, onClick,
+}: { icon: any; name: string; connected: boolean; accent: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="ucs-card ucs-card-interactive p-5 text-left flex items-center justify-between group">
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-[hsl(240_8%_10%)] ${accent}`}>
+          <Icon className="w-5 h-5" />
+        </div>
+        <div>
+          <div className="font-semibold text-[15px]">{name}</div>
+          <div className="text-xs ucs-text-muted flex items-center gap-1.5 mt-0.5">
+            <span className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-emerald-500" : "bg-zinc-600"}`} />
+            {connected ? "Connected" : "Not connected"}
+          </div>
+        </div>
+      </div>
+      <ArrowRight className="w-4 h-4 ucs-text-dim group-hover:translate-x-1 group-hover:ucs-text transition-all" />
+    </button>
+  );
+}
+
+function ActionCard({
+  icon: Icon, title, desc, onClick,
+}: { icon: any; title: string; desc: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="ucs-card ucs-card-interactive p-5 text-left group">
+      <div className="w-9 h-9 rounded-lg ucs-accent-soft flex items-center justify-center mb-4">
+        <Icon className="w-[18px] h-[18px] ucs-accent" />
+      </div>
+      <div className="text-[15px] font-semibold mb-1">{title}</div>
+      <div className="text-[13px] ucs-text-muted leading-relaxed">{desc}</div>
+    </button>
+  );
+}
 
 export default Dashboard;

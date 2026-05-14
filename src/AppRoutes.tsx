@@ -39,6 +39,7 @@ const CommentAutoResponder = lazy(() => import("./pages/CommentAutoResponder"));
 const ShortsFactory = lazy(() => import("./pages/ShortsFactory"));
 const YouResearch = lazy(() => import("./pages/YouResearch"));
 const FaceSwap = lazy(() => import("./pages/FaceSwap"));
+const Growth = lazy(() => import("./pages/Growth"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +101,8 @@ export default function AppRoutes() {
             <Route path="/creator-helper-bot" element={<ProtectedRoute><CreatorHelperBot /></ProtectedRoute>} />
             <Route path="/you-research" element={<ProtectedRoute><YouResearch /></ProtectedRoute>} />
             <Route path="/face-swap" element={<ProtectedRoute><FaceSwap /></ProtectedRoute>} />
+            <Route path="/growth" element={<ProtectedRoute><Growth /></ProtectedRoute>} />
+            <Route path="/growth/dna" element={<ProtectedRoute><Growth /></ProtectedRoute>} />
             <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
             <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
