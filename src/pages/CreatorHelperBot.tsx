@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Send, Sparkles, User, Bot } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Message {
@@ -79,17 +80,15 @@ const CreatorHelperBot = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <Card className="border-primary/20 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10 border-b">
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <Sparkles className="w-6 h-6 text-primary" />
-            Creator Helper Bot
-          </CardTitle>
-          <p className="text-sm text-muted-foreground mt-2">
-            Ask me anything about content creation, growing your audience, going viral, and more!
-          </p>
-        </CardHeader>
+    <div className="min-h-screen ucs-surface-0 ucs-text">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-10 py-8 max-w-4xl space-y-6">
+        <ToolHeader
+          icon={Bot}
+          title="Creator Helper Bot"
+          subtitle="Ask anything about content creation, audience growth, going viral, and more."
+          badge="AI TOOLS"
+        />
+        <Card className="border-primary/20 shadow-lg">
         <CardContent className="p-6">
           <ScrollArea className="h-[500px] pr-4 mb-4">
             {messages.length === 0 ? (
