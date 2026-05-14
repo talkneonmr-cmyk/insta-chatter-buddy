@@ -183,6 +183,20 @@ const YouTubeUploadStudio = () => {
     }
   };
 
+  const checkInstagramConnection = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('instagram_accounts')
+        .select('id, username')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (data) setInstagramInfo(data as InstagramInfo);
+    } catch (e) {
+      console.error('Error checking instagram:', e);
+    }
+  };
   const handleOAuthCallback = async (code: string, state: string) => {
     try {
       setConnectingChannel(true);
