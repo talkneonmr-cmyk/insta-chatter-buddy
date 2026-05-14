@@ -1,3 +1,32 @@
+# Fabulous Creators
+
+> AI-powered content studio for YouTube creators, plus Dr. Fabuos AI — a premium medical AI assistant.
+
+## Pages
+- [Home](/): Landing page and overview of Fabulous Creators.
+- [Dr. Fabuos AI](/dr-fabuos-ai): Premium AI doctor — prescription scanning, skin analysis, multilingual health guidance.
+- [Dr. Fabuos Chat](/dr-fabuos): Direct chat with Dr. Fabuos AI (no login required to start).
+- [About](/about): About Fabulous Creators and founder Jagrit Khundia.
+- [Press & Media Kit](/press): Press resources, founder info, brand assets.
+- [Pricing](/pricing): Free and Pro plans for the creator suite.
+- [Sign in / Sign up](/auth): Account access.
+- [YouTube Manager](/youtube-manager): Manage multiple YouTube channels.
+- [YouTube Upload Studio](/youtube-upload-studio): Schedule and bulk-manage uploads.
+- [Caption Generator](/caption-generator): AI captions for posts and reels.
+- [Script Writer](/script-writer): AI video scripts with hooks and CTAs.
+- [Music Generator](/music-generator): AI background music.
+- [Thumbnail Generator](/thumbnail-generator): AI YouTube thumbnails.
+- [Hashtag Generator](/hashtag-generator): Trending hashtag suggestions.
+- [SEO Optimizer](/seo-optimizer): Optimize titles, descriptions, tags.
+- [Trend Analyzer](/trend-analyzer): Niche trend insights.
+- [Text to Speech](/text-to-speech): Natural AI voiceovers.
+- [Speech to Text](/speech-to-text): Transcription for audio and video.
+- [Voice Cloning](/voice-cloning): Custom voice profiles.
+- [Background Removal](/background-removal): AI background removal.
+- [Image Enhancement](/image-enhancement): Upscale and enhance images.
+
+---
+
 # Fabulous Creators - AI-Powered Content Studio + Dr. Fabuos AI
 
 ## Dr. Fabuos AI (Premium Medical AI Assistant)

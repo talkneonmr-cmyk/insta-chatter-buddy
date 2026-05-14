@@ -221,7 +221,7 @@ export default function DrFabuos() {
               </div>
               <span className="font-semibold tracking-tight">Dr. Fabuos</span>
             </Link>
-            <Button size="icon" variant="ghost" className="md:hidden" onClick={() => setShowHistory(false)}>
+            <Button size="icon" variant="ghost" className="md:hidden" onClick={() => setShowHistory(false)} aria-label="Close history">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -248,13 +248,18 @@ export default function DrFabuos() {
                       )}
                     >
                       <span className="truncate">{c.title}</span>
-                      <Trash2
-                        className="h-3.5 w-3.5 opacity-0 group-hover:opacity-60 hover:opacity-100 transition shrink-0"
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Delete conversation ${c.title}`}
+                        className="opacity-0 group-hover:opacity-60 hover:opacity-100 transition shrink-0 cursor-pointer"
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteConv(c.id);
                         }}
-                      />
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -305,7 +310,7 @@ export default function DrFabuos() {
               <div className="h-7 w-7 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                 <Stethoscope className="h-3.5 w-3.5 text-white" />
               </div>
-              <h1 className="font-semibold text-sm md:text-base">Dr. Fabuos AI</h1>
+              <h1 className="font-semibold text-sm md:text-base">Dr. Fabuos AI — Your AI Doctor</h1>
               <span className="hidden sm:inline text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                 Beta
               </span>
@@ -395,7 +400,7 @@ export default function DrFabuos() {
                             <img
                               key={i}
                               src={a.dataUrl}
-                              alt="upload"
+                              alt={`Image attached to message ${i + 1} for Dr. Fabuos AI to analyze`}
                               className="h-24 w-24 object-cover rounded-lg border border-border/40"
                               loading="lazy"
                             />
@@ -435,10 +440,11 @@ export default function DrFabuos() {
                 <div className="flex flex-wrap gap-2 mb-2">
                   {pending.map((a, i) => (
                     <div key={i} className="relative">
-                      <img src={a.dataUrl} className="h-16 w-16 object-cover rounded-lg border border-border" />
+                      <img src={a.dataUrl} alt={`Pending upload ${i + 1}`} className="h-16 w-16 object-cover rounded-lg border border-border" />
                       <button
                         onClick={() => setPending((p) => p.filter((_, idx) => idx !== i))}
                         className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-foreground text-background flex items-center justify-center"
+                        aria-label={`Remove pending upload ${i + 1}`}
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -468,11 +474,12 @@ export default function DrFabuos() {
                     }
                   }}
                   placeholder="Ask Dr. Fabuos about your health…"
+                  aria-label="Message Dr. Fabuos AI"
                   rows={1}
                   className="resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-1 py-2 max-h-40"
                 />
                 {isStreaming ? (
-                  <Button size="icon" variant="destructive" className="rounded-xl shrink-0" onClick={stop}>
+                  <Button size="icon" variant="destructive" className="rounded-xl shrink-0" onClick={stop} aria-label="Stop generating response">
                     <Square className="h-4 w-4" />
                   </Button>
                 ) : (
@@ -481,6 +488,7 @@ export default function DrFabuos() {
                     className="rounded-xl shrink-0 bg-gradient-to-br from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white"
                     onClick={() => submit()}
                     disabled={!input.trim() && pending.length === 0}
+                    aria-label="Send message"
                   >
                     <Send className="h-4 w-4" />
                   </Button>

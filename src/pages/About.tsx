@@ -48,6 +48,8 @@ const About = () => {
           </p>
         </div>
 
+        <h2 className="sr-only">Company overview</h2>
+
         {/* Founder Section */}
         <Card className="mb-12 border-primary/20">
           <CardHeader>

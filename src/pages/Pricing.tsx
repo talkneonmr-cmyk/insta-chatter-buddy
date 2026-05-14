@@ -93,6 +93,8 @@ export default function Pricing() {
           </p>
         </div>
 
+        <h2 className="sr-only">Available plans</h2>
+
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* Free Plan */}
           <Card className={`relative scale-in ${subscription.plan === 'free' ? 'border-primary' : ''}`}>

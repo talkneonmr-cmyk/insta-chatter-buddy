@@ -88,7 +88,7 @@ export function AppSidebar() {
           />
           {showText && (
             <div>
-              <h1 className="font-bold text-xl gradient-text tracking-tight">Fabuos Creators</h1>
+              <div className="font-bold text-xl gradient-text tracking-tight">Fabuos Creators</div>
               <p className="text-xs text-muted-foreground font-medium">AI Content Studio</p>
             </div>
           )}

@@ -134,7 +134,12 @@ const LandingPage = () => {
           </div>
 
           {/* Mobile toggle */}
-          <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          <button
+            className="md:hidden p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+          >
             <Icon name={mobileMenuOpen ? "x" : "menu"} className="w-5 h-5" />
           </button>
         </div>
