@@ -25,12 +25,32 @@ serve(async (req) => {
     const url = new URL(req.url);
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
 
-    // For OAuth callback, authenticate using state parameter
-    // For auth-url, require Authorization header
+    // For OAuth callback, validate state against server-stored CSRF token
+    // For auth-url, require Authorization header (and issue a fresh state)
     let user;
+    let issuedState: string | null = null;
     if (req.method === 'POST' && body.code) {
-      // OAuth callback - user ID will come from state parameter
-      user = { id: body.state || body.userId };
+      // OAuth callback - look up state in oauth_states table
+      const stateValue = body.state;
+      if (!stateValue || typeof stateValue !== 'string') {
+        throw new Error('Missing OAuth state');
+      }
+      const { data: stateRow, error: stateErr } = await supabase
+        .from('oauth_states')
+        .select('user_id, expires_at')
+        .eq('state', stateValue)
+        .eq('provider', 'youtube')
+        .maybeSingle();
+      if (stateErr || !stateRow) {
+        throw new Error('Invalid OAuth state');
+      }
+      if (new Date(stateRow.expires_at).getTime() < Date.now()) {
+        await supabase.from('oauth_states').delete().eq('state', stateValue);
+        throw new Error('OAuth state expired');
+      }
+      // One-time use
+      await supabase.from('oauth_states').delete().eq('state', stateValue);
+      user = { id: stateRow.user_id };
     } else {
       // Auth URL generation - require authentication
       const authHeader = req.headers.get('Authorization');
@@ -43,6 +63,13 @@ serve(async (req) => {
         throw new Error('Unauthorized');
       }
       user = authUser;
+      // Generate a fresh CSRF state for this request and persist it
+      issuedState = crypto.randomUUID();
+      await supabase.from('oauth_states').insert({
+        state: issuedState,
+        user_id: user.id,
+        provider: 'youtube',
+      });
     }
 
     // Generate OAuth URL
@@ -75,7 +102,7 @@ serve(async (req) => {
         authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl');
         authUrl.searchParams.set('access_type', 'offline');
         authUrl.searchParams.set('prompt', 'consent');
-        authUrl.searchParams.set('state', user.id);
+        authUrl.searchParams.set('state', issuedState!);
 
         return new Response(
           JSON.stringify({ authUrl: authUrl.toString() }),
@@ -115,7 +142,7 @@ serve(async (req) => {
       authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl');
       authUrl.searchParams.set('access_type', 'offline');
       authUrl.searchParams.set('prompt', 'consent');
-      authUrl.searchParams.set('state', user.id);
+      authUrl.searchParams.set('state', issuedState!);
 
       console.log('OAuth redirect URI:', redirectUri);
 
