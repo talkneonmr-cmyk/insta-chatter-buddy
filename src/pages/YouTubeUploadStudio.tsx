@@ -1093,6 +1093,41 @@ const YouTubeUploadStudio = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Default Platform Target */}
+                  <div>
+                    <Label>Default Platform</Label>
+                    <Select
+                      value={defaultTarget}
+                      onValueChange={(v: PlatformTarget) => {
+                        setDefaultTarget(v);
+                        setVideos(prev => prev.map(vd => ({ ...vd, target: v })));
+                      }}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="youtube" disabled={!channelInfo}>YouTube</SelectItem>
+                        <SelectItem value="instagram" disabled={!instagramInfo}>Instagram Reel</SelectItem>
+                        <SelectItem value="both" disabled={!channelInfo || !instagramInfo}>Both</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">Applied to all videos. Override per video below.</p>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div>
+                      <Label className="text-sm">Smart Time</Label>
+                      <p className="text-xs text-muted-foreground">Schedule at predicted peak engagement (18:00).</p>
+                    </div>
+                    <Switch
+                      checked={scheduleSettings.smartTime}
+                      onCheckedChange={(c) => setScheduleSettings(prev => ({ ...prev, smartTime: c }))}
+                    />
+                  </div>
+
+                  <Separator />
+
                   {/* Mode Toggle */}
                   <Tabs 
                     value={scheduleSettings.mode} 
