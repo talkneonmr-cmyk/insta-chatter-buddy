@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Hash, Sparkles, Copy, Check } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import TesterGuard from "@/components/TesterGuard";
