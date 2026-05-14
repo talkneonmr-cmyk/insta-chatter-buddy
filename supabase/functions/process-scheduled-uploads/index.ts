@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
     // Query for videos that are scheduled and past their upload time
     const { data: scheduledVideos, error: queryError } = await supabase
       .from('scheduled_videos')
-      .select('id, title, scheduled_for, user_id')
+      .select('id, title, scheduled_for, user_id, target_platform, youtube_account_id, instagram_account_id, instagram_caption, video_file_path')
       .or('status.in.(pending,scheduled),status.is.null')
       .lte('scheduled_for', new Date().toISOString())
       .order('scheduled_for', { ascending: true });
