@@ -226,6 +226,81 @@ export type Database = {
         }
         Relationships: []
       }
+      channel_dna_profiles: {
+        Row: {
+          ai_model_used: string | null
+          bottleneck: string | null
+          channel_id: string
+          channel_title: string
+          content_pillars: Json | null
+          created_at: string
+          growth_score: number | null
+          id: string
+          next_action: string | null
+          niche: string | null
+          raw_summary: string | null
+          recommendations: Json | null
+          strengths: Json | null
+          sub_niche: string | null
+          target_audience: Json | null
+          updated_at: string
+          user_id: string
+          videos_analyzed: number
+          viral_patterns: Json | null
+          voice_tone: Json | null
+          weaknesses: Json | null
+          youtube_account_id: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          bottleneck?: string | null
+          channel_id: string
+          channel_title: string
+          content_pillars?: Json | null
+          created_at?: string
+          growth_score?: number | null
+          id?: string
+          next_action?: string | null
+          niche?: string | null
+          raw_summary?: string | null
+          recommendations?: Json | null
+          strengths?: Json | null
+          sub_niche?: string | null
+          target_audience?: Json | null
+          updated_at?: string
+          user_id: string
+          videos_analyzed?: number
+          viral_patterns?: Json | null
+          voice_tone?: Json | null
+          weaknesses?: Json | null
+          youtube_account_id: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          bottleneck?: string | null
+          channel_id?: string
+          channel_title?: string
+          content_pillars?: Json | null
+          created_at?: string
+          growth_score?: number | null
+          id?: string
+          next_action?: string | null
+          niche?: string | null
+          raw_summary?: string | null
+          recommendations?: Json | null
+          strengths?: Json | null
+          sub_niche?: string | null
+          target_audience?: Json | null
+          updated_at?: string
+          user_id?: string
+          videos_analyzed?: number
+          viral_patterns?: Json | null
+          voice_tone?: Json | null
+          weaknesses?: Json | null
+          youtube_account_id?: string
+        }
+        Relationships: []
+      }
       comments_log: {
         Row: {
           action_taken: string | null
@@ -1454,6 +1529,71 @@ export type Database = {
           youtube_video_id?: string | null
         }
         Relationships: []
+      }
+      viral_video_insights: {
+        Row: {
+          channel_dna_id: string | null
+          comments: number | null
+          created_at: string
+          emotion_analysis: string | null
+          hook_analysis: string | null
+          id: string
+          likes: number | null
+          pacing_analysis: string | null
+          published_at: string | null
+          replicable_formula: string | null
+          structure: Json | null
+          user_id: string
+          video_id: string
+          video_title: string
+          views: number | null
+          why_it_worked: Json | null
+        }
+        Insert: {
+          channel_dna_id?: string | null
+          comments?: number | null
+          created_at?: string
+          emotion_analysis?: string | null
+          hook_analysis?: string | null
+          id?: string
+          likes?: number | null
+          pacing_analysis?: string | null
+          published_at?: string | null
+          replicable_formula?: string | null
+          structure?: Json | null
+          user_id: string
+          video_id: string
+          video_title: string
+          views?: number | null
+          why_it_worked?: Json | null
+        }
+        Update: {
+          channel_dna_id?: string | null
+          comments?: number | null
+          created_at?: string
+          emotion_analysis?: string | null
+          hook_analysis?: string | null
+          id?: string
+          likes?: number | null
+          pacing_analysis?: string | null
+          published_at?: string | null
+          replicable_formula?: string | null
+          structure?: Json | null
+          user_id?: string
+          video_id?: string
+          video_title?: string
+          views?: number | null
+          why_it_worked?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viral_video_insights_channel_dna_id_fkey"
+            columns: ["channel_dna_id"]
+            isOneToOne: false
+            referencedRelation: "channel_dna_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       youtube_accounts: {
         Row: {
