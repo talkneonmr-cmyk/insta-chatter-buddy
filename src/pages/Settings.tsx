@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, User as UserIcon, Bell, Link2, Shield, Sparkles } from "lucide-react";
+import { ArrowLeft, User as UserIcon, Bell, Link2, Shield, Sparkles, Dna, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -59,6 +59,27 @@ const Settings = () => {
       description: "Please contact support to delete your account.",
       variant: "destructive",
     });
+  };
+
+  const [resettingDna, setResettingDna] = useState(false);
+  const handleResetDna = async () => {
+    if (!user) return;
+    setResettingDna(true);
+    try {
+      const { error } = await supabase
+        .from("channel_dna_profiles")
+        .delete()
+        .eq("user_id", user.id);
+      if (error) throw error;
+      toast({
+        title: "Channel DNA reset",
+        description: "Your AI profile was cleared. Run a new scan from the Growth Engine to rebuild it.",
+      });
+    } catch (e: any) {
+      toast({ title: "Reset failed", description: e.message || "Try again", variant: "destructive" });
+    } finally {
+      setResettingDna(false);
+    }
   };
 
   if (loading) {
@@ -207,6 +228,53 @@ const Settings = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* AI Channel DNA */}
+          <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Dna className="w-5 h-5 text-primary" />
+                <CardTitle>AI Channel DNA</CardTitle>
+              </div>
+              <CardDescription>
+                Your evolving creator intelligence profile. Auto-refreshes every 2 days. Reset to rebuild from scratch.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-medium">Reset Channel DNA</p>
+                  <p className="text-sm text-muted-foreground">
+                    Clears all stored DNA. Next Growth Engine scan rebuilds it from your latest channel data.
+                  </p>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" disabled={resettingDna}>
+                      <RefreshCw className={`w-4 h-4 mr-2 ${resettingDna ? "animate-spin" : ""}`} />
+                      Reset DNA
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Reset your AI Channel DNA?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This permanently deletes your stored creator profile (niche, audience, viral patterns,
+                        recommendations, growth score). You'll need to run a fresh DNA scan from the Growth Engine
+                        afterwards. This cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleResetDna}>
+                        Reset DNA
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Danger Zone */}
           <Card className="border-2 border-destructive/50">
