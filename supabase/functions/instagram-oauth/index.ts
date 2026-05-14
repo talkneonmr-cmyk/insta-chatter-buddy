@@ -26,8 +26,27 @@ serve(async (req) => {
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
 
     let user;
+    let issuedState: string | null = null;
     if (req.method === 'POST' && body.code) {
-      user = { id: body.state || body.userId };
+      const stateValue = body.state;
+      if (!stateValue || typeof stateValue !== 'string') {
+        throw new Error('Missing OAuth state');
+      }
+      const { data: stateRow, error: stateErr } = await supabase
+        .from('oauth_states')
+        .select('user_id, expires_at')
+        .eq('state', stateValue)
+        .eq('provider', 'instagram')
+        .maybeSingle();
+      if (stateErr || !stateRow) {
+        throw new Error('Invalid OAuth state');
+      }
+      if (new Date(stateRow.expires_at).getTime() < Date.now()) {
+        await supabase.from('oauth_states').delete().eq('state', stateValue);
+        throw new Error('OAuth state expired');
+      }
+      await supabase.from('oauth_states').delete().eq('state', stateValue);
+      user = { id: stateRow.user_id };
     } else {
       const authHeader = req.headers.get('Authorization');
       if (!authHeader) {
@@ -39,6 +58,12 @@ serve(async (req) => {
         throw new Error('Unauthorized');
       }
       user = authUser;
+      issuedState = crypto.randomUUID();
+      await supabase.from('oauth_states').insert({
+        state: issuedState,
+        user_id: user.id,
+        provider: 'instagram',
+      });
     }
 
     // Generate OAuth URL - Using Facebook OAuth for Instagram Graph API
@@ -54,7 +79,7 @@ serve(async (req) => {
       authUrl.searchParams.set('redirect_uri', redirectUri);
       authUrl.searchParams.set('scope', 'instagram_basic,instagram_content_publish,pages_read_engagement,pages_manage_metadata');
       authUrl.searchParams.set('response_type', 'code');
-      authUrl.searchParams.set('state', user.id);
+      authUrl.searchParams.set('state', issuedState!);
 
       console.log('Instagram OAuth redirect URI:', redirectUri);
       console.log('Generated auth URL:', authUrl.toString());
