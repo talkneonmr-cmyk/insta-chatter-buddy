@@ -16,7 +16,7 @@ Icons: Lucide Icons
 
 /* SITE */
 
-Platform: Fabulous Creators
+Platform: Fabuos Creators
 Purpose: AI-powered content creation for YouTube creators
 Standards: HTML5, CSS3, TypeScript, React
 Components: Vite, React Router, TanStack Query, Tailwind CSS

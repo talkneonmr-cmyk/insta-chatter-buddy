@@ -30,7 +30,7 @@ export function Footer() {
           </div>
           
           <div className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Fabulous Creators
+            © {new Date().getFullYear()} Fabuos Creators
           </div>
         </div>
       </div>

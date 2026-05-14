@@ -355,7 +355,7 @@ const LandingPage = () => {
               <button onClick={() => navigate("/pricing")} className="hover:text-foreground transition-colors">Pricing</button>
             </div>
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Fabulous Creators. Founded by Jagrit Khundia.
+              © {new Date().getFullYear()} Fabuos Creators. Founded by Jagrit Khundia.
             </p>
           </div>
         </div>

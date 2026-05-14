@@ -1,12 +1,12 @@
-# Fabulous Creators
+# Fabuos Creators
 
 > AI-powered content studio for YouTube creators, plus Dr. Fabuos AI — a premium medical AI assistant.
 
 ## Pages
-- [Home](/): Landing page and overview of Fabulous Creators.
+- [Home](/): Landing page and overview of Fabuos Creators.
 - [Dr. Fabuos AI](/dr-fabuos-ai): Premium AI doctor — prescription scanning, skin analysis, multilingual health guidance.
 - [Dr. Fabuos Chat](/dr-fabuos): Direct chat with Dr. Fabuos AI (no login required to start).
-- [About](/about): About Fabulous Creators and founder Jagrit Khundia.
+- [About](/about): About Fabuos Creators and founder Jagrit Khundia.
 - [Press & Media Kit](/press): Press resources, founder info, brand assets.
 - [Pricing](/pricing): Free and Pro plans for the creator suite.
 - [Sign in / Sign up](/auth): Account access.
@@ -27,13 +27,13 @@
 
 ---
 
-# Fabulous Creators - AI-Powered Content Studio + Dr. Fabuos AI
+# Fabuos Creators - AI-Powered Content Studio + Dr. Fabuos AI
 
 ## Dr. Fabuos AI (Premium Medical AI Assistant)
 **URL:** https://fabuos.com/dr-fabuos-ai
 **Chat:** https://fabuos.com/dr-fabuos
 
-Dr. Fabuos AI is a premium medical AI doctor and health assistant built into the Fabulous platform. It is a focused conversational experience for healthcare — NOT a general-purpose chatbot.
+Dr. Fabuos AI is a premium medical AI doctor and health assistant built into the Fabuos platform. It is a focused conversational experience for healthcare — NOT a general-purpose chatbot.
 
 ### What Dr. Fabuos AI does
 - Acts as a calm, human-feeling AI doctor for everyday health questions
@@ -64,16 +64,16 @@ ai doctor, doctor ai, medical ai, ai skin doctor, prescription ai, health chatbo
 ---
 
 
-Fabulous Creators (fabuos.com) is a professional AI-powered content creation platform designed specifically for YouTube creators. The platform provides a comprehensive suite of AI tools to streamline the entire content creation workflow.
+Fabuos Creators (fabuos.com) is a professional AI-powered content creation platform designed specifically for YouTube creators. The platform provides a comprehensive suite of AI tools to streamline the entire content creation workflow.
 
 ## Owner & Founder
 **Name:** Jagrit Khundia
 **Role:** Founder & CEO
-**Platform:** Fabulous Creators
+**Platform:** Fabuos Creators
 **Website:** https://fabuos.com
 
 ## About the Platform
-Fabulous Creators was founded by Jagrit Khundia to empower YouTube content creators with cutting-edge AI technology. The platform offers an all-in-one solution for video content creation, from script writing to video upload and management.
+Fabuos Creators was founded by Jagrit Khundia to empower YouTube content creators with cutting-edge AI technology. The platform offers an all-in-one solution for video content creation, from script writing to video upload and management.
 
 ## Core Features & AI Tools
 
