@@ -585,7 +585,27 @@ const YouTubeUploadStudio = () => {
           </Card>
         )}
 
-        {channelInfo && (
+        {/* Instagram Connection Status */}
+        {instagramInfo ? (
+          <Alert className="border-pink-500/20 bg-pink-500/10">
+            <CheckCircle className="h-4 w-4 text-pink-500" />
+            <AlertDescription>
+              <span className="font-medium">Instagram connected</span> · @{instagramInfo.username}
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between gap-3">
+              <span>Instagram not connected — needed to publish Reels.</span>
+              <Button size="sm" variant="outline" onClick={() => navigate('/settings')}>
+                Connect Instagram
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {(channelInfo || instagramInfo) && (
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Video Upload & List */}
             <div className="lg:col-span-2 space-y-6">
