@@ -206,7 +206,7 @@ export default function DrFabuos() {
         <link rel="canonical" href="https://fabuos.com/dr-fabuos" />
       </Helmet>
 
-      <div className="flex h-[100dvh] w-full ucs-surface-0 ucs-text text-foreground">
+      <div className="flex h-[100dvh] w-full bg-gradient-to-br from-background via-muted/10 to-background text-foreground">
         {/* Sidebar */}
         <aside
           className={cn(

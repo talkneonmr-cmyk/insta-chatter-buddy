@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mic, MicOff, Copy, Download, Sparkles } from "lucide-react";
-import ToolHeader from "@/components/ToolHeader";
+import { ArrowLeft, Mic, MicOff, Copy, Download, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -109,14 +108,26 @@ const SpeechToText = () => {
   };
 
   return (
-    <div className="min-h-screen ucs-surface-0 ucs-text">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-8">
-        <ToolHeader
-          icon={Mic}
-          title="Speech to Text"
-          subtitle="Convert your speech to text in real-time."
-          badge="AI TOOLS"
-        />
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-4 md:p-8">
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate("/")} 
+        className="mb-6"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
+
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
+            <Mic className="h-10 w-10" />
+            Speech to Text
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Convert your speech to text in real-time
+          </p>
+        </div>
 
         {!isSupported ? (
           <Card className="border-destructive">

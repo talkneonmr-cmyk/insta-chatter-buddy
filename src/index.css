@@ -218,45 +218,6 @@ All colors MUST be HSL.
   .bg-mesh {
     background: var(--gradient-mesh);
   }
-
-  /* ===== Ultimate Creator Studio — minimal surface system ===== */
-  /* Used by new shell, dashboard, and Growth Engine pages.
-     Existing tool pages keep their previous tokens until Phase 2. */
-  .ucs-surface-0 { background-color: hsl(240 10% 4%); }
-  .ucs-surface-1 { background-color: hsl(240 8% 7%); }
-  .ucs-surface-2 { background-color: hsl(240 8% 9%); }
-  .ucs-hairline  { border-color: hsl(240 6% 14%); }
-  .ucs-text       { color: hsl(0 0% 98%); }
-  .ucs-text-muted { color: hsl(240 5% 65%); }
-  .ucs-text-dim   { color: hsl(240 4% 46%); }
-  .ucs-accent     { color: hsl(258 90% 66%); }
-  .ucs-accent-bg  { background-color: hsl(258 90% 66%); }
-  .ucs-accent-soft{ background-color: hsl(258 90% 66% / 0.10); }
-  .ucs-accent-border { border-color: hsl(258 90% 66%); }
-  .ucs-mono       { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-feature-settings: 'tnum' 1; }
-  .ucs-card {
-    background-color: hsl(240 8% 7%);
-    border: 1px solid hsl(240 6% 14%);
-    border-radius: 12px;
-    transition: border-color 120ms ease-out, background-color 120ms ease-out;
-  }
-  .ucs-card:hover { border-color: hsl(240 6% 22%); background-color: hsl(240 8% 8%); }
-  .ucs-card-interactive { cursor: pointer; }
-  .ucs-card-interactive:hover { border-color: hsl(258 90% 66% / 0.4); }
-  .ucs-chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 10px; border-radius: 999px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
-    background: hsl(258 90% 66% / 0.10); color: hsl(258 90% 75%);
-    border: 1px solid hsl(258 90% 66% / 0.20);
-  }
-  .ucs-divider { border-top: 1px solid hsl(240 6% 14%); }
-  .ucs-grid-bg {
-    background-image:
-      linear-gradient(hsl(240 6% 12% / 0.4) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(240 6% 12% / 0.4) 1px, transparent 1px);
-    background-size: 32px 32px;
-  }
   
   .text-gradient-primary {
     background: var(--gradient-primary);

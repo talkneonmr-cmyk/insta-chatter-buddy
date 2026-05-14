@@ -48,7 +48,7 @@ export function Layout({ children }: LayoutProps) {
   // Show loading state while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center ucs-surface-0 ucs-text">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background">
         <div className="text-center space-y-4 animate-fade-in">
           <div className="relative inline-block">
             <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur-xl opacity-60 animate-glow"></div>
@@ -69,7 +69,7 @@ export function Layout({ children }: LayoutProps) {
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full ucs-surface-0 ucs-text">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-muted/20 to-background">
         <AppSidebar />
         
         <div className="flex-1 flex flex-col w-full">

@@ -71,7 +71,7 @@ export default function PaymentSuccess() {
 
   if (checking || isLoading) {
     return (
-      <div className="min-h-screen ucs-surface-0 ucs-text flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center space-y-4">
@@ -89,7 +89,7 @@ export default function PaymentSuccess() {
   const isSuccess = verifiedSuccess || (plan === "pro" && status === "active");
 
   return (
-    <div className="min-h-screen ucs-surface-0 ucs-text flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
         <CardHeader>
           <div className="flex flex-col items-center space-y-4">

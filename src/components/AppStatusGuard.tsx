@@ -90,7 +90,7 @@ export function AppStatusGuard({ children, checkMaintenance = true }: AppStatusG
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center ucs-surface-0 ucs-text">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
