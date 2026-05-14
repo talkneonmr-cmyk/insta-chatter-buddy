@@ -93,10 +93,13 @@ const YouTubeUploadStudio = () => {
   // Schedule settings
   const [scheduleSettings, setScheduleSettings] = useState<ScheduleSettings>({
     mode: 'auto',
-    dailyTime: '10:00',
+    dailyTime: '18:00',
     startDate: format(new Date(), 'yyyy-MM-dd'),
     videosPerDay: 1,
+    smartTime: true,
   });
+  const [defaultTarget, setDefaultTarget] = useState<PlatformTarget>('youtube');
+  const [instagramInfo, setInstagramInfo] = useState<InstagramInfo | null>(null);
   
   // Usage tracking
   const [channelsUsage, setChannelsUsage] = useState(0);
