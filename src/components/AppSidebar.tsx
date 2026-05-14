@@ -83,7 +83,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-3 animate-scale-in">
           <img 
             src={fabulousLogo} 
-            alt="Fabulous Creators Logo" 
+            alt="Fabuos Creators Logo" 
             className="w-10 h-10 object-contain"
           />
           {showText && (
