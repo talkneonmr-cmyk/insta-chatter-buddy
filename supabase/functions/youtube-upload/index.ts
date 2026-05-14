@@ -28,9 +28,10 @@ serve(async (req) => {
     const body: UploadRequest = await req.json();
     scheduledVideoId = body.scheduledVideoId;
 
-    if (!scheduledVideoId) {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!scheduledVideoId || typeof scheduledVideoId !== 'string' || !UUID_RE.test(scheduledVideoId)) {
       return new Response(
-        JSON.stringify({ error: 'scheduledVideoId is required' }),
+        JSON.stringify({ error: 'Invalid or missing scheduledVideoId (must be a UUID)' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

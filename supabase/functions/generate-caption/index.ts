@@ -86,9 +86,24 @@ serve(async (req) => {
       model = 'google/gemini-2.5-flash'
     }: CaptionRequest = requestBody;
 
-    if (!reelIdea || reelIdea.trim().length === 0) {
+    if (!reelIdea || typeof reelIdea !== 'string' || reelIdea.trim().length === 0) {
       return new Response(
         JSON.stringify({ error: 'Reel idea is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    if (reelIdea.length > 2000 || (targetAudience && targetAudience.length > 200)) {
+      return new Response(
+        JSON.stringify({ error: 'Input too long. Reel idea max 2000 chars, audience max 200 chars.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const allowedVoice = ['professional', 'casual', 'humorous', 'inspiring', 'friendly'];
+    const allowedType = ['reel', 'post', 'story'];
+    const allowedLen = ['short', 'medium', 'long'];
+    if (!allowedVoice.includes(brandVoice) || !allowedType.includes(contentType) || !allowedLen.includes(captionLength)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid contentType, brandVoice, or captionLength value' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
