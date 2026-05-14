@@ -56,6 +56,7 @@ const YouTubeManager = () => {
 
         {/* YouTube Account Connection */}
         <YouTubeAccountConnect />
+        <InstagramAccountConnect />
 
         {/* Main Content */}
         <Card className="p-3 md:p-6">
