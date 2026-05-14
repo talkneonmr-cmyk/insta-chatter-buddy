@@ -49,9 +49,8 @@ Deno.serve(async (req) => {
     const results = [];
     for (const video of scheduledVideos) {
       try {
-        console.log(`Processing video: ${video.title} (ID: ${video.id})`);
+        console.log(`Processing video: ${video.title} (ID: ${video.id}, target: ${video.target_platform})`);
 
-        // Update status to 'uploading' to prevent duplicate processing
         const { error: updateError } = await supabase
           .from('scheduled_videos')
           .update({ status: 'processing' })
@@ -59,58 +58,62 @@ Deno.serve(async (req) => {
 
         if (updateError) {
           console.error(`Error updating video ${video.id} status:`, updateError);
-          results.push({ 
-            id: video.id, 
-            title: video.title,
-            success: false, 
-            error: 'Failed to update status' 
-          });
+          results.push({ id: video.id, title: video.title, success: false, error: 'Failed to update status' });
           continue;
         }
 
-        // Call the youtube-upload function
-        const { data: uploadResult, error: uploadError } = await supabase.functions.invoke(
-          'youtube-upload',
-          {
+        const target = (video as any).target_platform || 'youtube';
+        const wantsYT = target === 'youtube' || target === 'both';
+        const wantsIG = target === 'instagram' || target === 'both';
+
+        let ytOk = !wantsYT;
+        let igOk = !wantsIG;
+        let ytErr: string | null = null;
+        let igErr: string | null = null;
+
+        if (wantsYT && (video as any).youtube_account_id) {
+          const { data, error } = await supabase.functions.invoke('youtube-upload', {
             body: { scheduledVideoId: video.id }
-          }
-        );
-
-        if (uploadError) {
-          console.error(`Error uploading video ${video.id}:`, uploadError);
-          
-          // Update status back to 'scheduled' on error
-          await supabase
-            .from('scheduled_videos')
-            .update({ 
-              status: 'failed',
-              upload_error: uploadError.message || 'Upload failed'
-            })
-            .eq('id', video.id);
-
-          results.push({ 
-            id: video.id, 
-            title: video.title,
-            success: false, 
-            error: uploadError.message 
           });
-        } else {
-          console.log(`Successfully initiated upload for video ${video.id}`);
-          results.push({ 
-            id: video.id, 
-            title: video.title,
-            success: true 
-          });
+          if (error) { ytErr = error.message || 'YouTube upload failed'; }
+          else { ytOk = true; }
+        } else if (wantsYT) {
+          ytErr = 'No YouTube account linked';
         }
+
+        if (wantsIG && (video as any).instagram_account_id) {
+          const { data, error } = await supabase.functions.invoke('instagram-publish-reel', {
+            body: {
+              scheduledVideoId: video.id,
+              caption: (video as any).instagram_caption || video.title,
+              shareToFeed: true,
+            }
+          });
+          if (error) { igErr = error.message || 'Instagram publish failed'; }
+          else { igOk = true; }
+        } else if (wantsIG) {
+          igErr = 'No Instagram account linked';
+        }
+
+        const allOk = ytOk && igOk;
+        const noneOk = !ytOk && !igOk;
+        const finalStatus = allOk ? (wantsYT ? 'uploaded' : 'published') : noneOk ? 'failed' : 'partial';
+
+        await supabase
+          .from('scheduled_videos')
+          .update({
+            status: finalStatus,
+            upload_error: ytErr,
+            instagram_error: igErr,
+          })
+          .eq('id', video.id);
+
+        results.push({ id: video.id, title: video.title, success: !noneOk, ytErr, igErr });
       } catch (error) {
         console.error(`Unexpected error processing video ${video.id}:`, error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        results.push({ 
-          id: video.id, 
-          title: video.title,
-          success: false, 
-          error: errorMessage 
-        });
+        await supabase.from('scheduled_videos').update({ status: 'failed', upload_error: errorMessage }).eq('id', video.id);
+        results.push({ id: video.id, title: video.title, success: false, error: errorMessage });
       }
     }
 
