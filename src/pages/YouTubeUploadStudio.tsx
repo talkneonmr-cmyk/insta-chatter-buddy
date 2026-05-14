@@ -1193,7 +1193,12 @@ const YouTubeUploadStudio = () => {
                     className="w-full" 
                     size="lg"
                     onClick={handleScheduleAll}
-                    disabled={isProcessing || videos.length === 0 || !channelInfo}
+                    disabled={
+                      isProcessing ||
+                      videos.length === 0 ||
+                      (videos.some(v => v.target === 'youtube' || v.target === 'both') && !channelInfo) ||
+                      (videos.some(v => v.target === 'instagram' || v.target === 'both') && !instagramInfo)
+                    }
                   >
                     {isProcessing ? (
                       <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Processing...</>
