@@ -33,7 +33,7 @@ export default function MusicGenerator() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-background via-background/95 to-primary/5">
+    <div className="min-h-screen relative overflow-hidden ucs-surface-0 ucs-text">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent rounded-full blur-3xl animate-pulse" />
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-pink-500/20 via-purple-500/10 to-transparent rounded-full blur-3xl animate-pulse" />

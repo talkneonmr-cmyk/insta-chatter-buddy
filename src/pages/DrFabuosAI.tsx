@@ -78,7 +78,7 @@ export default function DrFabuosLanding() {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background text-foreground">
+      <div className="min-h-screen ucs-surface-0 ucs-text text-foreground">
         {/* Nav */}
         <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/70 backdrop-blur-xl">
           <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">

@@ -12,7 +12,7 @@ const ThumbnailGenerator = () => {
 
   return (
     <SubscriptionGuard featureName="AI Thumbnail Generator">
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-4 md:p-8">
+      <div className="min-h-screen ucs-surface-0 ucs-text p-4 md:p-8">
       <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Dashboard
