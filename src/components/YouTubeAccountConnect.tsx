@@ -26,10 +26,11 @@ const YouTubeAccountConnect = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const state = urlParams.get('state');
-    console.log('[YouTube OAuth] URL params - code:', code, 'state:', state);
-    
-    if (code && state) {
-      // Clean URL immediately to prevent reuse
+    const pending = sessionStorage.getItem('pending_oauth_provider');
+    console.log('[YouTube OAuth] URL params - code:', code, 'state:', state, 'pending:', pending);
+
+    // Skip if Instagram (or another provider) initiated this OAuth flow
+    if (code && state && pending !== 'instagram') {
       window.history.replaceState({}, document.title, window.location.pathname);
       handleOAuthCallback(code, state);
     }
