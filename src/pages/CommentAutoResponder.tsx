@@ -795,6 +795,7 @@ export default function CommentAutoResponder() {
           </Table>
         )}
       </Card>
+      </div>
     </div>
   );
 }
