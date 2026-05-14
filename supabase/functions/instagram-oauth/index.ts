@@ -68,21 +68,23 @@ serve(async (req) => {
 
     // Generate OAuth URL - Using Facebook OAuth for Instagram Graph API
     if (url.pathname.endsWith('/auth-url')) {
-      const clientId = Deno.env.get('INSTAGRAM_CLIENT_ID'); // This should be your Facebook App ID
+      const clientId = Deno.env.get('INSTAGRAM_CLIENT_ID'); // Facebook App ID
       const referer = req.headers.get('referer') || req.headers.get('origin') || '';
-      const appUrl = new URL(referer);
-      const redirectUri = `${appUrl.origin}/`;
-      
+      const redirectOrigin = body.redirectOrigin || (referer ? new URL(referer).origin : '');
+      if (!redirectOrigin) {
+        throw new Error('Unable to determine redirect origin');
+      }
+      const redirectUri = `${redirectOrigin}/youtube-manager`;
+
       // Use Facebook OAuth with Instagram permissions
       const authUrl = new URL('https://www.facebook.com/v18.0/dialog/oauth');
       authUrl.searchParams.set('client_id', clientId!);
       authUrl.searchParams.set('redirect_uri', redirectUri);
-      authUrl.searchParams.set('scope', 'instagram_basic,instagram_content_publish,pages_read_engagement,pages_manage_metadata');
+      authUrl.searchParams.set('scope', 'instagram_basic,instagram_content_publish,pages_read_engagement,pages_manage_metadata,pages_show_list');
       authUrl.searchParams.set('response_type', 'code');
       authUrl.searchParams.set('state', issuedState!);
 
       console.log('Instagram OAuth redirect URI:', redirectUri);
-      console.log('Generated auth URL:', authUrl.toString());
 
       return new Response(
         JSON.stringify({ authUrl: authUrl.toString() }),
@@ -94,11 +96,14 @@ serve(async (req) => {
     if (req.method === 'POST' && body.code) {
       const { code } = body as OAuthCallbackRequest;
 
-      const clientId = Deno.env.get('INSTAGRAM_CLIENT_ID'); // Facebook App ID
-      const clientSecret = Deno.env.get('INSTAGRAM_CLIENT_SECRET'); // Facebook App Secret
+      const clientId = Deno.env.get('INSTAGRAM_CLIENT_ID');
+      const clientSecret = Deno.env.get('INSTAGRAM_CLIENT_SECRET');
       const referer = req.headers.get('referer') || req.headers.get('origin') || '';
-      const appUrl = new URL(referer);
-      const redirectUri = `${appUrl.origin}/`;
+      const redirectOrigin = body.redirectOrigin || (referer ? new URL(referer).origin : '');
+      if (!redirectOrigin) {
+        throw new Error('Unable to determine redirect origin');
+      }
+      const redirectUri = `${redirectOrigin}/youtube-manager`;
 
       console.log('Exchanging code for token...');
 
