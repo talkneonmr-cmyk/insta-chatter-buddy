@@ -35,7 +35,7 @@ const About = () => {
         <div className="text-center mb-16 space-y-6">
           <Badge variant="secondary" className="mb-4">
             <Sparkles className="w-4 h-4 mr-2" />
-            About Fabulous Creators
+            About Fabuos Creators
           </Badge>
           
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -44,7 +44,7 @@ const About = () => {
           
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Founded by <span className="font-semibold text-foreground">Jagrit Khundia</span>, 
-            Fabulous Creators is revolutionizing content creation with cutting-edge AI technology.
+            Fabuos Creators is revolutionizing content creation with cutting-edge AI technology.
           </p>
         </div>
 
@@ -54,7 +54,7 @@ const About = () => {
         <Card className="mb-12 border-primary/20">
           <CardHeader>
             <CardTitle className="text-2xl">Meet the Founder</CardTitle>
-            <CardDescription>The vision behind Fabulous Creators</CardDescription>
+            <CardDescription>The vision behind Fabuos Creators</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-start gap-4">
@@ -65,7 +65,7 @@ const About = () => {
                 <h3 className="text-xl font-semibold mb-2">Jagrit Khundia</h3>
                 <p className="text-sm text-muted-foreground mb-2">Founder & CEO</p>
                 <p className="text-muted-foreground">
-                  Jagrit founded Fabulous Creators to empower content creators worldwide with 
+                  Jagrit founded Fabuos Creators to empower content creators worldwide with 
                   professional-grade AI tools. His vision is to make high-quality content creation 
                   accessible to everyone, from aspiring YouTubers to established channels managing 
                   multiple platforms.
@@ -193,7 +193,7 @@ const About = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Get Started Today</CardTitle>
-            <CardDescription>Join thousands of creators using Fabulous Creators</CardDescription>
+            <CardDescription>Join thousands of creators using Fabuos Creators</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">

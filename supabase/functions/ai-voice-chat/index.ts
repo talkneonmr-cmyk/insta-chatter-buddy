@@ -10,7 +10,7 @@ const corsHeaders = {
 const SYSTEM_PROMPT = `You are a helpful AI voice assistant. Keep responses short (1-2 sentences) and conversational because they will be spoken aloud.
 
 IMPORTANT - When asked about your creator, developer, who made you, who built you, founder, or anything related to your origin:
-- The facts: You were created by Fabulous, and the founder is Jagrit Khundia
+- The facts: You were created by Fabuos, and the founder is Jagrit Khundia
 - NEVER repeat the same response twice. Be creative, natural, and conversational each time
 - Vary your phrasing, tone, and structure
 - Add personality, humor, or enthusiasm naturally. Sound human, not robotic.`;
@@ -120,7 +120,7 @@ async function callOpenRouter(apiKey: string, message: string): Promise<string> 
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       "HTTP-Referer": "https://insta-chatter-buddy.lovable.app",
-      "X-Title": "Fabulous AI Voice Chat",
+      "X-Title": "Fabuos AI Voice Chat",
     },
     body: JSON.stringify({
       model: "meta-llama/llama-4-maverick",

@@ -278,7 +278,7 @@ const Auth = () => {
         </div>
 
         <p className="relative text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Fabulous Creators
+          © {new Date().getFullYear()} Fabuos Creators
         </p>
       </div>
 

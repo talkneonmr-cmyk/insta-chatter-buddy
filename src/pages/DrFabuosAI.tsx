@@ -177,7 +177,7 @@ export default function DrFabuosLanding() {
             Dr. Fabuos AI is for general guidance only and does not replace a licensed physician. For emergencies call your local emergency number.
           </p>
           <p className="mt-2">
-            <Link to="/" className="hover:text-foreground transition">Back to Fabulous</Link>
+            <Link to="/" className="hover:text-foreground transition">Back to Fabuos</Link>
           </p>
         </footer>
       </div>

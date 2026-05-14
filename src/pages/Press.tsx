@@ -32,7 +32,7 @@ export default function Press() {
             <Sparkles className="w-3 h-3 mr-1" />
             Press & Media Kit
           </Badge>
-          <h1 className="text-4xl font-bold mb-4">Fabulous Creators — Press & Media Kit</h1>
+          <h1 className="text-4xl font-bold mb-4">Fabuos Creators — Press & Media Kit</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             AI-powered content creation platform helping YouTube creators save time and grow their channels
           </p>
@@ -53,7 +53,7 @@ export default function Press() {
               <div>
                 <h3 className="font-semibold mb-2">About</h3>
                 <p className="text-sm text-muted-foreground">
-                  Fabulous Creators is an all-in-one AI platform that empowers YouTube content creators 
+                  Fabuos Creators is an all-in-one AI platform that empowers YouTube content creators 
                   with 15+ AI-powered tools for content creation, video enhancement, and channel management.
                 </p>
               </div>
@@ -86,7 +86,7 @@ export default function Press() {
               <div>
                 <h3 className="font-semibold mb-2">Jagrit Khundia</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Founder & CEO of Fabulous Creators. Passionate about empowering content creators 
+                  Founder & CEO of Fabuos Creators. Passionate about empowering content creators 
                   with AI technology to streamline their workflow and maximize their creative potential.
                 </p>
               </div>
