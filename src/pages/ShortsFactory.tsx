@@ -9,7 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Sparkles, Copy, Clock, TrendingUp, Download, Calendar, ExternalLink } from "lucide-react";
+import { Sparkles, Copy, Clock, TrendingUp, Download, Calendar, ExternalLink } from "lucide-react";
+import ToolHeader from "@/components/ToolHeader";
 import TesterGuard from "@/components/TesterGuard";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 
