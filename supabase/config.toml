@@ -135,3 +135,42 @@ verify_jwt = true
 
 [functions.dr-fabuos-chat]
 verify_jwt = false
+
+[functions.scan-channel-dna]
+verify_jwt = true
+
+[functions.auto-rescan-dna]
+verify_jwt = false
+
+[functions.reset-channel-dna]
+verify_jwt = true
+
+[functions.dr-fabuos-subscribe]
+verify_jwt = true
+
+[functions.dr-fabuos-verify]
+verify_jwt = true
+
+[functions.instagram-publish-reel]
+verify_jwt = true
+
+[functions.reset-daily-usage]
+verify_jwt = false
+
+[functions.youtube-analytics]
+verify_jwt = true
+
+[functions.youtube-create-playlist]
+verify_jwt = true
+
+[functions.youtube-list-playlists]
+verify_jwt = true
+
+[functions.youtube-list-videos]
+verify_jwt = true
+
+[functions.youtube-update-video]
+verify_jwt = true
+
+[functions.face-swap]
+verify_jwt = true
