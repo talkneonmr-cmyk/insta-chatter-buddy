@@ -278,6 +278,8 @@ const YouTubeUploadStudio = () => {
         status: 'pending',
         progress: 0,
         aiGenerated: false,
+        target: defaultTarget,
+        instagramCaption: '',
       };
     });
 
