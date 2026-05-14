@@ -448,7 +448,10 @@ const YouTubeUploadStudio = () => {
             .from('scheduled_videos')
             .insert({
               user_id: user.id,
-              youtube_account_id: channelInfo.id,
+              youtube_account_id: (video.target === 'youtube' || video.target === 'both') ? channelInfo?.id ?? null : null,
+              instagram_account_id: (video.target === 'instagram' || video.target === 'both') ? instagramInfo?.id ?? null : null,
+              target_platform: video.target,
+              instagram_caption: video.instagramCaption || video.description || video.title,
               title: video.title + (video.isShort ? ' #shorts' : ''),
               description: video.description,
               tags: tagsArray,
@@ -460,7 +463,7 @@ const YouTubeUploadStudio = () => {
               ai_generated_metadata: video.aiGenerated,
               status: 'scheduled',
               is_short: video.isShort,
-            })
+            } as any)
             .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, is_short')
             .single();
 
