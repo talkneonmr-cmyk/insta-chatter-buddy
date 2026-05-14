@@ -25,7 +25,31 @@ const ScheduledVideosList = () => {
   const [videos, setVideos] = useState<ScheduledVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [reelPostingId, setReelPostingId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const handleCrossPostReel = async (id: string, title: string) => {
+    setReelPostingId(id);
+    try {
+      const { data, error } = await supabase.functions.invoke("instagram-publish-reel", {
+        body: { scheduledVideoId: id, caption: title },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({
+        title: "Reel published!",
+        description: data?.permalink ? "View it on Instagram" : "Posted to Reels successfully",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Reel post failed",
+        description: err?.message || "Could not post to Instagram",
+        variant: "destructive",
+      });
+    } finally {
+      setReelPostingId(null);
+    }
+  };
 
   useEffect(() => {
     fetchVideos();
