@@ -24,6 +24,8 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { format, addDays, setHours, setMinutes } from "date-fns";
 import UsageResetCountdown from "@/components/UsageResetCountdown";
 
+type PlatformTarget = 'youtube' | 'instagram' | 'both';
+
 interface UploadedVideo {
   id: string;
   file: File;
@@ -38,12 +40,19 @@ interface UploadedVideo {
   status: 'pending' | 'uploading' | 'scheduled' | 'error';
   progress: number;
   aiGenerated: boolean;
+  target: PlatformTarget;
+  instagramCaption: string;
 }
 
 interface ChannelInfo {
   id: string;
   channel_title: string;
   channel_id: string;
+}
+
+interface InstagramInfo {
+  id: string;
+  username: string;
 }
 
 interface ScheduledVideo {
@@ -63,6 +72,7 @@ interface ScheduleSettings {
   dailyTime: string;
   startDate: string;
   videosPerDay: number;
+  smartTime: boolean;
 }
 
 const YouTubeUploadStudio = () => {
