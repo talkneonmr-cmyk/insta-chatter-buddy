@@ -88,7 +88,7 @@ const CaptionGenerator = () => {
 
   return (
     <TesterGuard featureName="AI Caption Generator">
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      <div className="min-h-screen ucs-surface-0 ucs-text">
         {/* Top Navigation */}
         <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
 ...
