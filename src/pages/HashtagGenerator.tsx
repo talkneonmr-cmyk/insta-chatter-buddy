@@ -134,19 +134,16 @@ export default function HashtagGenerator() {
   };
 
   return (
-    
-      <TesterGuard featureName="Hashtag Generator">
-        <SubscriptionGuard>
-          <div className="max-w-6xl mx-auto p-4 space-y-8">
-          <div className="text-center space-y-2 slide-in">
-            <h1 className="text-4xl font-bold gradient-text flex items-center justify-center gap-2">
-              <Hash className="h-10 w-10" />
-              AI Hashtag Generator
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Generate strategic hashtag mixes for maximum reach and engagement
-            </p>
-          </div>
+    <TesterGuard featureName="Hashtag Generator">
+      <SubscriptionGuard>
+        <div className="min-h-screen ucs-surface-0 ucs-text">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-8">
+            <ToolHeader
+              icon={Hash}
+              title="AI Hashtag Generator"
+              subtitle="Strategic hashtag mixes for maximum reach and engagement."
+              badge="CREATE"
+            />
 
           <Card className="card-3d border-2">
             <CardHeader>
