@@ -32,11 +32,13 @@ export default function Press() {
             <Sparkles className="w-3 h-3 mr-1" />
             Press & Media Kit
           </Badge>
-          <h1 className="text-4xl font-bold mb-4">Fabulous Creators</h1>
+          <h1 className="text-4xl font-bold mb-4">Fabulous Creators — Press & Media Kit</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             AI-powered content creation platform helping YouTube creators save time and grow their channels
           </p>
         </div>
+
+        <h2 className="sr-only">Company information</h2>
 
         <div className="grid gap-8 md:grid-cols-2 mb-12">
           {/* Company Overview */}
