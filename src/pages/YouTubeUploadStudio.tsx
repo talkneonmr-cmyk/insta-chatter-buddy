@@ -24,6 +24,8 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { format, addDays, setHours, setMinutes } from "date-fns";
 import UsageResetCountdown from "@/components/UsageResetCountdown";
 
+type PlatformTarget = 'youtube' | 'instagram' | 'both';
+
 interface UploadedVideo {
   id: string;
   file: File;
@@ -38,12 +40,19 @@ interface UploadedVideo {
   status: 'pending' | 'uploading' | 'scheduled' | 'error';
   progress: number;
   aiGenerated: boolean;
+  target: PlatformTarget;
+  instagramCaption: string;
 }
 
 interface ChannelInfo {
   id: string;
   channel_title: string;
   channel_id: string;
+}
+
+interface InstagramInfo {
+  id: string;
+  username: string;
 }
 
 interface ScheduledVideo {
@@ -63,6 +72,7 @@ interface ScheduleSettings {
   dailyTime: string;
   startDate: string;
   videosPerDay: number;
+  smartTime: boolean;
 }
 
 const YouTubeUploadStudio = () => {
@@ -83,10 +93,13 @@ const YouTubeUploadStudio = () => {
   // Schedule settings
   const [scheduleSettings, setScheduleSettings] = useState<ScheduleSettings>({
     mode: 'auto',
-    dailyTime: '10:00',
+    dailyTime: '18:00',
     startDate: format(new Date(), 'yyyy-MM-dd'),
     videosPerDay: 1,
+    smartTime: true,
   });
+  const [defaultTarget, setDefaultTarget] = useState<PlatformTarget>('youtube');
+  const [instagramInfo, setInstagramInfo] = useState<InstagramInfo | null>(null);
   
   // Usage tracking
   const [channelsUsage, setChannelsUsage] = useState(0);
@@ -98,6 +111,7 @@ const YouTubeUploadStudio = () => {
 
   useEffect(() => {
     checkChannelConnection();
+    checkInstagramConnection();
     fetchScheduledVideos();
     
     // Handle OAuth callback
@@ -169,6 +183,20 @@ const YouTubeUploadStudio = () => {
     }
   };
 
+  const checkInstagramConnection = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('instagram_accounts')
+        .select('id, username')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (data) setInstagramInfo(data as InstagramInfo);
+    } catch (e) {
+      console.error('Error checking instagram:', e);
+    }
+  };
   const handleOAuthCallback = async (code: string, state: string) => {
     try {
       setConnectingChannel(true);
@@ -265,6 +293,8 @@ const YouTubeUploadStudio = () => {
         status: 'pending',
         progress: 0,
         aiGenerated: false,
+        target: defaultTarget,
+        instagramCaption: '',
       };
     });
 
@@ -322,18 +352,20 @@ const YouTubeUploadStudio = () => {
   };
 
   const calculateScheduleDates = useCallback(() => {
-    const { dailyTime, startDate, videosPerDay, mode } = scheduleSettings;
-    const [hours, minutes] = dailyTime.split(':').map(Number);
-    
+    const { dailyTime, startDate, videosPerDay, mode, smartTime } = scheduleSettings;
+    // Smart time picks 18:00 (peak engagement window) when enabled.
+    const baseTime = smartTime ? '18:00' : dailyTime;
+    const [hours, minutes] = baseTime.split(':').map(Number);
+
     return videos.map((video, index) => {
       if (mode === 'manual') {
         return video.scheduledFor;
       }
-      
+
       const dayOffset = Math.floor(index / videosPerDay);
       const date = addDays(new Date(startDate), dayOffset);
       const scheduledDate = setMinutes(setHours(date, hours), minutes);
-      
+
       return scheduledDate.toISOString();
     });
   }, [scheduleSettings, videos]);
@@ -345,8 +377,15 @@ const YouTubeUploadStudio = () => {
   };
 
   const handleScheduleAll = async () => {
-    if (!channelInfo) {
-      toast({ title: "Error", description: "Connect your YouTube channel first", variant: "destructive" });
+    const needsYT = videos.some(v => v.target === 'youtube' || v.target === 'both');
+    const needsIG = videos.some(v => v.target === 'instagram' || v.target === 'both');
+
+    if (needsYT && !channelInfo) {
+      toast({ title: "Connect YouTube", description: "Connect your YouTube channel for YouTube uploads", variant: "destructive" });
+      return;
+    }
+    if (needsIG && !instagramInfo) {
+      toast({ title: "Connect Instagram", description: "Connect Instagram in Settings to publish Reels", variant: "destructive" });
       return;
     }
 
@@ -409,7 +448,10 @@ const YouTubeUploadStudio = () => {
             .from('scheduled_videos')
             .insert({
               user_id: user.id,
-              youtube_account_id: channelInfo.id,
+              youtube_account_id: (video.target === 'youtube' || video.target === 'both') ? channelInfo?.id ?? null : null,
+              instagram_account_id: (video.target === 'instagram' || video.target === 'both') ? instagramInfo?.id ?? null : null,
+              target_platform: video.target,
+              instagram_caption: video.instagramCaption || video.description || video.title,
               title: video.title + (video.isShort ? ' #shorts' : ''),
               description: video.description,
               tags: tagsArray,
@@ -421,7 +463,7 @@ const YouTubeUploadStudio = () => {
               ai_generated_metadata: video.aiGenerated,
               status: 'scheduled',
               is_short: video.isShort,
-            })
+            } as any)
             .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, is_short')
             .single();
 
@@ -543,7 +585,27 @@ const YouTubeUploadStudio = () => {
           </Card>
         )}
 
-        {channelInfo && (
+        {/* Instagram Connection Status */}
+        {instagramInfo ? (
+          <Alert className="border-pink-500/20 bg-pink-500/10">
+            <CheckCircle className="h-4 w-4 text-pink-500" />
+            <AlertDescription>
+              <span className="font-medium">Instagram connected</span> · @{instagramInfo.username}
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between gap-3">
+              <span>Instagram not connected — needed to publish Reels.</span>
+              <Button size="sm" variant="outline" onClick={() => navigate('/settings')}>
+                Connect Instagram
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {(channelInfo || instagramInfo) && (
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Video Upload & List */}
             <div className="lg:col-span-2 space-y-6">
@@ -713,6 +775,38 @@ const YouTubeUploadStudio = () => {
                                     </div>
                                   </div>
 
+
+                                  {/* Platform Target */}
+                                  <div>
+                                    <Label className="text-xs">Publish To</Label>
+                                    <Select
+                                      value={video.target}
+                                      onValueChange={(v: PlatformTarget) => updateVideo(video.id, { target: v })}
+                                    >
+                                      <SelectTrigger className="mt-1">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="youtube" disabled={!channelInfo}>YouTube{!channelInfo ? ' (not connected)' : ''}</SelectItem>
+                                        <SelectItem value="instagram" disabled={!instagramInfo}>Instagram Reel{!instagramInfo ? ' (not connected)' : ''}</SelectItem>
+                                        <SelectItem value="both" disabled={!channelInfo || !instagramInfo}>Both</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+
+                                  {(video.target === 'instagram' || video.target === 'both') && (
+                                    <div>
+                                      <Label className="text-xs">Instagram Caption</Label>
+                                      <Textarea
+                                        value={video.instagramCaption}
+                                        onChange={(e) => updateVideo(video.id, { instagramCaption: e.target.value })}
+                                        placeholder="Reel caption (defaults to description)"
+                                        rows={2}
+                                        className="mt-1"
+                                      />
+                                    </div>
+                                  )}
+
                                   {/* Short/Long Toggle */}
                                   <div className="flex items-center gap-3">
                                     <Switch
@@ -720,9 +814,10 @@ const YouTubeUploadStudio = () => {
                                       onCheckedChange={(checked) => updateVideo(video.id, { isShort: checked })}
                                     />
                                     <Label className="text-xs">
-                                      {video.isShort ? 'YouTube Short (vertical)' : 'Long-form video'}
+                                      {video.isShort ? 'YouTube Short / Reel (vertical)' : 'Long-form video'}
                                     </Label>
                                   </div>
+
 
                                   {/* Thumbnail */}
                                   <div>
@@ -998,6 +1093,41 @@ const YouTubeUploadStudio = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Default Platform Target */}
+                  <div>
+                    <Label>Default Platform</Label>
+                    <Select
+                      value={defaultTarget}
+                      onValueChange={(v: PlatformTarget) => {
+                        setDefaultTarget(v);
+                        setVideos(prev => prev.map(vd => ({ ...vd, target: v })));
+                      }}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="youtube" disabled={!channelInfo}>YouTube</SelectItem>
+                        <SelectItem value="instagram" disabled={!instagramInfo}>Instagram Reel</SelectItem>
+                        <SelectItem value="both" disabled={!channelInfo || !instagramInfo}>Both</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">Applied to all videos. Override per video below.</p>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div>
+                      <Label className="text-sm">Smart Time</Label>
+                      <p className="text-xs text-muted-foreground">Schedule at predicted peak engagement (18:00).</p>
+                    </div>
+                    <Switch
+                      checked={scheduleSettings.smartTime}
+                      onCheckedChange={(c) => setScheduleSettings(prev => ({ ...prev, smartTime: c }))}
+                    />
+                  </div>
+
+                  <Separator />
+
                   {/* Mode Toggle */}
                   <Tabs 
                     value={scheduleSettings.mode} 
@@ -1098,7 +1228,12 @@ const YouTubeUploadStudio = () => {
                     className="w-full" 
                     size="lg"
                     onClick={handleScheduleAll}
-                    disabled={isProcessing || videos.length === 0 || !channelInfo}
+                    disabled={
+                      isProcessing ||
+                      videos.length === 0 ||
+                      (videos.some(v => v.target === 'youtube' || v.target === 'both') && !channelInfo) ||
+                      (videos.some(v => v.target === 'instagram' || v.target === 'both') && !instagramInfo)
+                    }
                   >
                     {isProcessing ? (
                       <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Processing...</>
