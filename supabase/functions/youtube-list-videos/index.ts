@@ -78,10 +78,21 @@ serve(async (req) => {
 
     const data = await response.json();
 
-    // Get video statistics
-    const videoIds = data.items.map((item: any) => item.id.videoId).join(',');
+    // Get video statistics + contentDetails (duration)
+    const videoIds = (data.items || [])
+      .map((item: any) => item.id?.videoId)
+      .filter(Boolean)
+      .join(',');
+
+    if (!videoIds) {
+      return new Response(
+        JSON.stringify({ videos: [] }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const statsResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoIds}`,
+      `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet,contentDetails&id=${videoIds}`,
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -92,14 +103,29 @@ serve(async (req) => {
 
     const statsData = await statsResponse.json();
 
-    const videos = statsData.items.map((item: any) => ({
-      id: item.id,
-      title: item.snippet.title,
-      description: item.snippet.description,
-      thumbnailUrl: item.snippet.thumbnails.medium.url,
-      publishedAt: item.snippet.publishedAt,
-      viewCount: item.statistics.viewCount,
-    }));
+    // Parse ISO 8601 duration (PT#H#M#S) into total seconds
+    const parseDuration = (iso: string): number => {
+      const m = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(iso || '');
+      if (!m) return 0;
+      const [, h, mm, s] = m;
+      return (parseInt(h || '0') * 3600) + (parseInt(mm || '0') * 60) + parseInt(s || '0');
+    };
+
+    const videos = statsData.items.map((item: any) => {
+      const durationSec = parseDuration(item.contentDetails?.duration);
+      return {
+        id: item.id,
+        title: item.snippet.title,
+        description: item.snippet.description,
+        thumbnailUrl: item.snippet.thumbnails.medium.url,
+        publishedAt: item.snippet.publishedAt,
+        viewCount: item.statistics.viewCount,
+        likeCount: item.statistics.likeCount || '0',
+        commentCount: item.statistics.commentCount || '0',
+        durationSec,
+        isShort: durationSec > 0 && durationSec <= 60,
+      };
+    });
 
     return new Response(
       JSON.stringify({ videos }),
