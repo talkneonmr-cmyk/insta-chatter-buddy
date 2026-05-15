@@ -1181,12 +1181,16 @@ const YouTubeUploadStudio = () => {
                   {/* Mode Toggle */}
                   <Tabs 
                     value={scheduleSettings.mode} 
-                    onValueChange={(v) => setScheduleSettings(prev => ({ ...prev, mode: v as 'auto' | 'manual' }))}
+                    onValueChange={(v) => setScheduleSettings(prev => ({ ...prev, mode: v as 'instant' | 'manual' | 'ai_best_time' }))}
                   >
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="auto">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="instant">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Now
+                      </TabsTrigger>
+                      <TabsTrigger value="ai_best_time">
                         <Zap className="h-4 w-4 mr-2" />
-                        Auto
+                        AI Time
                       </TabsTrigger>
                       <TabsTrigger value="manual">
                         <Calendar className="h-4 w-4 mr-2" />
@@ -1194,7 +1198,14 @@ const YouTubeUploadStudio = () => {
                       </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="auto" className="space-y-4 mt-4">
+                    <TabsContent value="instant" className="mt-4">
+                      <div className="bg-muted/50 rounded-lg p-4 text-center">
+                        <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">Uploads are queued for immediate publishing.</p>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="ai_best_time" className="space-y-4 mt-4">
                       <div>
                         <Label>Start Date</Label>
                         <Input
