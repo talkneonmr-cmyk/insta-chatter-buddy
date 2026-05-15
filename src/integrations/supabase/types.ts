@@ -348,6 +348,45 @@ export type Database = {
           },
         ]
       }
+      creator_ai_settings: {
+        Row: {
+          ai_upload_mode: string
+          audience_notes: string | null
+          created_at: string
+          id: string
+          niche: string | null
+          primary_country: string
+          target_countries: string[]
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_upload_mode?: string
+          audience_notes?: string | null
+          created_at?: string
+          id?: string
+          niche?: string | null
+          primary_country?: string
+          target_countries?: string[]
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_upload_mode?: string
+          audience_notes?: string | null
+          created_at?: string
+          id?: string
+          niche?: string | null
+          primary_country?: string
+          target_countries?: string[]
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dms_sent: {
         Row: {
           comment_log_id: string
@@ -1013,6 +1052,7 @@ export type Database = {
       scheduled_videos: {
         Row: {
           ai_generated_metadata: boolean | null
+          best_time_reason: string | null
           category_id: string | null
           created_at: string | null
           description: string | null
@@ -1024,10 +1064,12 @@ export type Database = {
           instagram_permalink: string | null
           is_short: boolean | null
           privacy_status: string | null
+          schedule_mode: string
           scheduled_for: string
           status: string | null
           tags: string[] | null
           target_platform: string
+          targeting_context: Json
           thumbnail_path: string | null
           title: string
           updated_at: string | null
@@ -1039,6 +1081,7 @@ export type Database = {
         }
         Insert: {
           ai_generated_metadata?: boolean | null
+          best_time_reason?: string | null
           category_id?: string | null
           created_at?: string | null
           description?: string | null
@@ -1050,10 +1093,12 @@ export type Database = {
           instagram_permalink?: string | null
           is_short?: boolean | null
           privacy_status?: string | null
+          schedule_mode?: string
           scheduled_for: string
           status?: string | null
           tags?: string[] | null
           target_platform?: string
+          targeting_context?: Json
           thumbnail_path?: string | null
           title: string
           updated_at?: string | null
@@ -1065,6 +1110,7 @@ export type Database = {
         }
         Update: {
           ai_generated_metadata?: boolean | null
+          best_time_reason?: string | null
           category_id?: string | null
           created_at?: string | null
           description?: string | null
@@ -1076,10 +1122,12 @@ export type Database = {
           instagram_permalink?: string | null
           is_short?: boolean | null
           privacy_status?: string | null
+          schedule_mode?: string
           scheduled_for?: string
           status?: string | null
           tags?: string[] | null
           target_platform?: string
+          targeting_context?: Json
           thumbnail_path?: string | null
           title?: string
           updated_at?: string | null
