@@ -547,8 +547,8 @@ const YouTubeUploadStudio = () => {
       }
 
       toast({
-        title: "Upload Complete!",
-        description: `${successfulLocalIds.length}/${videos.length} videos scheduled successfully`,
+        title: "Uploads Queued",
+        description: `${successfulLocalIds.length}/${videos.length} videos saved to the publishing queue`,
       });
 
       // Show immediately, then sync from DB
@@ -1300,7 +1300,7 @@ const YouTubeUploadStudio = () => {
 
                   {videos.length > 0 && (
                     <p className="text-xs text-center text-muted-foreground">
-                      Videos will be uploaded to your channel storage and published at scheduled times.
+                      Videos are saved to the publishing queue and only marked uploaded/published after the platform confirms success.
                     </p>
                   )}
                 </CardContent>
