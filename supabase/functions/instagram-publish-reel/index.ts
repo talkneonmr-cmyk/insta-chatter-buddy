@@ -112,7 +112,7 @@ serve(async (req) => {
 
     // ---- Track in DB ----
     const { data: row } = await supabase.from('instagram_reel_posts').insert({
-      user_id: user.id,
+      user_id: userId,
       instagram_account_id: ig.id,
       scheduled_video_id: body.scheduledVideoId || null,
       source_video_path: videoPath,
@@ -191,6 +191,15 @@ serve(async (req) => {
     } catch (_e) { /* non-fatal */ }
 
     await updateRow({ status: 'published', ig_media_id: mediaId, ig_permalink: permalink });
+
+    if (body.scheduledVideoId) {
+      await supabase.from('scheduled_videos').update({
+        instagram_media_id: mediaId,
+        instagram_permalink: permalink,
+        instagram_error: null,
+        updated_at: new Date().toISOString(),
+      }).eq('id', body.scheduledVideoId);
+    }
 
     return new Response(JSON.stringify({
       success: true, ig_media_id: mediaId, permalink,
