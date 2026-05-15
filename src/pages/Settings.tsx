@@ -9,7 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import InstagramAccountConnect from "@/components/InstagramAccountConnect";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +34,15 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(false);
+  const [savingTargeting, setSavingTargeting] = useState(false);
+  const [targeting, setTargeting] = useState({
+    primary_country: "US",
+    target_countries: "US",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+    niche: "",
+    audience_notes: "",
+    ai_upload_mode: "assisted",
+  });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -38,6 +51,8 @@ const Settings = () => {
       
       if (!session) {
         navigate("/auth");
+      } else {
+        loadTargetingSettings(session.user.id);
       }
     });
 
@@ -47,6 +62,8 @@ const Settings = () => {
       setUser(session?.user ?? null);
       if (!session) {
         navigate("/auth");
+      } else {
+        loadTargetingSettings(session.user.id);
       }
     });
 
@@ -59,6 +76,52 @@ const Settings = () => {
       description: "Please contact support to delete your account.",
       variant: "destructive",
     });
+  };
+
+  const loadTargetingSettings = async (userId: string) => {
+    const { data } = await supabase
+      .from("creator_ai_settings" as any)
+      .select("primary_country,target_countries,timezone,niche,audience_notes,ai_upload_mode")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (data) {
+      const row = data as any;
+      setTargeting({
+        primary_country: row.primary_country || "US",
+        target_countries: Array.isArray(row.target_countries) ? row.target_countries.join(", ") : "US",
+        timezone: row.timezone || "UTC",
+        niche: row.niche || "",
+        audience_notes: row.audience_notes || "",
+        ai_upload_mode: row.ai_upload_mode || "assisted",
+      });
+    }
+  };
+
+  const saveTargetingSettings = async () => {
+    if (!user) return;
+    setSavingTargeting(true);
+    try {
+      const payload = {
+        user_id: user.id,
+        primary_country: targeting.primary_country,
+        target_countries: targeting.target_countries.split(",").map((c) => c.trim().toUpperCase()).filter(Boolean),
+        timezone: targeting.timezone || "UTC",
+        niche: targeting.niche.trim() || null,
+        audience_notes: targeting.audience_notes.trim() || null,
+        ai_upload_mode: targeting.ai_upload_mode,
+      };
+
+      const { error } = await supabase
+        .from("creator_ai_settings" as any)
+        .upsert(payload as any, { onConflict: "user_id" });
+      if (error) throw error;
+      toast({ title: "AI targeting saved", description: "Upload timing and metadata generation now use these settings." });
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e.message || "Try again", variant: "destructive" });
+    } finally {
+      setSavingTargeting(false);
+    }
   };
 
   const [resettingDna, setResettingDna] = useState(false);
