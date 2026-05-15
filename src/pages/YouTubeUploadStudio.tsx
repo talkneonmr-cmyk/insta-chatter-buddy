@@ -681,51 +681,32 @@ const YouTubeUploadStudio = () => {
                     Add Videos
                   </CardTitle>
                   <CardDescription>
-                    Choose the video type and upload single or multiple videos
+                    Use the specialized flow for long videos or Shorts/Reels
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Shorts Upload */}
-                    <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-purple-500/50 rounded-lg cursor-pointer hover:bg-purple-500/10 transition-colors group">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <div className="p-3 bg-purple-500/10 rounded-full mb-3 group-hover:bg-purple-500/20 transition-colors">
-                          <Film className="h-8 w-8 text-purple-500" />
-                        </div>
-                        <p className="text-sm font-semibold text-purple-600">Upload Shorts</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Vertical videos (under 60 sec)
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="video/*"
-                        multiple
-                        onChange={(e) => handleFileSelect(e, true)}
-                      />
-                    </label>
-
-                    {/* Long Video Upload */}
-                    <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-red-500/50 rounded-lg cursor-pointer hover:bg-red-500/10 transition-colors group">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <div className="p-3 bg-red-500/10 rounded-full mb-3 group-hover:bg-red-500/20 transition-colors">
-                          <Video className="h-8 w-8 text-red-500" />
-                        </div>
-                        <p className="text-sm font-semibold text-red-600">Upload Long Videos</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Standard YouTube videos
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="video/*"
-                        multiple
-                        onChange={(e) => handleFileSelect(e, false)}
-                      />
-                    </label>
-                  </div>
+                  <Tabs value={activeUploadTab} onValueChange={(v) => setActiveUploadTab(v as 'long' | 'shorts')}>
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                      <TabsTrigger value="long"><Video className="h-4 w-4 mr-2" />Long Video Upload</TabsTrigger>
+                      <TabsTrigger value="shorts"><Film className="h-4 w-4 mr-2" />Shorts/Reels Upload</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="long">
+                      <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50 transition-colors group">
+                        <Video className="h-8 w-8 text-primary mb-3" />
+                        <p className="text-sm font-semibold">Upload Long Videos</p>
+                        <p className="text-xs text-muted-foreground mt-1">Optimized for YouTube long-form publishing</p>
+                        <input type="file" className="hidden" accept="video/*" multiple onChange={(e) => handleFileSelect(e, false)} />
+                      </label>
+                    </TabsContent>
+                    <TabsContent value="shorts">
+                      <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50 transition-colors group">
+                        <Film className="h-8 w-8 text-primary mb-3" />
+                        <p className="text-sm font-semibold">Upload Shorts/Reels</p>
+                        <p className="text-xs text-muted-foreground mt-1">Optimized for YouTube Shorts, Instagram Reels, or both</p>
+                        <input type="file" className="hidden" accept="video/*" multiple onChange={(e) => handleFileSelect(e, true)} />
+                      </label>
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
 
