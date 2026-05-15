@@ -43,21 +43,6 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, serviceKey);
 
   try {
-    // ---- AuthN ----
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
-    if (userErr || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     // ---- Validate body ----
     const body = (await req.json().catch(() => ({}))) as PublishRequest;
     const caption = (body.caption ?? '').toString().slice(0, 2200);
@@ -74,16 +59,36 @@ serve(async (req) => {
       });
     }
 
+    // ---- AuthN. Scheduled jobs may call this with the service key; browser calls need user auth. ----
+    const authHeader = req.headers.get('Authorization');
+    let userId = '';
+    const serviceToken = serviceKey;
+    if (authHeader && authHeader.replace('Bearer ', '') !== serviceToken) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
+      if (userErr || !user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      userId = user.id;
+    } else if (!body.scheduledVideoId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // ---- Resolve source video path ----
     let videoPath = body.videoFilePath || '';
     if (body.scheduledVideoId) {
       const { data: v, error: vErr } = await supabase
         .from('scheduled_videos')
-        .select('user_id, video_file_path, title')
+        .select('user_id, video_file_path, title, instagram_account_id')
         .eq('id', body.scheduledVideoId)
         .single();
       if (vErr || !v) throw new Error('Scheduled video not found');
-      if (v.user_id !== user.id) throw new Error('Not your video');
+      if (userId && v.user_id !== userId) throw new Error('Not your video');
+      userId = v.user_id;
       videoPath = v.video_file_path.replace(/^videos\//, '');
     }
     if (!videoPath) throw new Error('No video path resolved');
@@ -92,7 +97,7 @@ serve(async (req) => {
     const { data: ig, error: igErr } = await supabase
       .from('instagram_accounts')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .maybeSingle();
     if (igErr || !ig) throw new Error('Instagram account not connected');
     if (ig.token_expires_at && new Date(ig.token_expires_at) < new Date()) {
