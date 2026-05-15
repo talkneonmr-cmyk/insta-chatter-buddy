@@ -150,6 +150,7 @@ export default function Growth() {
 }
 
 function ModuleGrid({ title, subtitle, modules }: { title: string; subtitle: string; modules: GrowthModule[] }) {
+  const navigate = useNavigate();
   return (
     <section className="space-y-4">
       <div>
@@ -164,14 +165,14 @@ function ModuleGrid({ title, subtitle, modules }: { title: string; subtitle: str
                 <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 group-hover:from-primary/20 group-hover:to-secondary/20 transition-all">
                   <m.icon className="w-5 h-5 text-primary" />
                 </div>
-                {m.status === "soon" ? (
-                  <Badge variant="outline" className="text-xs gap-1"><Lock className="w-3 h-3" />Soon</Badge>
-                ) : (
-                  <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/10">Live</Badge>
-                )}
+                <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/10">Live</Badge>
               </div>
               <h3 className="font-semibold mb-1.5">{m.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{m.description}</p>
+              <Button variant="outline" size="sm" className="mt-4 w-full" onClick={() => navigate(m.route)}>
+                {m.action}
+                <ArrowRight className="w-3.5 h-3.5 ml-2" />
+              </Button>
             </CardContent>
           </Card>
         ))}
