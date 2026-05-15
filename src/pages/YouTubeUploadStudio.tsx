@@ -157,7 +157,7 @@ const YouTubeUploadStudio = () => {
       console.log('Fetched scheduled videos:', data, error);
 
       if (!error && data) {
-        setScheduledVideos(data);
+        setScheduledVideos(data as ScheduledVideo[]);
       }
     } catch (error) {
       console.error('Error fetching scheduled videos:', error);
@@ -443,8 +443,8 @@ const YouTubeUploadStudio = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Apply schedule if in auto mode (updates UI dates)
-      if (scheduleSettings.mode === 'auto') {
+      // Apply schedule when AI best-time mode is active (updates UI dates)
+      if (scheduleSettings.mode === 'ai_best_time') {
         applyAutoSchedule();
       }
 
