@@ -12,7 +12,28 @@ interface MetadataRequest {
   videoDescription?: string;
   videoContent?: string;
   tags?: string[];
+  platform?: 'youtube' | 'instagram' | 'both';
+  contentType?: 'long' | 'short';
+  creatorSettings?: Record<string, unknown>;
+  channelDna?: Record<string, unknown>;
   model?: string;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function fetchWithRetry(url: string, init: RequestInit, retries = 3): Promise<Response> {
+  let last: Response | undefined;
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const response = await fetch(url, init);
+      if (response.ok || (response.status >= 400 && response.status < 500 && response.status !== 429)) return response;
+      last = response;
+    } catch (error) {
+      if (attempt === retries - 1) throw error;
+    }
+    await sleep(700 * (attempt + 1));
+  }
+  return last!;
 }
 
 serve(async (req) => {
@@ -31,7 +52,7 @@ serve(async (req) => {
       );
     }
 
-    const { videoTitle, videoDescription, videoContent, tags, model = 'google/gemini-2.5-flash' }: MetadataRequest = requestBody;
+    const { videoTitle, videoDescription, videoContent, tags, platform = 'youtube', contentType = 'long', creatorSettings, channelDna, model = 'google/gemini-2.5-flash' }: MetadataRequest = requestBody;
 
     if (!videoTitle && !videoDescription && !videoContent) {
       return new Response(
@@ -54,10 +75,12 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const systemPrompt = `You are an expert YouTube content strategist and SEO specialist. Generate optimized metadata for YouTube videos including:
-- Engaging, click-worthy titles (max 100 characters)
-- SEO-optimized descriptions (detailed but concise)
-- Relevant, high-ranking tags (mix of broad and specific)
+    const systemPrompt = `You are an elite AI creator operating system for YouTube and Instagram. Generate metadata that can be applied directly, using channel DNA, country, timezone, niche, audience countries, and platform behavior.
+- YouTube titles must be engaging and under 100 characters
+- YouTube descriptions must be SEO-optimized and practical
+- Instagram captions must be native to Reels and include targeted hashtags
+- Tags/hashtags must match niche, country, audience, and platform
+- Best upload time must be a real recommendation, not generic, and include a short reason
 
 Focus on maximizing discoverability, engagement, and click-through rates while maintaining authenticity.`;
 
@@ -66,18 +89,26 @@ Focus on maximizing discoverability, engagement, and click-through rates while m
     if (videoDescription) userPrompt += `\nProposed Description: ${videoDescription}`;
     if (videoContent) userPrompt += `\nVideo Content Summary: ${videoContent}`;
     if (tags && tags.length > 0) userPrompt += `\nProposed Tags: ${tags.join(', ')}`;
+    userPrompt += `\nPlatform Target: ${platform}\nContent Type: ${contentType}`;
+    if (creatorSettings) userPrompt += `\nCreator Targeting Settings: ${JSON.stringify(creatorSettings)}`;
+    if (channelDna) userPrompt += `\nChannel DNA: ${JSON.stringify(channelDna).slice(0, 6000)}`;
 
     userPrompt += `\n\nProvide your response in this exact JSON format:
 {
   "title": "optimized video title",
   "description": "detailed SEO-optimized description with timestamps if applicable",
+  "instagram_caption": "native Instagram Reel caption with hashtags",
   "tags": ["tag1", "tag2", "tag3", "..."],
+  "hashtags": ["#tag1", "#tag2", "#tag3"],
+  "best_upload_time_local": "HH:MM",
+  "best_upload_day": "weekday name or today",
+  "best_time_reason": "why this time fits this niche, audience, country, and platform",
   "category_suggestion": "category name (e.g., Education, Entertainment, Gaming)"
 }`;
 
     console.log('Calling Lovable AI API with model:', model);
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetchWithRetry('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
@@ -151,7 +182,12 @@ Focus on maximizing discoverability, engagement, and click-through rates while m
       JSON.stringify({
         title: metadata.title || videoTitle,
         description: metadata.description || videoDescription,
+        instagram_caption: metadata.instagram_caption || metadata.description || videoDescription,
         tags: metadata.tags || tags || [],
+        hashtags: metadata.hashtags || [],
+        best_upload_time_local: metadata.best_upload_time_local || '18:00',
+        best_upload_day: metadata.best_upload_day || 'today',
+        best_time_reason: metadata.best_time_reason || 'Evening audience activity window based on your targeting settings.',
         category_suggestion: metadata.category_suggestion || 'Entertainment',
         ai_model_used: model
       }),
