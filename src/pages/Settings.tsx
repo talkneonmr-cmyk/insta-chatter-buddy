@@ -240,18 +240,13 @@ const Settings = () => {
           </Card>
 
           {/* API Status */}
-          <Card className="border-2">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Link2 className="w-5 h-5 text-accent" />
-                <CardTitle>API Connections</CardTitle>
-              </div>
-              <CardDescription>Status of external integrations</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <InstagramAccountConnect />
-            </CardContent>
-          </Card>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <Link2 className="w-5 h-5 text-accent" />
+              <h2 className="text-lg font-semibold">API Connections</h2>
+            </div>
+            <InstagramAccountConnect />
+          </div>
 
           {/* AI Targeting */}
           <Card className="border-2 border-primary/30">
