@@ -42,6 +42,8 @@ interface UploadedVideo {
   aiGenerated: boolean;
   target: PlatformTarget;
   instagramCaption: string;
+  bestUploadTimeLocal?: string;
+  bestTimeReason?: string;
 }
 
 interface ChannelInfo {
@@ -334,6 +336,8 @@ const YouTubeUploadStudio = () => {
         aiGenerated: false,
         target: defaultTarget,
         instagramCaption: '',
+        bestUploadTimeLocal: undefined,
+        bestTimeReason: undefined,
       };
     });
 
@@ -363,7 +367,11 @@ const YouTubeUploadStudio = () => {
         body: {
           videoTitle: video.title,
           videoDescription: video.description,
-          videoContent: video.isShort ? 'Short-form vertical video for YouTube Shorts' : 'Long-form YouTube video',
+          videoContent: video.isShort ? 'Short-form vertical video for YouTube Shorts and Instagram Reels' : 'Long-form YouTube video',
+          platform: video.target,
+          contentType: video.isShort ? 'short' : 'long',
+          creatorSettings,
+          channelDna,
         }
       });
 
@@ -373,6 +381,9 @@ const YouTubeUploadStudio = () => {
         title: data.title || video.title,
         description: data.description || video.description,
         tags: Array.isArray(data.tags) ? data.tags.join(', ') : data.tags || video.tags,
+        instagramCaption: data.instagram_caption || video.instagramCaption || data.description || video.description,
+        bestUploadTimeLocal: data.best_upload_time_local || video.bestUploadTimeLocal,
+        bestTimeReason: data.best_time_reason || video.bestTimeReason,
         aiGenerated: true,
       });
 
