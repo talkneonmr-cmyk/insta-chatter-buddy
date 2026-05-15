@@ -64,15 +64,27 @@ interface ScheduledVideo {
   privacy_status: string | null;
   youtube_video_id: string | null;
   upload_error: string | null;
+  instagram_error?: string | null;
+  target_platform?: PlatformTarget;
+  best_time_reason?: string | null;
   is_short: boolean | null;
 }
 
 interface ScheduleSettings {
-  mode: 'auto' | 'manual';
+  mode: 'instant' | 'manual' | 'ai_best_time';
   dailyTime: string;
   startDate: string;
   videosPerDay: number;
   smartTime: boolean;
+}
+
+interface CreatorAISettings {
+  primary_country: string;
+  target_countries: string[];
+  timezone: string;
+  niche: string | null;
+  audience_notes: string | null;
+  ai_upload_mode: 'manual' | 'assisted' | 'automatic';
 }
 
 const YouTubeUploadStudio = () => {
@@ -92,7 +104,7 @@ const YouTubeUploadStudio = () => {
   
   // Schedule settings
   const [scheduleSettings, setScheduleSettings] = useState<ScheduleSettings>({
-    mode: 'auto',
+    mode: 'ai_best_time',
     dailyTime: '18:00',
     startDate: format(new Date(), 'yyyy-MM-dd'),
     videosPerDay: 1,
@@ -100,6 +112,9 @@ const YouTubeUploadStudio = () => {
   });
   const [defaultTarget, setDefaultTarget] = useState<PlatformTarget>('youtube');
   const [instagramInfo, setInstagramInfo] = useState<InstagramInfo | null>(null);
+  const [creatorSettings, setCreatorSettings] = useState<CreatorAISettings | null>(null);
+  const [channelDna, setChannelDna] = useState<any>(null);
+  const [activeUploadTab, setActiveUploadTab] = useState<'long' | 'shorts'>('long');
   
   // Usage tracking
   const [channelsUsage, setChannelsUsage] = useState(0);
