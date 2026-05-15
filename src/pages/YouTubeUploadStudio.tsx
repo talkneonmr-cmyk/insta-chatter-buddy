@@ -127,6 +127,7 @@ const YouTubeUploadStudio = () => {
   useEffect(() => {
     checkChannelConnection();
     checkInstagramConnection();
+    loadCreatorIntelligence();
     fetchScheduledVideos();
     
     // Handle OAuth callback
@@ -148,7 +149,7 @@ const YouTubeUploadStudio = () => {
 
       const { data, error } = await supabase
         .from('scheduled_videos')
-        .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, is_short')
+        .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, instagram_error, target_platform, best_time_reason, is_short')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -162,6 +163,29 @@ const YouTubeUploadStudio = () => {
       console.error('Error fetching scheduled videos:', error);
     } finally {
       setLoadingScheduled(false);
+    }
+  };
+
+  const loadCreatorIntelligence = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const [{ data: settings }, { data: dna }] = await Promise.all([
+        supabase.from('creator_ai_settings' as any).select('*').eq('user_id', user.id).maybeSingle(),
+        supabase.from('channel_dna_profiles').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(1).maybeSingle(),
+      ]);
+
+      setCreatorSettings(settings as any || {
+        primary_country: 'US',
+        target_countries: ['US'],
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+        niche: null,
+        audience_notes: null,
+        ai_upload_mode: 'assisted',
+      });
+      setChannelDna(dna || null);
+    } catch (error) {
+      console.error('Error loading creator intelligence:', error);
     }
   };
 
