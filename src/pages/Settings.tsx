@@ -249,15 +249,57 @@ const Settings = () => {
               <CardDescription>Status of external integrations</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Instagram Account</p>
-                  <p className="text-sm text-muted-foreground">Not connected</p>
-                </div>
-                <Button variant="outline" size="sm">
-                  Connect
-                </Button>
+              <InstagramAccountConnect />
+            </CardContent>
+          </Card>
+
+          {/* AI Targeting */}
+          <Card className="border-2 border-primary/30">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <CardTitle>AI Targeting & Upload Mode</CardTitle>
               </div>
+              <CardDescription>Used by metadata generation, hashtags, Channel DNA, and best-time scheduling.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Primary country</Label>
+                  <Input value={targeting.primary_country} onChange={(e) => setTargeting((p) => ({ ...p, primary_country: e.target.value.toUpperCase() }))} placeholder="US" maxLength={2} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Target audience countries</Label>
+                  <Input value={targeting.target_countries} onChange={(e) => setTargeting((p) => ({ ...p, target_countries: e.target.value }))} placeholder="US, IN, GB" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Timezone</Label>
+                  <Input value={targeting.timezone} onChange={(e) => setTargeting((p) => ({ ...p, timezone: e.target.value }))} placeholder="America/New_York" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Creator niche</Label>
+                  <Input value={targeting.niche} onChange={(e) => setTargeting((p) => ({ ...p, niche: e.target.value }))} placeholder="Gaming, finance, fitness..." />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Audience notes</Label>
+                <Textarea value={targeting.audience_notes} onChange={(e) => setTargeting((p) => ({ ...p, audience_notes: e.target.value }))} placeholder="Who you want to reach, language, age, interests..." rows={3} />
+              </div>
+              <div className="space-y-2">
+                <Label>AI upload mode</Label>
+                <Select value={targeting.ai_upload_mode} onValueChange={(v) => setTargeting((p) => ({ ...p, ai_upload_mode: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="manual">Manual — I approve every change</SelectItem>
+                    <SelectItem value="assisted">AI Assisted — AI fills, I review</SelectItem>
+                    <SelectItem value="automatic">Fully Automatic — AI chooses metadata and time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={saveTargetingSettings} disabled={savingTargeting}>
+                {savingTargeting && <RefreshCw className="w-4 h-4 mr-2 animate-spin" />}
+                Save AI Targeting
+              </Button>
             </CardContent>
           </Card>
 
