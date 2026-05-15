@@ -82,14 +82,20 @@ Deno.serve(async (req) => {
         }
 
         if (wantsIG && (video as any).instagram_account_id) {
-          const { data, error } = await supabase.functions.invoke('instagram-publish-reel', {
-            body: {
+          const igRes = await fetch(`${supabaseUrl}/functions/v1/instagram-publish-reel`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseServiceKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
               scheduledVideoId: video.id,
               caption: (video as any).instagram_caption || video.title,
               shareToFeed: true,
-            }
+            }),
           });
-          if (error) { igErr = error.message || 'Instagram publish failed'; }
+          const igData = await igRes.json().catch(() => ({}));
+          if (!igRes.ok || igData?.error) { igErr = igData?.error || 'Instagram publish failed'; }
           else { igOk = true; }
         } else if (wantsIG) {
           igErr = 'No Instagram account linked';

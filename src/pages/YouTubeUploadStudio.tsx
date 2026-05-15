@@ -42,6 +42,8 @@ interface UploadedVideo {
   aiGenerated: boolean;
   target: PlatformTarget;
   instagramCaption: string;
+  bestUploadTimeLocal?: string;
+  bestTimeReason?: string;
 }
 
 interface ChannelInfo {
@@ -64,15 +66,27 @@ interface ScheduledVideo {
   privacy_status: string | null;
   youtube_video_id: string | null;
   upload_error: string | null;
+  instagram_error?: string | null;
+  target_platform?: PlatformTarget;
+  best_time_reason?: string | null;
   is_short: boolean | null;
 }
 
 interface ScheduleSettings {
-  mode: 'auto' | 'manual';
+  mode: 'instant' | 'manual' | 'ai_best_time';
   dailyTime: string;
   startDate: string;
   videosPerDay: number;
   smartTime: boolean;
+}
+
+interface CreatorAISettings {
+  primary_country: string;
+  target_countries: string[];
+  timezone: string;
+  niche: string | null;
+  audience_notes: string | null;
+  ai_upload_mode: 'manual' | 'assisted' | 'automatic';
 }
 
 const YouTubeUploadStudio = () => {
@@ -92,7 +106,7 @@ const YouTubeUploadStudio = () => {
   
   // Schedule settings
   const [scheduleSettings, setScheduleSettings] = useState<ScheduleSettings>({
-    mode: 'auto',
+    mode: 'ai_best_time',
     dailyTime: '18:00',
     startDate: format(new Date(), 'yyyy-MM-dd'),
     videosPerDay: 1,
@@ -100,6 +114,9 @@ const YouTubeUploadStudio = () => {
   });
   const [defaultTarget, setDefaultTarget] = useState<PlatformTarget>('youtube');
   const [instagramInfo, setInstagramInfo] = useState<InstagramInfo | null>(null);
+  const [creatorSettings, setCreatorSettings] = useState<CreatorAISettings | null>(null);
+  const [channelDna, setChannelDna] = useState<any>(null);
+  const [activeUploadTab, setActiveUploadTab] = useState<'long' | 'shorts'>('long');
   
   // Usage tracking
   const [channelsUsage, setChannelsUsage] = useState(0);
@@ -112,6 +129,7 @@ const YouTubeUploadStudio = () => {
   useEffect(() => {
     checkChannelConnection();
     checkInstagramConnection();
+    loadCreatorIntelligence();
     fetchScheduledVideos();
     
     // Handle OAuth callback
@@ -133,7 +151,7 @@ const YouTubeUploadStudio = () => {
 
       const { data, error } = await supabase
         .from('scheduled_videos')
-        .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, is_short')
+        .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, instagram_error, target_platform, best_time_reason, is_short')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -141,12 +159,35 @@ const YouTubeUploadStudio = () => {
       console.log('Fetched scheduled videos:', data, error);
 
       if (!error && data) {
-        setScheduledVideos(data);
+        setScheduledVideos(data as ScheduledVideo[]);
       }
     } catch (error) {
       console.error('Error fetching scheduled videos:', error);
     } finally {
       setLoadingScheduled(false);
+    }
+  };
+
+  const loadCreatorIntelligence = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const [{ data: settings }, { data: dna }] = await Promise.all([
+        supabase.from('creator_ai_settings' as any).select('*').eq('user_id', user.id).maybeSingle(),
+        supabase.from('channel_dna_profiles').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(1).maybeSingle(),
+      ]);
+
+      setCreatorSettings(settings as any || {
+        primary_country: 'US',
+        target_countries: ['US'],
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+        niche: null,
+        audience_notes: null,
+        ai_upload_mode: 'assisted',
+      });
+      setChannelDna(dna || null);
+    } catch (error) {
+      console.error('Error loading creator intelligence:', error);
     }
   };
 
@@ -295,6 +336,8 @@ const YouTubeUploadStudio = () => {
         aiGenerated: false,
         target: defaultTarget,
         instagramCaption: '',
+        bestUploadTimeLocal: undefined,
+        bestTimeReason: undefined,
       };
     });
 
@@ -324,7 +367,11 @@ const YouTubeUploadStudio = () => {
         body: {
           videoTitle: video.title,
           videoDescription: video.description,
-          videoContent: video.isShort ? 'Short-form vertical video for YouTube Shorts' : 'Long-form YouTube video',
+          videoContent: video.isShort ? 'Short-form vertical video for YouTube Shorts and Instagram Reels' : 'Long-form YouTube video',
+          platform: video.target,
+          contentType: video.isShort ? 'short' : 'long',
+          creatorSettings,
+          channelDna,
         }
       });
 
@@ -334,6 +381,9 @@ const YouTubeUploadStudio = () => {
         title: data.title || video.title,
         description: data.description || video.description,
         tags: Array.isArray(data.tags) ? data.tags.join(', ') : data.tags || video.tags,
+        instagramCaption: data.instagram_caption || video.instagramCaption || data.description || video.description,
+        bestUploadTimeLocal: data.best_upload_time_local || video.bestUploadTimeLocal,
+        bestTimeReason: data.best_time_reason || video.bestTimeReason,
         aiGenerated: true,
       });
 
@@ -353,15 +403,17 @@ const YouTubeUploadStudio = () => {
 
   const calculateScheduleDates = useCallback(() => {
     const { dailyTime, startDate, videosPerDay, mode, smartTime } = scheduleSettings;
-    // Smart time picks 18:00 (peak engagement window) when enabled.
-    const baseTime = smartTime ? '18:00' : dailyTime;
-    const [hours, minutes] = baseTime.split(':').map(Number);
 
     return videos.map((video, index) => {
+      if (mode === 'instant') {
+        return new Date(Date.now() + index * 60_000).toISOString();
+      }
       if (mode === 'manual') {
         return video.scheduledFor;
       }
 
+      const baseTime = smartTime ? (video.bestUploadTimeLocal || '18:00') : dailyTime;
+      const [hours, minutes] = baseTime.split(':').map(Number);
       const dayOffset = Math.floor(index / videosPerDay);
       const date = addDays(new Date(startDate), dayOffset);
       const scheduledDate = setMinutes(setHours(date, hours), minutes);
@@ -404,8 +456,8 @@ const YouTubeUploadStudio = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Apply schedule if in auto mode (updates UI dates)
-      if (scheduleSettings.mode === 'auto') {
+      // Apply schedule when AI best-time mode is active (updates UI dates)
+      if (scheduleSettings.mode === 'ai_best_time') {
         applyAutoSchedule();
       }
 
@@ -460,15 +512,27 @@ const YouTubeUploadStudio = () => {
               video_file_path: `videos/${videoFileName}`,
               thumbnail_path: thumbnailPath,
               scheduled_for: scheduledFor,
+              schedule_mode: scheduleSettings.mode,
+              best_time_reason: scheduleSettings.mode === 'ai_best_time' ? video.bestTimeReason || 'AI selected this posting window from creator targeting and channel DNA.' : null,
+              targeting_context: {
+                creatorSettings,
+                channelDna: channelDna ? {
+                  niche: channelDna.niche,
+                  sub_niche: channelDna.sub_niche,
+                  growth_score: channelDna.growth_score,
+                  bottleneck: channelDna.bottleneck,
+                  next_action: channelDna.next_action,
+                } : null,
+              },
               ai_generated_metadata: video.aiGenerated,
               status: 'scheduled',
               is_short: video.isShort,
             } as any)
-            .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, is_short')
+            .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, instagram_error, target_platform, best_time_reason, is_short')
             .single();
 
           if (insertDbError) throw insertDbError;
-          if (inserted) newlyScheduledRows.push(inserted);
+          if (inserted) newlyScheduledRows.push(inserted as ScheduledVideo);
 
           await supabase.functions.invoke('increment-usage', {
             body: { usageType: 'video_uploads' }
@@ -483,8 +547,8 @@ const YouTubeUploadStudio = () => {
       }
 
       toast({
-        title: "Upload Complete!",
-        description: `${successfulLocalIds.length}/${videos.length} videos scheduled successfully`,
+        title: "Uploads Queued",
+        description: `${successfulLocalIds.length}/${videos.length} videos saved to the publishing queue`,
       });
 
       // Show immediately, then sync from DB
@@ -617,51 +681,32 @@ const YouTubeUploadStudio = () => {
                     Add Videos
                   </CardTitle>
                   <CardDescription>
-                    Choose the video type and upload single or multiple videos
+                    Use the specialized flow for long videos or Shorts/Reels
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Shorts Upload */}
-                    <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-purple-500/50 rounded-lg cursor-pointer hover:bg-purple-500/10 transition-colors group">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <div className="p-3 bg-purple-500/10 rounded-full mb-3 group-hover:bg-purple-500/20 transition-colors">
-                          <Film className="h-8 w-8 text-purple-500" />
-                        </div>
-                        <p className="text-sm font-semibold text-purple-600">Upload Shorts</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Vertical videos (under 60 sec)
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="video/*"
-                        multiple
-                        onChange={(e) => handleFileSelect(e, true)}
-                      />
-                    </label>
-
-                    {/* Long Video Upload */}
-                    <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-red-500/50 rounded-lg cursor-pointer hover:bg-red-500/10 transition-colors group">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <div className="p-3 bg-red-500/10 rounded-full mb-3 group-hover:bg-red-500/20 transition-colors">
-                          <Video className="h-8 w-8 text-red-500" />
-                        </div>
-                        <p className="text-sm font-semibold text-red-600">Upload Long Videos</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Standard YouTube videos
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="video/*"
-                        multiple
-                        onChange={(e) => handleFileSelect(e, false)}
-                      />
-                    </label>
-                  </div>
+                  <Tabs value={activeUploadTab} onValueChange={(v) => setActiveUploadTab(v as 'long' | 'shorts')}>
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                      <TabsTrigger value="long"><Video className="h-4 w-4 mr-2" />Long Video Upload</TabsTrigger>
+                      <TabsTrigger value="shorts"><Film className="h-4 w-4 mr-2" />Shorts/Reels Upload</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="long">
+                      <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50 transition-colors group">
+                        <Video className="h-8 w-8 text-primary mb-3" />
+                        <p className="text-sm font-semibold">Upload Long Videos</p>
+                        <p className="text-xs text-muted-foreground mt-1">Optimized for YouTube long-form publishing</p>
+                        <input type="file" className="hidden" accept="video/*" multiple onChange={(e) => handleFileSelect(e, false)} />
+                      </label>
+                    </TabsContent>
+                    <TabsContent value="shorts">
+                      <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50 transition-colors group">
+                        <Film className="h-8 w-8 text-primary mb-3" />
+                        <p className="text-sm font-semibold">Upload Shorts/Reels</p>
+                        <p className="text-xs text-muted-foreground mt-1">Optimized for YouTube Shorts, Instagram Reels, or both</p>
+                        <input type="file" className="hidden" accept="video/*" multiple onChange={(e) => handleFileSelect(e, true)} />
+                      </label>
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
 
@@ -1131,12 +1176,16 @@ const YouTubeUploadStudio = () => {
                   {/* Mode Toggle */}
                   <Tabs 
                     value={scheduleSettings.mode} 
-                    onValueChange={(v) => setScheduleSettings(prev => ({ ...prev, mode: v as 'auto' | 'manual' }))}
+                    onValueChange={(v) => setScheduleSettings(prev => ({ ...prev, mode: v as 'instant' | 'manual' | 'ai_best_time' }))}
                   >
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="auto">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="instant">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Now
+                      </TabsTrigger>
+                      <TabsTrigger value="ai_best_time">
                         <Zap className="h-4 w-4 mr-2" />
-                        Auto
+                        AI Time
                       </TabsTrigger>
                       <TabsTrigger value="manual">
                         <Calendar className="h-4 w-4 mr-2" />
@@ -1144,7 +1193,14 @@ const YouTubeUploadStudio = () => {
                       </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="auto" className="space-y-4 mt-4">
+                    <TabsContent value="instant" className="mt-4">
+                      <div className="bg-muted/50 rounded-lg p-4 text-center">
+                        <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">Uploads are queued for immediate publishing.</p>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="ai_best_time" className="space-y-4 mt-4">
                       <div>
                         <Label>Start Date</Label>
                         <Input
@@ -1244,7 +1300,7 @@ const YouTubeUploadStudio = () => {
 
                   {videos.length > 0 && (
                     <p className="text-xs text-center text-muted-foreground">
-                      Videos will be uploaded to your channel storage and published at scheduled times.
+                      Videos are saved to the publishing queue and only marked uploaded/published after the platform confirms success.
                     </p>
                   )}
                 </CardContent>

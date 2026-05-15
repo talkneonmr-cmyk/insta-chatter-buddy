@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Dna, Sparkles, Lightbulb, PenLine, Activity, TrendingUp, Users, Clock, Target, Gauge,
-  Lock, ArrowRight, Loader2, RefreshCw, CheckCircle2, AlertTriangle, Youtube, Instagram,
+  ArrowRight, Loader2, RefreshCw, CheckCircle2, AlertTriangle, Youtube, Instagram, Upload, Settings,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -12,29 +12,22 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface GrowthModule {
-  id: string; title: string; description: string; icon: typeof Dna; status: "ready" | "soon";
+  id: string; title: string; description: string; icon: typeof Dna; action: string; route: string;
 }
 
 const ytModules: GrowthModule[] = [
-  { id: "dna", title: "Channel DNA", description: "Deep scan of your channel: niche, audience, viral patterns, weaknesses, and content pillars.", icon: Dna, status: "ready" },
-  { id: "viral", title: "Viral Intelligence", description: "Reverse-engineer your top videos: hook, pacing, emotion, and what made them work.", icon: Sparkles, status: "soon" },
-  { id: "ideas", title: "Content Strategist", description: "Personalized video and Short ideas built around your real channel data.", icon: Lightbulb, status: "soon" },
-  { id: "optimizer", title: "Title & Hook Optimizer", description: "Paste a title or hook and get stronger rewrites scored against your DNA.", icon: PenLine, status: "soon" },
-  { id: "retention", title: "Retention Improver", description: "Find weak intros, slow transitions, and moments that lose viewers.", icon: Activity, status: "soon" },
-  { id: "trends", title: "Smart Trend Matching", description: "Trends filtered by your niche with clear ways to use each one.", icon: TrendingUp, status: "soon" },
-  { id: "competitor", title: "Competitor Intel", description: "Track competitors and find opportunities they are missing.", icon: Users, status: "soon" },
-  { id: "upload", title: "Upload Optimizer", description: "Best posting times, days, and frequency based on audience activity.", icon: Clock, status: "soon" },
-  { id: "gap", title: "Content Gap Detector", description: "Important content your channel should be making but is not yet covering.", icon: Target, status: "soon" },
-  { id: "score", title: "Growth Score", description: "One number, one bottleneck, and one clear next action.", icon: Gauge, status: "soon" },
+  { id: "dna", title: "Channel DNA", description: "Deep scan of your channel: niche, audience, viral patterns, weaknesses, and content pillars.", icon: Dna, action: "Scan / re-scan", route: "/growth" },
+  { id: "bulk", title: "AI Bulk Optimizer", description: "Apply AI title, description, and tag improvements to selected videos or your full channel.", icon: PenLine, action: "Optimize videos", route: "/youtube-manager?tab=bulk" },
+  { id: "upload", title: "Smart Upload Studio", description: "AI metadata, Shorts/Reels workflows, platform selection, and best-time scheduling.", icon: Upload, action: "Upload smarter", route: "/youtube-upload-studio" },
+  { id: "performance", title: "Auto-Pilot", description: "Detect underperforming videos and run automatic optimizations when you allow it.", icon: Activity, action: "Open auto-pilot", route: "/youtube-manager?tab=performance" },
+  { id: "targeting", title: "Audience Targeting", description: "Country, timezone, and audience settings that guide AI metadata and upload timing.", icon: Target, action: "Edit targeting", route: "/settings" },
+  { id: "trends", title: "Trend Analyzer", description: "Generate niche and platform-specific trend ideas for your next content batch.", icon: TrendingUp, action: "Analyze trends", route: "/trend-analyzer" },
 ];
 
 const igModules: GrowthModule[] = [
-  { id: "ig-dna", title: "Account DNA (Reels)", description: "Niche, audience, and viral patterns from your Reels and posts.", icon: Dna, status: "soon" },
-  { id: "ig-viral", title: "Reel Hook Optimizer", description: "Generate scroll-stopping hooks scored against your account DNA.", icon: PenLine, status: "soon" },
-  { id: "ig-trends", title: "Trending Audio Match", description: "Trending audios filtered by your niche with usage angles.", icon: TrendingUp, status: "soon" },
-  { id: "ig-time", title: "Best Posting Times", description: "When your followers are most active by day and hour.", icon: Clock, status: "soon" },
-  { id: "ig-cross", title: "Cross-Platform Strategy", description: "Repurpose YouTube Shorts to Reels and vice versa with platform-tuned captions.", icon: Sparkles, status: "soon" },
-  { id: "ig-score", title: "Account Growth Score", description: "One number, the bottleneck, and the next action for your IG.", icon: Gauge, status: "soon" },
+  { id: "ig-upload", title: "Reels Publisher", description: "Publish or schedule vertical videos to Instagram with AI captions and status tracking.", icon: Instagram, action: "Create Reel upload", route: "/youtube-upload-studio" },
+  { id: "ig-cross", title: "Cross-Post Shorts/Reels", description: "Send the same short-form video to YouTube, Instagram, or both from one queue.", icon: Sparkles, action: "Cross-post", route: "/youtube-upload-studio" },
+  { id: "ig-targeting", title: "Audience Targeting", description: "Use country and timezone settings for caption hashtags and best-time scheduling.", icon: Settings, action: "Edit targeting", route: "/settings" },
 ];
 
 export default function Growth() {
@@ -157,6 +150,7 @@ export default function Growth() {
 }
 
 function ModuleGrid({ title, subtitle, modules }: { title: string; subtitle: string; modules: GrowthModule[] }) {
+  const navigate = useNavigate();
   return (
     <section className="space-y-4">
       <div>
@@ -171,14 +165,14 @@ function ModuleGrid({ title, subtitle, modules }: { title: string; subtitle: str
                 <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 group-hover:from-primary/20 group-hover:to-secondary/20 transition-all">
                   <m.icon className="w-5 h-5 text-primary" />
                 </div>
-                {m.status === "soon" ? (
-                  <Badge variant="outline" className="text-xs gap-1"><Lock className="w-3 h-3" />Soon</Badge>
-                ) : (
-                  <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/10">Live</Badge>
-                )}
+                <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/10">Live</Badge>
               </div>
               <h3 className="font-semibold mb-1.5">{m.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{m.description}</p>
+              <Button variant="outline" size="sm" className="mt-4 w-full" onClick={() => navigate(m.route)}>
+                {m.action}
+                <ArrowRight className="w-3.5 h-3.5 ml-2" />
+              </Button>
             </CardContent>
           </Card>
         ))}
