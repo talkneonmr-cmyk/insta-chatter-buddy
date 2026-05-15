@@ -403,15 +403,17 @@ const YouTubeUploadStudio = () => {
 
   const calculateScheduleDates = useCallback(() => {
     const { dailyTime, startDate, videosPerDay, mode, smartTime } = scheduleSettings;
-    // Smart time picks 18:00 (peak engagement window) when enabled.
-    const baseTime = smartTime ? '18:00' : dailyTime;
-    const [hours, minutes] = baseTime.split(':').map(Number);
 
     return videos.map((video, index) => {
+      if (mode === 'instant') {
+        return new Date(Date.now() + index * 60_000).toISOString();
+      }
       if (mode === 'manual') {
         return video.scheduledFor;
       }
 
+      const baseTime = smartTime ? (video.bestUploadTimeLocal || '18:00') : dailyTime;
+      const [hours, minutes] = baseTime.split(':').map(Number);
       const dayOffset = Math.floor(index / videosPerDay);
       const date = addDays(new Date(startDate), dayOffset);
       const scheduledDate = setMinutes(setHours(date, hours), minutes);
@@ -510,15 +512,27 @@ const YouTubeUploadStudio = () => {
               video_file_path: `videos/${videoFileName}`,
               thumbnail_path: thumbnailPath,
               scheduled_for: scheduledFor,
+              schedule_mode: scheduleSettings.mode,
+              best_time_reason: scheduleSettings.mode === 'ai_best_time' ? video.bestTimeReason || 'AI selected this posting window from creator targeting and channel DNA.' : null,
+              targeting_context: {
+                creatorSettings,
+                channelDna: channelDna ? {
+                  niche: channelDna.niche,
+                  sub_niche: channelDna.sub_niche,
+                  growth_score: channelDna.growth_score,
+                  bottleneck: channelDna.bottleneck,
+                  next_action: channelDna.next_action,
+                } : null,
+              },
               ai_generated_metadata: video.aiGenerated,
               status: 'scheduled',
               is_short: video.isShort,
             } as any)
-            .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, is_short')
+            .select('id, title, description, scheduled_for, status, privacy_status, youtube_video_id, upload_error, instagram_error, target_platform, best_time_reason, is_short')
             .single();
 
           if (insertDbError) throw insertDbError;
-          if (inserted) newlyScheduledRows.push(inserted);
+          if (inserted) newlyScheduledRows.push(inserted as ScheduledVideo);
 
           await supabase.functions.invoke('increment-usage', {
             body: { usageType: 'video_uploads' }
