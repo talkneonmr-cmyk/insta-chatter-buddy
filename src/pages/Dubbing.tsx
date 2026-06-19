@@ -172,14 +172,10 @@ export default function Dubbing() {
             className="hidden"
           />
 
-          <div className="text-center text-xs text-muted-foreground">— OR enter transcript directly —</div>
+          <p className="text-xs text-muted-foreground bg-muted/40 rounded-md p-2">
+            ✨ Powered by ElevenLabs — preserves the original speaker's voice, accent, and emotion across languages.
+          </p>
 
-          <Textarea
-            placeholder="Paste your transcript here if you don't have audio..."
-            value={transcript}
-            onChange={(e) => setTranscript(e.target.value)}
-            rows={3}
-          />
 
           <div>
             <label className="block text-sm font-medium mb-2">Target Language</label>
