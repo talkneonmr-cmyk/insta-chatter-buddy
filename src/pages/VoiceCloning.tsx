@@ -2,15 +2,27 @@ import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, Download, Loader2, Mic, Volume2 } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Upload, Download, Loader2, Mic, Volume2, RotateCcw, Settings2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+
+// Tuned for maximum vocal fidelity — captures natural pauses, gaps, and tone
+const DEFAULT_SETTINGS = {
+  stability: 0.3,        // lower = preserves natural expression, gaps, breaths
+  similarity_boost: 1.0, // max = clone matches source vocals as closely as possible
+  style: 0.45,           // adds source speaker's stylistic flourishes
+  use_speaker_boost: true,
+  speed: 1.0,
+};
 
 const VoiceCloning = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [text, setText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
+  const [settings, setSettings] = useState({ ...DEFAULT_SETTINGS });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
@@ -21,6 +33,11 @@ const VoiceCloning = () => {
       setAudioFile(file);
       setGeneratedAudio(null);
     }
+  };
+
+  const resetSettings = () => {
+    setSettings({ ...DEFAULT_SETTINGS });
+    toast({ title: "Settings reset", description: "Restored max-fidelity defaults" });
   };
 
   const handleGenerate = async () => {
@@ -62,7 +79,7 @@ const VoiceCloning = () => {
         .getPublicUrl(fileName);
 
       const { data, error } = await supabase.functions.invoke('clone-voice', {
-        body: { audioUrl: publicUrl, text, usePreMadeVoice: false }
+        body: { audioUrl: publicUrl, text, usePreMadeVoice: false, voiceSettings: settings }
       });
 
       if (error) throw error;
@@ -95,6 +112,19 @@ const VoiceCloning = () => {
     link.click();
   };
 
+  const SliderRow = ({ label, hint, value, min, max, step, onChange }: {
+    label: string; hint: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void;
+  }) => (
+    <div>
+      <div className="flex items-baseline justify-between mb-1">
+        <label className="text-sm font-medium">{label}</label>
+        <span className="text-xs font-mono text-muted-foreground">{value.toFixed(2)}</span>
+      </div>
+      <Slider value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
+      <p className="text-[11px] text-muted-foreground mt-1">{hint}</p>
+    </div>
+  );
+
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
       <div>
@@ -103,7 +133,7 @@ const VoiceCloning = () => {
           Voice Cloning
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Clone any voice with AI - Upload a sample and generate speech
+          Clone any voice with AI — tuned to match the original recording exactly, gaps and all
         </p>
       </div>
 
@@ -129,7 +159,7 @@ const VoiceCloning = () => {
               <div>
                 <Mic className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-muted-foreground mb-2 sm:mb-4" />
                 <p className="text-sm sm:text-lg font-medium">Click to upload audio</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">MP3, WAV up to 10MB</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">MP3, WAV up to 10MB · 30s+ clean sample = best clone</p>
               </div>
             )}
           </div>
@@ -192,6 +222,56 @@ const VoiceCloning = () => {
           )}
         </Card>
       </div>
+
+      {/* Voice Settings */}
+      <Card className="p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+            <Settings2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            Voice Settings
+          </h2>
+          <Button variant="outline" size="sm" onClick={resetSettings}>
+            <RotateCcw className="mr-2 h-4 w-4" /> Reset to Default
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <SliderRow
+            label="Stability"
+            hint="Lower = keeps natural pauses, breaths & expression. Higher = more monotone."
+            value={settings.stability} min={0} max={1} step={0.01}
+            onChange={(v) => setSettings(s => ({ ...s, stability: v }))}
+          />
+          <SliderRow
+            label="Similarity (Clone Strength)"
+            hint="How closely the output matches your sample vocals. Max = exact clone."
+            value={settings.similarity_boost} min={0} max={1} step={0.01}
+            onChange={(v) => setSettings(s => ({ ...s, similarity_boost: v }))}
+          />
+          <SliderRow
+            label="Style Exaggeration"
+            hint="Reproduces the speaker's accent & mannerisms. Higher = stronger style."
+            value={settings.style} min={0} max={1} step={0.01}
+            onChange={(v) => setSettings(s => ({ ...s, style: v }))}
+          />
+          <SliderRow
+            label="Speed"
+            hint="Speech rate. 1.00 = natural pace from your sample."
+            value={settings.speed} min={0.7} max={1.2} step={0.01}
+            onChange={(v) => setSettings(s => ({ ...s, speed: v }))}
+          />
+          <div className="flex items-center justify-between md:col-span-2 rounded-md border p-3">
+            <div>
+              <p className="text-sm font-medium">Speaker Boost</p>
+              <p className="text-[11px] text-muted-foreground">Enhances clarity and similarity to the original voice.</p>
+            </div>
+            <Switch
+              checked={settings.use_speaker_boost}
+              onCheckedChange={(v) => setSettings(s => ({ ...s, use_speaker_boost: v }))}
+            />
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };
