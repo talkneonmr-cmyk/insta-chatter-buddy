@@ -22,7 +22,16 @@ serve(async (req) => {
       );
     }
 
-    const { audioUrl, text, voiceId, usePreMadeVoice } = requestBody;
+    const { audioUrl, text, voiceId, usePreMadeVoice, voiceSettings } = requestBody;
+
+    // Max-fidelity defaults — preserve natural gaps, tone, and accent
+    const finalVoiceSettings = {
+      stability: voiceSettings?.stability ?? 0.3,
+      similarity_boost: voiceSettings?.similarity_boost ?? 1.0,
+      style: voiceSettings?.style ?? 0.45,
+      use_speaker_boost: voiceSettings?.use_speaker_boost ?? true,
+      speed: voiceSettings?.speed ?? 1.0,
+    };
 
     if (!text) {
       throw new Error("Missing required field: text");
@@ -106,10 +115,7 @@ serve(async (req) => {
          body: JSON.stringify({
            text,
            model_id: "eleven_multilingual_v2",
-           voice_settings: {
-             stability: 0.5,
-             similarity_boost: 0.75,
-           },
+           voice_settings: finalVoiceSettings,
          }),
        });
        if (resp.ok) {
