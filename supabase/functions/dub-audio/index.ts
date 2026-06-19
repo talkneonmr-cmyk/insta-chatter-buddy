@@ -117,11 +117,11 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
-    const fileName = `dubbed-${targetLanguage}-${Date.now()}.mp4`;
+    const fileName = `dubbed-${targetLanguage}-${Date.now()}.mp3`;
     const { error: uploadError } = await supabase.storage
       .from('voice-samples')
       .upload(fileName, new Uint8Array(dubbedBuffer), {
-        contentType: 'audio/mp4',
+        contentType: 'audio/mpeg',
         upsert: true,
       });
     if (uploadError) throw new Error(`Storage upload failed: ${uploadError.message}`);
