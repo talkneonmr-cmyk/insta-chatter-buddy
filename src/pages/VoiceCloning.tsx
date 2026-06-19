@@ -154,7 +154,34 @@ const VoiceCloning = () => {
   );
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+    <>
+      <AlertDialog open={tosOpen} onOpenChange={(o) => { if (!o && !tosAccepted) handleDeclineTos(); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-destructive" />
+              Use at Your Own Risk
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2 text-sm">
+              <span className="block">
+                Voice Cloning generates synthetic audio of real voices. By continuing you confirm:
+              </span>
+              <span className="block">• You have the right & consent to clone the voice in your sample.</span>
+              <span className="block">• You will NOT use this for fraud, impersonation, harassment, deepfakes, political deception, or any illegal activity.</span>
+              <span className="block">• Fabulous and its team are <strong>not responsible</strong> for any misuse, damages, or consequences from generated audio.</span>
+              <span className="block">• All responsibility — legal, ethical and otherwise — lies entirely with you, the user.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDeclineTos}>Decline</AlertDialogCancel>
+            <AlertDialogAction onClick={handleAcceptTos}>I Agree — Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {!tosAccepted ? null : (
+      <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 flex items-center gap-2">
           <Volume2 className="h-7 w-7 sm:h-8 sm:w-8" />
