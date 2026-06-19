@@ -191,7 +191,7 @@ export default function Dubbing() {
             </Select>
           </div>
 
-          <Button onClick={handleDub} disabled={isProcessing || (!audioFile && !transcript) || !targetLanguage} className="w-full" size="lg">
+          <Button onClick={handleDub} disabled={isProcessing || !audioFile || !targetLanguage} className="w-full" size="lg">
             {isProcessing ? (
               <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Dubbing...</>
             ) : (
