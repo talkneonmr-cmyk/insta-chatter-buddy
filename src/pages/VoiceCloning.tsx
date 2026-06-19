@@ -1,31 +1,59 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Download, Loader2, Mic, Volume2, RotateCcw, Settings2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Upload, Download, Loader2, Mic, Volume2, RotateCcw, Settings2, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-// Tuned for maximum vocal fidelity — captures natural pauses, gaps, and tone
+// Tuned for MAX vocal fidelity — captures natural pauses, breaths, accent & vocal texture
 const DEFAULT_SETTINGS = {
-  stability: 0.3,        // lower = preserves natural expression, gaps, breaths
-  similarity_boost: 1.0, // max = clone matches source vocals as closely as possible
-  style: 0.45,           // adds source speaker's stylistic flourishes
+  stability: 0.20,        // very low = preserves every breath, gap & expression
+  similarity_boost: 1.0,  // max = exact clone of source vocals
+  style: 0.75,            // strong = locks in accent, mannerisms & vocal style
   use_speaker_boost: true,
   speed: 1.0,
 };
 
 const VoiceCloning = () => {
+  const navigate = useNavigate();
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [text, setText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
   const [settings, setSettings] = useState({ ...DEFAULT_SETTINGS });
+  const [tosOpen, setTosOpen] = useState(false);
+  const [tosAccepted, setTosAccepted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const accepted = sessionStorage.getItem("voice-cloning-tos-accepted") === "true";
+    if (accepted) {
+      setTosAccepted(true);
+    } else {
+      setTosOpen(true);
+    }
+  }, []);
+
+  const handleAcceptTos = () => {
+    sessionStorage.setItem("voice-cloning-tos-accepted", "true");
+    setTosAccepted(true);
+    setTosOpen(false);
+  };
+
+  const handleDeclineTos = () => {
+    setTosOpen(false);
+    navigate("/dashboard");
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
