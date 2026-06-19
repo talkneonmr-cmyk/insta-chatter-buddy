@@ -1,31 +1,59 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Download, Loader2, Mic, Volume2, RotateCcw, Settings2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Upload, Download, Loader2, Mic, Volume2, RotateCcw, Settings2, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-// Tuned for maximum vocal fidelity — captures natural pauses, gaps, and tone
+// Tuned for MAX vocal fidelity — captures natural pauses, breaths, accent & vocal texture
 const DEFAULT_SETTINGS = {
-  stability: 0.3,        // lower = preserves natural expression, gaps, breaths
-  similarity_boost: 1.0, // max = clone matches source vocals as closely as possible
-  style: 0.45,           // adds source speaker's stylistic flourishes
+  stability: 0.20,        // very low = preserves every breath, gap & expression
+  similarity_boost: 1.0,  // max = exact clone of source vocals
+  style: 0.75,            // strong = locks in accent, mannerisms & vocal style
   use_speaker_boost: true,
   speed: 1.0,
 };
 
 const VoiceCloning = () => {
+  const navigate = useNavigate();
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [text, setText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
   const [settings, setSettings] = useState({ ...DEFAULT_SETTINGS });
+  const [tosOpen, setTosOpen] = useState(false);
+  const [tosAccepted, setTosAccepted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const accepted = sessionStorage.getItem("voice-cloning-tos-accepted") === "true";
+    if (accepted) {
+      setTosAccepted(true);
+    } else {
+      setTosOpen(true);
+    }
+  }, []);
+
+  const handleAcceptTos = () => {
+    sessionStorage.setItem("voice-cloning-tos-accepted", "true");
+    setTosAccepted(true);
+    setTosOpen(false);
+  };
+
+  const handleDeclineTos = () => {
+    setTosOpen(false);
+    navigate("/dashboard");
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,7 +154,34 @@ const VoiceCloning = () => {
   );
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+    <>
+      <AlertDialog open={tosOpen} onOpenChange={(o) => { if (!o && !tosAccepted) handleDeclineTos(); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-destructive" />
+              Use at Your Own Risk
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2 text-sm">
+              <span className="block">
+                Voice Cloning generates synthetic audio of real voices. By continuing you confirm:
+              </span>
+              <span className="block">• You have the right & consent to clone the voice in your sample.</span>
+              <span className="block">• You will NOT use this for fraud, impersonation, harassment, deepfakes, political deception, or any illegal activity.</span>
+              <span className="block">• Fabulous and its team are <strong>not responsible</strong> for any misuse, damages, or consequences from generated audio.</span>
+              <span className="block">• All responsibility — legal, ethical and otherwise — lies entirely with you, the user.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDeclineTos}>Decline</AlertDialogCancel>
+            <AlertDialogAction onClick={handleAcceptTos}>I Agree — Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {!tosAccepted ? null : (
+      <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 flex items-center gap-2">
           <Volume2 className="h-7 w-7 sm:h-8 sm:w-8" />
@@ -273,6 +328,8 @@ const VoiceCloning = () => {
         </div>
       </Card>
     </div>
+      )}
+    </>
   );
 };
 
