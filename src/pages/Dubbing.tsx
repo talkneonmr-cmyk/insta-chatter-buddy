@@ -8,17 +8,35 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const LANGUAGES = [
+  { value: "en", label: "English" },
   { value: "es", label: "Spanish" },
   { value: "fr", label: "French" },
   { value: "de", label: "German" },
   { value: "it", label: "Italian" },
   { value: "pt", label: "Portuguese" },
-  { value: "hi", label: "Hindi" },
-  { value: "ja", label: "Japanese" },
-  { value: "ko", label: "Korean" },
-  { value: "zh", label: "Chinese" },
-  { value: "ar", label: "Arabic" },
+  { value: "pl", label: "Polish" },
+  { value: "tr", label: "Turkish" },
   { value: "ru", label: "Russian" },
+  { value: "nl", label: "Dutch" },
+  { value: "cs", label: "Czech" },
+  { value: "ar", label: "Arabic" },
+  { value: "zh", label: "Chinese" },
+  { value: "ja", label: "Japanese" },
+  { value: "hu", label: "Hungarian" },
+  { value: "ko", label: "Korean" },
+  { value: "hi", label: "Hindi" },
+  { value: "id", label: "Indonesian" },
+  { value: "fi", label: "Finnish" },
+  { value: "el", label: "Greek" },
+  { value: "vi", label: "Vietnamese" },
+  { value: "no", label: "Norwegian" },
+  { value: "da", label: "Danish" },
+  { value: "ms", label: "Malay" },
+  { value: "ro", label: "Romanian" },
+  { value: "sv", label: "Swedish" },
+  { value: "uk", label: "Ukrainian" },
+  { value: "ta", label: "Tamil" },
+  { value: "tl", label: "Tagalog" },
 ];
 
 export default function Dubbing() {
@@ -43,8 +61,8 @@ export default function Dubbing() {
       toast({ title: "Select a language", description: "Choose a target language for dubbing", variant: "destructive" });
       return;
     }
-    if (!audioFile && !transcript) {
-      toast({ title: "Missing input", description: "Upload an audio file or enter a transcript", variant: "destructive" });
+    if (!audioFile) {
+      toast({ title: "Audio required", description: "Upload an audio file — voice-preserving dubbing needs source audio", variant: "destructive" });
       return;
     }
 
@@ -154,14 +172,10 @@ export default function Dubbing() {
             className="hidden"
           />
 
-          <div className="text-center text-xs text-muted-foreground">— OR enter transcript directly —</div>
+          <p className="text-xs text-muted-foreground bg-muted/40 rounded-md p-2">
+            ✨ Powered by ElevenLabs — preserves the original speaker's voice, accent, and emotion across languages.
+          </p>
 
-          <Textarea
-            placeholder="Paste your transcript here if you don't have audio..."
-            value={transcript}
-            onChange={(e) => setTranscript(e.target.value)}
-            rows={3}
-          />
 
           <div>
             <label className="block text-sm font-medium mb-2">Target Language</label>
@@ -177,7 +191,7 @@ export default function Dubbing() {
             </Select>
           </div>
 
-          <Button onClick={handleDub} disabled={isProcessing || (!audioFile && !transcript) || !targetLanguage} className="w-full" size="lg">
+          <Button onClick={handleDub} disabled={isProcessing || !audioFile || !targetLanguage} className="w-full" size="lg">
             {isProcessing ? (
               <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Dubbing...</>
             ) : (
