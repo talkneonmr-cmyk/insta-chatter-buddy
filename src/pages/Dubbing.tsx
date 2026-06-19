@@ -61,8 +61,8 @@ export default function Dubbing() {
       toast({ title: "Select a language", description: "Choose a target language for dubbing", variant: "destructive" });
       return;
     }
-    if (!audioFile && !transcript) {
-      toast({ title: "Missing input", description: "Upload an audio file or enter a transcript", variant: "destructive" });
+    if (!audioFile) {
+      toast({ title: "Audio required", description: "Upload an audio file — voice-preserving dubbing needs source audio", variant: "destructive" });
       return;
     }
 
