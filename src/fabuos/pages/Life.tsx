@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, BookOpen, CalendarClock, Timer, Smile, Play, Pause, RotateCcw, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -227,9 +227,6 @@ function FocusTool() {
   const [running, setRunning] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
 
-  useMemo(() => undefined, []);
-
-  // simple interval driven by running state
   useTick(running, () => {
     setSeconds((s) => {
       if (s <= 1) {
@@ -283,36 +280,14 @@ function FocusTool() {
 }
 
 function useTick(active: boolean, fn: () => void) {
-  const [, force] = useState(0);
-  useMemoEffect(active, fn, force);
-}
-
-// eslint-disable-next-line react-hooks/rules-of-hooks
-function useMemoEffect(active: boolean, fn: () => void, _force: (n: number) => void) {
-  const ref = useRefLike(fn);
-  useEffectLike(active, ref);
-}
-
-function useRefLike(fn: () => void) {
-  const [box] = useState<{ current: () => void }>({ current: fn });
-  box.current = fn;
-  return box;
-}
-
-function useEffectLike(active: boolean, ref: { current: () => void }) {
-  useEffectImpl(active, ref);
-}
-
-function useEffectImpl(active: boolean, ref: { current: () => void }) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useReactEffect(() => {
+  const ref = useRef(fn);
+  ref.current = fn;
+  useEffect(() => {
     if (!active) return;
     const id = setInterval(() => ref.current(), 1000);
     return () => clearInterval(id);
-  }, [active, ref]);
+  }, [active]);
 }
-
-import { useEffect as useReactEffect } from "react";
 
 function MoodTool() {
   const { state, update, addWin } = useFabuos();
