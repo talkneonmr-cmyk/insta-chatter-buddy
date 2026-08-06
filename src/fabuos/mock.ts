@@ -37,8 +37,8 @@ const captionBank = [
 
 export function generateCaptions(topic: string, tone: Tone) {
   const t = topic.trim() || "this";
-  const hooks = hookBank[tone].map((h) => h.replaceAll("{topic}", t));
-  const caps = captionBank.map((c, i) => c.replaceAll("{n}", String(i + 3)));
+  const hooks = hookBank[tone].map((h) => h.split("{topic}").join(t));
+  const caps = captionBank.map((c, i) => c.split("{n}").join(String(i + 3)));
   return hooks.map((hook, i) => ({
     id: `${tone}-${i}`,
     hook,
