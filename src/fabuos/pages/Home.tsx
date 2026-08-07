@@ -1,125 +1,202 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Flame, Trophy, ArrowRight, CheckCircle2, Sparkles, HeartPulse } from "lucide-react";
+import { Flame, Trophy, Sparkles, ArrowRight, CheckCircle2, BookOpen, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FabCard, SectionTitle, Pill, EmptyState } from "../components/ui-kit";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { FabCard, SectionTitle, GradientText, Pill } from "../components/ui-kit";
 import { Confetti } from "../components/Confetti";
-import { useFabuos, todayKey } from "../store";
-import { dailyChallenge } from "../mock";
+import { challengeForToday, skillForWeek, moods, moodInsight, promptForToday } from "../mock";
+import { useFabuos, todayKey, XP_PER_LEVEL } from "../store";
 
 export default function Home() {
-  const { state, update, addWin, checkIn } = useFabuos();
+  const { state, update, addWin, checkIn, level, progress } = useFabuos();
   const navigate = useNavigate();
-  const [celebrate, setCelebrate] = useState(false);
+  const [fire, setFire] = useState(false);
+  const [mood, setMood] = useState<string | null>(null);
+  const [note, setNote] = useState("");
 
-  const challenge = useMemo(() => dailyChallenge(state.interests), [state.interests]);
+  const challenge = useMemo(() => challengeForToday(state.userType), [state.userType]);
+  const skill = useMemo(() => skillForWeek(), []);
   const challengeDone = state.challengeDoneDate === todayKey();
   const checkedIn = state.lastCheckIn === todayKey();
+  const todaysMood = state.moods.find((m) => m.date === todayKey());
 
-  const greeting = (() => {
-    const h = new Date().getHours();
-    if (h < 12) return "Good morning";
-    if (h < 18) return "Good afternoon";
-    return "Good evening";
-  })();
-
-  const doCheckIn = () => {
-    if (checkIn()) setCelebrate(true);
-  };
+  const openTasks = state.tasks.filter((t) => !t.done);
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   const completeChallenge = () => {
     if (challengeDone) return;
     update({ challengeDoneDate: todayKey() });
-    addWin(challenge.title, "streak");
-    setCelebrate(true);
+    addWin(challenge, "streak", 20);
+    setFire(true);
+  };
+
+  const saveMood = () => {
+    if (!mood) return;
+    const rest = state.moods.filter((m) => m.date !== todayKey());
+    update({ moods: [{ date: todayKey(), mood, note: note.trim() }, ...rest].slice(0, 90) });
+    addWin("Checked in on how you're doing", "grow", 10);
+    setNote("");
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <Confetti fire={celebrate} onDone={() => setCelebrate(false)} />
+      <Confetti fire={fire} onDone={() => setFire(false)} />
 
-      <div>
+      <header>
         <p className="text-sm text-muted-foreground">{greeting},</p>
-        <h1 className="font-heading text-3xl font-extrabold tracking-tight">{state.name || "friend"} 👋</h1>
-      </div>
+        <h1 className="font-heading text-3xl font-extrabold tracking-tight">
+          <GradientText>{state.name || "friend"}</GradientText>
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">One app. Everything you actually use, every day.</p>
+      </header>
 
+      {/* Streak + level */}
       <FabCard className="relative overflow-hidden">
-        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-30 blur-3xl" style={{ background: "var(--gradient-3d)" }} />
-        <div className="relative flex items-center justify-between gap-4">
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full blur-3xl opacity-30" style={{ background: "var(--gradient-3d)" }} />
+        <div className="relative flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <Flame className="h-5 w-5 text-orange-400" />
-              <span className="font-heading text-3xl font-extrabold">{state.streak}</span>
-              <span className="text-sm text-muted-foreground">day streak</span>
+              <Flame className="h-5 w-5 text-primary" />
+              <span className="font-heading text-2xl font-extrabold">{state.streak} day streak</span>
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {checkedIn ? "Checked in for today. Nice." : "Tap to keep the streak alive."}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Level {level} · {state.xp % XP_PER_LEVEL}/{XP_PER_LEVEL} XP</p>
           </div>
           <Button
-            onClick={doCheckIn}
+            onClick={() => {
+              if (checkIn()) setFire(true);
+            }}
             disabled={checkedIn}
             className="rounded-2xl font-bold"
             style={!checkedIn ? { background: "var(--gradient-3d)" } : undefined}
           >
-            {checkedIn ? "Done ✓" : "Check in"}
+            {checkedIn ? "Checked in" : "Check in"}
           </Button>
         </div>
-      </FabCard>
-
-      <FabCard>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <Pill className="bg-primary/15 text-primary">Today's challenge</Pill>
-            <p className="mt-3 font-heading text-lg font-bold">{challenge.title}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{challenge.sub}</p>
-          </div>
-          <button
-            onClick={completeChallenge}
-            aria-label="Complete challenge"
-            className="shrink-0 transition-transform active:scale-90"
-          >
-            <CheckCircle2 className={challengeDone ? "h-9 w-9 text-primary" : "h-9 w-9 text-muted-foreground/40"} />
-          </button>
+        <div className="relative mt-4 h-2 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress * 100}%`, background: "var(--gradient-3d)" }} />
         </div>
       </FabCard>
 
+      {/* Daily challenge */}
+      <FabCard>
+        <SectionTitle action={<Pill>+20 XP</Pill>}>Today's challenge</SectionTitle>
+        <p className="text-base font-medium">{challenge}</p>
+        <Button
+          onClick={completeChallenge}
+          disabled={challengeDone}
+          variant={challengeDone ? "secondary" : "default"}
+          className="mt-4 h-11 w-full rounded-2xl font-bold"
+          style={!challengeDone ? { background: "var(--gradient-3d)" } : undefined}
+        >
+          {challengeDone ? (
+            <>
+              <CheckCircle2 className="mr-2 h-4 w-4" /> Done today
+            </>
+          ) : (
+            "Mark as done"
+          )}
+        </Button>
+      </FabCard>
+
+      {/* Compass summary */}
+      <FabCard as="button" onClick={() => navigate("/compass")}>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-heading font-bold">Daily Compass</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {openTasks.length ? `${openTasks.length} task${openTasks.length > 1 ? "s" : ""} left today` : "Nothing planned yet — take 2 minutes"}
+            </p>
+          </div>
+          <ArrowRight className="h-5 w-5 text-primary" />
+        </div>
+      </FabCard>
+
+      {/* Quick actions */}
       <div>
         <SectionTitle>Jump back in</SectionTitle>
         <div className="grid grid-cols-2 gap-3">
-          <FabCard as="button" onClick={() => navigate(state.lastActivity?.to ?? "/create")}>
-            <Sparkles className="h-6 w-6 text-primary" />
-            <p className="mt-3 font-bold">{state.lastActivity?.label ?? "Create Studio"}</p>
-            <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-              Continue <ArrowRight className="h-3 w-3" />
-            </p>
-          </FabCard>
-          <FabCard as="button" onClick={() => navigate("/life")}>
-            <HeartPulse className="h-6 w-6 text-pink-400" />
-            <p className="mt-3 font-bold">Life Hub</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">Study, plan, breathe</p>
-          </FabCard>
+          {[
+            { label: "Create Studio", hint: "Captions, clips, resume", to: "/create", icon: Sparkles },
+            { label: "Grow Hub", hint: "Summarise & learn", to: "/grow", icon: BookOpen },
+          ].map((a) => (
+            <FabCard key={a.to} as="button" onClick={() => navigate(a.to)}>
+              <a.icon className="h-5 w-5 text-primary" />
+              <p className="mt-2 font-semibold">{a.label}</p>
+              <p className="text-xs text-muted-foreground">{a.hint}</p>
+            </FabCard>
+          ))}
         </div>
       </div>
 
+      {/* Mood check */}
+      <FabCard>
+        <SectionTitle>How are you doing?</SectionTitle>
+        {todaysMood ? (
+          <div>
+            <p className="text-sm">
+              You logged <span className="font-semibold">{todaysMood.mood}</span> today.
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{moodInsight(todaysMood.mood)}</p>
+          </div>
+        ) : (
+          <>
+            <div className="flex gap-2">
+              {moods.map((m) => (
+                <button
+                  key={m.label}
+                  onClick={() => setMood(m.label)}
+                  className={cn(
+                    "flex-1 rounded-2xl border py-3 text-2xl transition-all active:scale-90",
+                    mood === m.label ? "border-primary bg-primary/10" : "border-border/60",
+                  )}
+                  aria-label={m.label}
+                >
+                  {m.emoji}
+                </button>
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">{promptForToday()}</p>
+            <Textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="One line is enough (optional)"
+              className="mt-2 rounded-2xl"
+              rows={2}
+            />
+            <Button onClick={saveMood} disabled={!mood} className="mt-3 h-11 w-full rounded-2xl font-bold">
+              <Heart className="mr-2 h-4 w-4" /> Save today
+            </Button>
+          </>
+        )}
+      </FabCard>
+
+      {/* Skill of the week */}
+      <FabCard>
+        <SectionTitle action={<Pill>{skill.tag}</Pill>}>Skill of the week</SectionTitle>
+        <p className="font-semibold">{skill.title}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{skill.body}</p>
+      </FabCard>
+
+      {/* Wins */}
       <div>
-        <SectionTitle action={<span className="text-xs text-muted-foreground">{state.wins.length} total</span>}>
-          Recent wins
-        </SectionTitle>
+        <SectionTitle action={<Pill><Trophy className="h-3 w-3" /> {state.wins.length}</Pill>}>Recent wins</SectionTitle>
         {state.wins.length === 0 ? (
-          <EmptyState
-            icon={<Trophy className="h-8 w-8" />}
-            title="No wins logged yet"
-            hint="Finish a challenge or make something in Create Studio — it'll show up here."
-          />
+          <FabCard>
+            <p className="text-sm text-muted-foreground">No wins logged yet. Finish today's challenge and this fills up fast.</p>
+          </FabCard>
         ) : (
           <div className="space-y-2">
             {state.wins.slice(0, 5).map((w) => (
-              <FabCard key={w.id} className="flex items-center gap-3 py-3.5">
-                <Trophy className="h-5 w-5 shrink-0 text-amber-400" />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{w.title}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(w.createdAt).toLocaleDateString()}</p>
+              <FabCard key={w.id} className="py-3">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">{w.title}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(w.createdAt).toLocaleDateString()}</p>
+                  </div>
                 </div>
               </FabCard>
             ))}
