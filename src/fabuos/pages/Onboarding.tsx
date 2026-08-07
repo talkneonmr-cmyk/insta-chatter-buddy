@@ -2,63 +2,64 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useFabuos, type Interest } from "../store";
+import { useFabuos, type UserType } from "../store";
 
-const options: { id: Interest; label: string; emoji: string }[] = [
-  { id: "content", label: "Content creation", emoji: "🎬" },
-  { id: "school", label: "School", emoji: "📚" },
-  { id: "gaming", label: "Gaming", emoji: "🎮" },
-  { id: "fitness", label: "Fitness", emoji: "🏃" },
-  { id: "music", label: "Music", emoji: "🎧" },
-  { id: "fashion", label: "Fashion", emoji: "👟" },
+const options: { id: UserType; label: string; emoji: string; blurb: string }[] = [
+  { id: "student", label: "Student", emoji: "📚", blurb: "Study packs, notes, focus" },
+  { id: "professional", label: "Professional", emoji: "💼", blurb: "Meetings, tasks, writing" },
+  { id: "parent", label: "Parent", emoji: "🏡", blurb: "Planning, expenses, routines" },
+  { id: "creator", label: "Creator", emoji: "🎬", blurb: "Clips, captions, thumbnails" },
+  { id: "personal", label: "Just for me", emoji: "✨", blurb: "A calmer, sorted day" },
 ];
 
 export default function Onboarding() {
   const { state, update } = useFabuos();
-  const [picked, setPicked] = useState<Interest[]>(state.interests);
+  const [picked, setPicked] = useState<UserType | null>(state.userType);
   const navigate = useNavigate();
-
-  const toggle = (id: Interest) =>
-    setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length >= 3 ? p : [...p, id]));
 
   return (
     <div className="min-h-screen px-6 py-12 bg-background text-foreground" style={{ backgroundImage: "var(--gradient-mesh)" }}>
       <div className="mx-auto max-w-md animate-fade-in">
         <p className="text-sm font-semibold text-primary">Step 1 of 1 — quick, promise</p>
         <h1 className="mt-2 font-heading text-3xl font-extrabold tracking-tight">
-          Hey {state.name || "there"} 👋 what are you into?
+          Hey {state.name || "there"} 👋 what does a normal day look like?
         </h1>
-        <p className="mt-2 text-muted-foreground">Pick up to 3. We'll tune your daily challenges around them.</p>
+        <p className="mt-2 text-muted-foreground">
+          We'll tune your home feed, challenges and tools around it. You can change this any time.
+        </p>
 
-        <div className="mt-7 grid grid-cols-2 gap-3">
+        <div className="mt-7 space-y-3">
           {options.map((o) => {
-            const active = picked.includes(o.id);
+            const active = picked === o.id;
             return (
               <button
                 key={o.id}
-                onClick={() => toggle(o.id)}
+                onClick={() => setPicked(o.id)}
                 className={cn(
-                  "rounded-3xl border p-5 text-left transition-all duration-200 active:scale-95",
-                  active ? "border-primary bg-primary/15 shadow-[var(--shadow-glow)]" : "border-border/60 bg-card/70",
+                  "flex w-full items-center gap-4 rounded-3xl border p-4 text-left transition-all duration-200 active:scale-[0.98]",
+                  active ? "border-primary bg-primary/10 shadow-[var(--shadow-glow)]" : "border-border/60 bg-card/70",
                 )}
               >
                 <span className="text-2xl">{o.emoji}</span>
-                <p className="mt-2 font-semibold">{o.label}</p>
+                <span>
+                  <span className="block font-semibold">{o.label}</span>
+                  <span className="block text-sm text-muted-foreground">{o.blurb}</span>
+                </span>
               </button>
             );
           })}
         </div>
 
         <Button
-          disabled={picked.length === 0}
+          disabled={!picked}
           onClick={() => {
-            update({ interests: picked, onboarded: true });
+            update({ userType: picked, onboarded: true });
             navigate("/", { replace: true });
           }}
           className="mt-8 h-12 w-full rounded-2xl text-base font-bold"
-          style={picked.length ? { background: "var(--gradient-3d)" } : undefined}
+          style={picked ? { background: "var(--gradient-3d)" } : undefined}
         >
-          {picked.length ? "Open Fabuos" : "Pick at least one"}
+          {picked ? "Open Fabuos" : "Pick one to continue"}
         </Button>
       </div>
     </div>
