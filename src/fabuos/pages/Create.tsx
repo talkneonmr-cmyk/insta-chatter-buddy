@@ -23,10 +23,6 @@ import { useFabuos } from "../store";
 
 const tones: Tone[] = ["friendly", "professional", "bold", "casual"];
 
-function Gate({ children, onNeed }: { children: React.ReactNode; onNeed: () => boolean }) {
-  return <>{children}</>;
-}
-
 export default function Create() {
   const { state, spendAI, aiLeft, unlimitedAI, addWin } = useFabuos();
   const [busy, setBusy] = useState<string | null>(null);
