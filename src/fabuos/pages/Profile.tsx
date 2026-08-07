@@ -1,104 +1,140 @@
 import { useNavigate } from "react-router-dom";
-import { Flame, Timer, Trophy, Sparkles, LogOut, Zap, Pencil } from "lucide-react";
+import { Moon, Sun, Trophy, Flame, Users, LogOut, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { FabCard, SectionTitle, Pill } from "../components/ui-kit";
-import { useFabuos, FREE_DAILY_CREDITS } from "../store";
-
-const interestLabels: Record<string, string> = {
-  content: "🎬 Content", school: "📚 School", gaming: "🎮 Gaming",
-  fitness: "🏃 Fitness", music: "🎧 Music", fashion: "👟 Fashion",
-};
+import { FabCard, SectionTitle, Pill, GradientText } from "../components/ui-kit";
+import { suggestedFriends, userTypeLabel } from "../mock";
+import { useFabuos, FREE_DAILY_AI, XP_PER_LEVEL } from "../store";
 
 export default function Profile() {
-  const { state, update, creditsLeft, reset } = useFabuos();
-  const [editing, setEditing] = useState(false);
-  const [name, setName] = useState(state.name);
+  const { state, update, aiLeft, unlimitedAI, toggleTheme, reset, level, progress } = useFabuos();
   const navigate = useNavigate();
 
   const stats = [
-    { icon: Flame, label: "Day streak", value: state.streak, tint: "text-orange-400" },
-    { icon: Timer, label: "Minutes focused", value: state.focusMinutes, tint: "text-sky-400" },
-    { icon: Trophy, label: "Wins logged", value: state.wins.length, tint: "text-amber-400" },
+    { label: "Streak", value: `${state.streak}d`, icon: Flame },
+    { label: "Wins", value: state.wins.length, icon: Trophy },
+    { label: "Level", value: level, icon: Sparkles },
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <FabCard className="flex items-center gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl font-heading text-2xl font-extrabold text-white" style={{ background: "var(--gradient-3d)" }}>
-          {(state.name || "F").slice(0, 1).toUpperCase()}
-        </div>
-        <div className="min-w-0 flex-1">
-          {editing ? (
-            <div className="flex gap-2">
-              <Input value={name} onChange={(e) => setName(e.target.value)} className="h-10 rounded-xl" />
-              <Button
-                onClick={() => { update({ name: name.trim() || state.name }); setEditing(false); toast.success("Saved"); }}
-                className="h-10 rounded-xl"
-              >
-                Save
-              </Button>
-            </div>
-          ) : (
-            <button onClick={() => setEditing(true)} className="flex items-center gap-2">
-              <span className="font-heading text-xl font-extrabold">{state.name || "friend"}</span>
-              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-            </button>
-          )}
-          <p className="mt-1 text-sm text-muted-foreground">
-            {state.plus ? "Fabuos+ member" : `Free plan · ${creditsLeft}/${FREE_DAILY_CREDITS} generations left today`}
-          </p>
-        </div>
-      </FabCard>
+    <div className="space-y-5 animate-fade-in">
+      <header>
+        <h1 className="font-heading text-2xl font-extrabold tracking-tight">
+          <GradientText>{state.name || "Your profile"}</GradientText>
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {state.userType ? userTypeLabel[state.userType] : "Set up your day"} · {state.tier} plan
+        </p>
+      </header>
 
       <div className="grid grid-cols-3 gap-3">
         {stats.map((s) => (
-          <FabCard key={s.label} className="p-4 text-center">
-            <s.icon className={`mx-auto h-5 w-5 ${s.tint}`} />
-            <p className="mt-2 font-heading text-2xl font-extrabold">{s.value}</p>
-            <p className="text-[11px] leading-tight text-muted-foreground">{s.label}</p>
+          <FabCard key={s.label} className="text-center">
+            <s.icon className="mx-auto h-4 w-4 text-primary" />
+            <p className="mt-2 font-heading text-xl font-extrabold">{s.value}</p>
+            <p className="text-xs text-muted-foreground">{s.label}</p>
           </FabCard>
         ))}
       </div>
 
-      <div>
-        <SectionTitle>Your interests</SectionTitle>
-        <FabCard className="flex flex-wrap gap-2">
-          {state.interests.length ? (
-            state.interests.map((i) => <Pill key={i}>{interestLabels[i] ?? i}</Pill>)
-          ) : (
-            <span className="text-sm text-muted-foreground">None picked yet.</span>
-          )}
-        </FabCard>
-      </div>
-
-      {!state.plus && (
-        <FabCard as="button" onClick={() => navigate("/pricing")} className="relative overflow-hidden">
-          <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full opacity-40 blur-3xl" style={{ background: "var(--gradient-3d)" }} />
-          <div className="relative flex items-center gap-3">
-            <Zap className="h-6 w-6 text-primary" />
-            <div>
-              <p className="font-heading font-bold">Go unlimited with Fabuos+</p>
-              <p className="text-sm text-muted-foreground">All tools, no daily cap, every trend.</p>
-            </div>
+      <FabCard>
+        <SectionTitle action={<Pill>{state.xp % XP_PER_LEVEL}/{XP_PER_LEVEL} XP</Pill>}>Level {level}</SectionTitle>
+        <div className="h-2 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full" style={{ width: `${progress * 100}%`, background: "var(--gradient-3d)" }} />
+        </div>
+        {state.badges.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {state.badges.map((b) => (
+              <Pill key={b}>{b}</Pill>
+            ))}
           </div>
-        </FabCard>
-      )}
+        )}
+      </FabCard>
 
-      <div className="space-y-3 pt-2">
-        <Button variant="outline" className="h-12 w-full rounded-2xl" onClick={() => navigate("/pricing")}>
-          <Sparkles className="mr-2 h-4 w-4" /> Manage plan
+      <FabCard>
+        <SectionTitle>Your details</SectionTitle>
+        <label className="text-xs font-semibold text-muted-foreground" htmlFor="p-name">Name</label>
+        <Input id="p-name" value={state.name} onChange={(e) => update({ name: e.target.value })} className="mt-1 h-11 rounded-2xl" />
+        <label className="mt-3 block text-xs font-semibold text-muted-foreground" htmlFor="p-email">Email</label>
+        <Input id="p-email" value={state.email} onChange={(e) => update({ email: e.target.value })} placeholder="you@example.com" className="mt-1 h-11 rounded-2xl" />
+        <Button variant="secondary" onClick={() => navigate("/onboarding")} className="mt-3 h-11 w-full rounded-2xl font-semibold">
+          Change what my day looks like
         </Button>
-        <Button
-          variant="ghost"
-          className="h-12 w-full rounded-2xl text-muted-foreground"
-          onClick={() => { reset(); navigate("/signin", { replace: true }); }}
-        >
-          <LogOut className="mr-2 h-4 w-4" /> Sign out & clear demo data
-        </Button>
-      </div>
+      </FabCard>
+
+      <FabCard>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {state.theme === "dark" ? <Moon className="h-4 w-4 text-primary" /> : <Sun className="h-4 w-4 text-primary" />}
+            <span className="text-sm font-semibold">Dark mode</span>
+          </div>
+          <Switch checked={state.theme === "dark"} onCheckedChange={toggleTheme} />
+        </div>
+      </FabCard>
+
+      <FabCard>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold">Share streaks with friends</span>
+          </div>
+          <Switch checked={state.communityOptIn} onCheckedChange={(v) => update({ communityOptIn: v })} />
+        </div>
+        {state.communityOptIn && (
+          <div className="mt-4 space-y-2">
+            {suggestedFriends.map((f) => {
+              const added = state.friends.some((x) => x.id === f.id);
+              return (
+                <div key={f.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{f.avatar}</span>
+                    <div>
+                      <p className="text-sm font-medium">{f.name}</p>
+                      <p className="text-xs text-muted-foreground">{f.streak}d streak · {f.challenges} challenges</p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={added ? "secondary" : "default"}
+                    className="rounded-xl text-xs"
+                    onClick={() =>
+                      update({ friends: added ? state.friends.filter((x) => x.id !== f.id) : [...state.friends, f] })
+                    }
+                  >
+                    {added ? "Following" : "Follow"}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </FabCard>
+
+      <FabCard as="button" onClick={() => navigate("/pricing")}>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-heading font-bold capitalize">{state.tier} plan</p>
+            <p className="text-sm text-muted-foreground">
+              {unlimitedAI ? "Unlimited AI runs" : `${aiLeft}/${FREE_DAILY_AI} AI runs left today`}
+            </p>
+          </div>
+          <Pill>Change</Pill>
+        </div>
+      </FabCard>
+
+      <Button
+        variant="ghost"
+        className="h-11 w-full rounded-2xl text-destructive"
+        onClick={() => {
+          reset();
+          toast("Signed out — your data stayed on this device");
+          navigate("/signin", { replace: true });
+        }}
+      >
+        <LogOut className="mr-2 h-4 w-4" /> Sign out & clear data
+      </Button>
     </div>
   );
 }
