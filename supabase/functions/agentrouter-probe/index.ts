@@ -6,9 +6,9 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const key = Deno.env.get("OPENAI_API_KEY");
+  const key = Deno.env.get("AGENTROUTER_API_KEY") ?? Deno.env.get("OPENAI_API_KEY");
   if (!key) {
-    return new Response(JSON.stringify({ error: "OPENAI_API_KEY not set" }), {
+    return new Response(JSON.stringify({ error: "AGENTROUTER_API_KEY not set" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
