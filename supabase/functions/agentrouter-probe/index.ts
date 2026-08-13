@@ -6,9 +6,9 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const key = Deno.env.get("OPENAI_API_KEY");
+  const key = Deno.env.get("AGENTROUTER_API_KEY") ?? Deno.env.get("OPENAI_API_KEY");
   if (!key) {
-    return new Response(JSON.stringify({ error: "OPENAI_API_KEY not set" }), {
+    return new Response(JSON.stringify({ error: "AGENTROUTER_API_KEY not set" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
@@ -54,6 +54,23 @@ Deno.serve(async (req) => {
     results.push({ step: "anthropic /v1/messages", status: r.status, body: t.slice(0, 400) });
   } catch (e) {
     results.push({ step: "anthropic /v1/messages", error: String(e) });
+  }
+
+  // Auth header variants
+  const variants: Record<string, Record<string, string>> = {
+    "raw Authorization": { Authorization: key },
+    "api-key header": { "api-key": key },
+    "x-api-key header": { "x-api-key": key },
+  };
+  for (const [name, h] of Object.entries(variants)) {
+    try {
+      const r = await fetch(`${base}/chat/completions`, {
+        method: "POST",
+        headers: { ...h, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "gpt-4o", messages: [{ role: "user", content: "hi" }], max_tokens: 5 }),
+      });
+      results.push({ step: name, status: r.status, body: (await r.text()).slice(0, 200) });
+    } catch (e) { results.push({ step: name, error: String(e) }); }
   }
 
   results.push({ step: "key shape", length: key.length, prefix: key.slice(0, 3), trimmedDiff: key !== key.trim() });
