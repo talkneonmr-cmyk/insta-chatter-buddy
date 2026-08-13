@@ -6,76 +6,33 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const key = Deno.env.get("AGENTROUTER_API_KEY") ?? Deno.env.get("OPENAI_API_KEY");
-  if (!key) {
-    return new Response(JSON.stringify({ error: "AGENTROUTER_API_KEY not set" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  const keys: Record<string, string | undefined> = {
+    AGENTROUTER_API_KEY: Deno.env.get("AGENTROUTER_API_KEY"),
+    OPENAI_API_KEY: Deno.env.get("OPENAI_API_KEY"),
+  };
 
-  let body: any = {};
-  try { body = await req.json(); } catch { /* ignore */ }
-  const base = body.base ?? "https://co.agentrouter.org/v1";
-  const models: string[] = body.models ?? ["gpt-4o", "gpt-4o-mini", "claude-sonnet-4-5"];
-
+  const bases = ["https://co.agentrouter.org/v1", "https://api.agentrouter.org/v1"];
   const results: any[] = [];
 
-  // list models
-  try {
-    const r = await fetch(`${base}/models`, { headers: { Authorization: `Bearer ${key}` } });
-    const t = await r.text();
-    results.push({ step: "GET /models", status: r.status, ct: r.headers.get("content-type"), body: t.slice(0, 600) });
-  } catch (e) {
-    results.push({ step: "GET /models", error: String(e) });
-  }
-
-  for (const model of models) {
-    try {
-      const r = await fetch(`${base}/chat/completions`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model, messages: [{ role: "user", content: "Say OK" }], max_tokens: 10 }),
-      });
-      const t = await r.text();
-      results.push({ step: `chat ${model}`, status: r.status, ct: r.headers.get("content-type"), body: t.slice(0, 400) });
-    } catch (e) {
-      results.push({ step: `chat ${model}`, error: String(e) });
+  for (const [name, key] of Object.entries(keys)) {
+    if (!key) { results.push({ key: name, missing: true }); continue; }
+    results.push({ key: name, length: key.length, prefix: key.slice(0, 6), suffix: key.slice(-4) });
+    for (const base of bases) {
+      try {
+        const r = await fetch(`${base}/chat/completions`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: "Say OK" }], max_tokens: 5 }),
+        });
+        const t = await r.text();
+        results.push({ key: name, base, status: r.status, body: t.slice(0, 300) });
+      } catch (e) {
+        results.push({ key: name, base, error: String(e) });
+      }
     }
   }
 
-  // Anthropic-compatible probe
-  try {
-    const r = await fetch("https://co.agentrouter.org/v1/messages", {
-      method: "POST",
-      headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 10, messages: [{ role: "user", content: "Say OK" }] }),
-    });
-    const t = await r.text();
-    results.push({ step: "anthropic /v1/messages", status: r.status, body: t.slice(0, 400) });
-  } catch (e) {
-    results.push({ step: "anthropic /v1/messages", error: String(e) });
-  }
-
-  // Auth header variants
-  const variants: Record<string, Record<string, string>> = {
-    "raw Authorization": { Authorization: key },
-    "api-key header": { "api-key": key },
-    "x-api-key header": { "x-api-key": key },
-  };
-  for (const [name, h] of Object.entries(variants)) {
-    try {
-      const r = await fetch(`${base}/chat/completions`, {
-        method: "POST",
-        headers: { ...h, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "gpt-4o", messages: [{ role: "user", content: "hi" }], max_tokens: 5 }),
-      });
-      results.push({ step: name, status: r.status, body: (await r.text()).slice(0, 200) });
-    } catch (e) { results.push({ step: name, error: String(e) }); }
-  }
-
-  results.push({ step: "key shape", length: key.length, prefix: key.slice(0, 3), trimmedDiff: key !== key.trim() });
-
-  return new Response(JSON.stringify({ base, results }, null, 2), {
+  return new Response(JSON.stringify({ results }, null, 2), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
